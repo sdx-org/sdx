@@ -1,0 +1,4 @@
+
+poetry
+nodejs  # used by semantic-release
+mypy

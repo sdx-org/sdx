@@ -1,0 +1,140 @@
+site_name: sdx
+site_url: https://sdx.com
+repo_url: https://github.com/MYORG/MYREPO
+docs_dir: ./docs/
+site_dir: ./build/
+# extra_css:
+#   - stylesheets/extra.css
+# Page tree
+nav:
+  - index.md
+  - Installation: installation.md
+  - Changelog: changelog.md
+  - Contributing: contributing.md
+  # from gen-files
+  - API: api/
+  - Notebook page: example.ipynb
+theme:
+  name: material
+
+  features:
+    - content.code.annotate
+    - content.tabs.link
+    - header.autohide
+    - navigation.indexes
+    - navigation.instant
+    - search.highlight
+    - search.share
+    - search.suggest
+  icon:
+    repo: fontawesome/brands/github
+  # note: the path should be investigate a bit more
+  logo: images/logo.png
+  favicon: images/favicon.png
+  palette:
+    scheme: slate
+    primary: white
+    accent: lime
+  # custom_dir: docs/overrides
+plugins:
+  - search
+  - macros
+  - autorefs
+  # - exclude:
+  #     glob:
+  #       - backends/template.md
+  - gen-files:
+      scripts:
+        - scripts/gen_ref_nav.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - mkdocstrings:
+      enable_inventory: true
+      handlers:
+        python:
+          paths: [./src]
+
+          import:
+            - https://docs.python.org/3/objects.inv
+          options:
+            docstring_options:
+              ignore_init_summary: true
+            docstring_section_style: list
+            docstring_style: numpy
+            filters: ["!^_"]
+            heading_level: 1
+            inherited_members: true
+            merge_init_into_class: true
+            separate_signature: true
+            # show_category_heading: true
+            # show_modules: true
+            show_root_full_path: false
+            show_root_heading: true
+            # show_root_toc_entry: true
+            show_signature_annotations: true
+            show_source: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            signature_crossrefs: true
+            summary: true
+  - mkdocs-jupyter:
+      execute: false
+      ignore:
+        - "*.py"
+      include_source: true
+      theme: dark
+markdown_extensions:
+  - admonition
+  - attr_list
+  - codehilite
+  - def_list
+  - footnotes
+  - md_in_html
+  - meta
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+      options:
+        custom_icons:
+          - docs/static/icons
+  - pymdownx.details
+  - pymdownx.highlight:
+      pygments_lang_class: true
+  - pymdownx.inlinehilite:
+      style_plain_text: python
+  - pymdownx.magiclink:
+      provider: github
+      repo_url_shortener: true
+  - pymdownx.saneheaders
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc
+extra:
+  project_name: "sdx"
+  team:
+    - name: "Active maintainers"
+      members:
+        - zoro_roronoa
+    - name: "Former maintainers"
+      members:
+        - zoro_roronoa
+  social:
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/zoro_roronoa
+    - icon: fontawesome/brands/github
+      link: https://github.com/
+  support_levels:
+    supported:
+      icon: :material-check-decagram:{ .verified }
+      description: Tested in CI. If this doesn't work for you, please [file an issue](/issues/new).
+    bug:
+      icon: :material-bug:{ .bug }
+      description: Should work but doesn't because upstream is broken. Supported on a best-effort basis.
+    unsupported:
+      icon: :material-cancel:{ .cancel }
+      description: Unlikely to ever be supported or no upstream support.
+
+copyright: "Copyright &copy; 2022, sdx Team"

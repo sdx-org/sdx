@@ -1,0 +1,108 @@
+[project]
+name = "sdx"
+version = "0.1.0"  # semantic-release
+description = "This Project aims to ..."
+readme = "README.md"
+authors = [
+  {name = "Ivan Ogasawara ", email = "ivan.ogasawara@gmail.com"}
+]
+license = "BSD 3 Clause"
+requires-python = ">=3.9,<4"
+[project.scripts]
+"sdx" = "sdx.__main__:app"
+[build-system]
+requires = ["poetry-core>=2", "poetry>=2"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+packages = [
+  {include = "sdx", from="src"},
+]
+include = ["src/sdx/py.typed"]
+
+exclude = [
+  ".git/*",
+  ".env*",
+]
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.3.2"
+pre-commit = ">=3.3.2"
+ruff = ">=0.2.0"
+mypy = ">=1.5.0"
+bandit = ">=1.7.5"
+vulture = ">=2.7"
+ipython = "<8"
+ipykernel = ">=6.0.0"
+
+Jinja2 = ">=3.1.2"
+mkdocs = ">=1.4.3"
+mkdocs-exclude = ">=1.0.2"
+mkdocs-jupyter = ">=0.24.1"
+mkdocs-literate-nav = ">=0.6.0"
+mkdocs-macros-plugin = ">=0.7.0,<1"
+mkdocs-material = ">=9.1.15"
+mkdocstrings = ">=0.21.2"
+mkdocstrings-python = ">= 1.1.2"
+mkdocs-gen-files = ">=0.5.0"
+# 'PosixPath' object has no attribute 'endswith'
+virtualenv = "<=20.25.1"
+
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+targets = "./"
+
+[tool.mypy]
+python_version = "3.9"
+check_untyped_defs = true
+strict = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+exclude = ["scripts/"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+
+[tool.ruff]
+line-length = 79
+force-exclude = true
+src = ["./"]
+exclude = [
+  'docs',
+]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle
+  "F",   # pyflakes
+  "D",   # pydocstyle
+  "YTT", # flake8-2020
+  "RUF", # Ruff-specific rules
+  "I001",  # isort
+]
+fixable = ["I001"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.isort]
+# Use a single line between direct and from import
+lines-between-types = 1
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.vulture]
+exclude = ["tests"]
+ignore_decorators = []
+ignore_names = []
+make_whitelist = true
+min_confidence = 80
+paths = ["./"]
+sort_by_size = true
+verbose = false
