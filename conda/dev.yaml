@@ -1,0 +1,12 @@
+name: sdx
+channels:
+  - nodefaults
+  - conda-forge
+dependencies:
+  - python >=3.9,<=3.12
+  - pip
+  - poetry
+  - nodejs # used by semantic-release
+  - pip:
+      # distlib issue
+      - paginate==0.5.6

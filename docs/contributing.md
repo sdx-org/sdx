@@ -72,9 +72,20 @@ $ git clone git@github.com:your_name_here/sdx.git
 $ cd sdx/
 ```
 
-### Prepare and use virtual environmentWe highly recommend you to use `conda` for managing virtual environment, but
+### Prepare and use virtual environment
 
-you can use any other one of your preference.
+If you don't have yet conda installed in your machine, you can check the
+installation steps here:
+<https://github.com/conda-forge/miniforge?tab=readme-ov-file#download> After
+that, ensure that conda is already available in your terminal session and run:
+
+```bash
+$ conda env create env create --file conda/dev.yaml
+$ conda activate sdx
+```
+
+Note: you can use `mamba env create` instead, if you have it already installed,
+in order to boost the installation step.
 
 ### Install the dependencies
 
@@ -149,6 +160,15 @@ following way:
 
 ```bash
 $ python -m pytest
+```
+
+## Automation Tasks with Makim
+
+This project uses `makim` as an automation tool. Please, check the `.makim.yaml`
+file to check all the tasks available or run:
+
+```bash
+$ makim --help
 ```
 
 ## Release

@@ -117,13 +117,13 @@ extra:
   team:
     - name: "Active maintainers"
       members:
-        - zoro_roronoa
+        - yorbriar
     - name: "Former maintainers"
       members:
-        - zoro_roronoa
+        - yorbriar
   social:
     - icon: fontawesome/brands/twitter
-      link: https://twitter.com/zoro_roronoa
+      link: https://twitter.com/yorbriar
     - icon: fontawesome/brands/github
       link: https://github.com/
   support_levels:

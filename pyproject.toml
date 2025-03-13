@@ -4,12 +4,10 @@ version = "0.1.0"  # semantic-release
 description = "This Project aims to ..."
 readme = "README.md"
 authors = [
-  {name = "Ivan Ogasawara ", email = "ivan.ogasawara@gmail.com"}
+  {name = "Ivan Ogasawara", email = "ivan.ogasawara@gmail.com"}
 ]
 license = "BSD 3 Clause"
 requires-python = ">=3.9,<4"
-[project.scripts]
-"sdx" = "sdx.__main__:app"
 [build-system]
 requires = ["poetry-core>=2", "poetry>=2"]
 build-backend = "poetry.core.masonry.api"
@@ -45,6 +43,7 @@ mkdocs-material = ">=9.1.15"
 mkdocstrings = ">=0.21.2"
 mkdocstrings-python = ">= 1.1.2"
 mkdocs-gen-files = ">=0.5.0"
+makim = "1.20.0"
 # 'PosixPath' object has no attribute 'endswith'
 virtualenv = "<=20.25.1"
 

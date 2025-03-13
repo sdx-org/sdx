@@ -14,5 +14,5 @@ def get_version() -> str:
 version = get_version()
 
 __version__ = version
-__author__ = 'Ivan Ogasawara '
+__author__ = 'Ivan Ogasawara'
 __email__ = 'ivan.ogasawara@gmail.com'
