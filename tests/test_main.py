@@ -1,4 +1,5 @@
 """Tests for sdx package."""
+
 import pytest
 
 
