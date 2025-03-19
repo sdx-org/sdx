@@ -9,7 +9,7 @@
         "replacements": [
           {
             "files": ["src/sdx/__init__.py"],
-            "from": "return \".*\"  # semantic-release",
+            "from": "return '.*'  # semantic-release",
             "to": "return \"${nextRelease.version}\"  # semantic-release",
             "results": [
               {
