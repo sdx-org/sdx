@@ -1,18 +1,8 @@
-"""sdx."""
+"""Top-level package for SecondDX."""
 
-from importlib import metadata as importlib_metadata
+__version__ = '0.1.0'  # semantic-release
 
-
-def get_version() -> str:
-    """Return the program version."""
-    try:
-        return importlib_metadata.version(__name__)
-    except importlib_metadata.PackageNotFoundError:  # pragma: no cover
-        return '0.1.0'  # semantic-release
-
-
-version = get_version()
-
-__version__ = version
-__author__ = 'Ivan Ogasawara'
-__email__ = 'ivan.ogasawara@gmail.com'
+__version_info__ = tuple(
+    int(num) if num.isdigit() else num
+    for num in __version__.replace('-', '.', 1).split('.')
+)
