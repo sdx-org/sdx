@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 from anamnesisai.openai import extract_fhir
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 
 
 def extract_text_from_pdf(pdf_path: Union[str, Path]) -> str:
@@ -39,7 +39,6 @@ def get_report_data_from_pdf(
     pdf_path: Union[str, Path], api_key: Optional[str] = None
 ) -> Dict[str, Any]:
     """Extract FHIR data from a medical PDF report."""
-    # Use provided API key or get from environment
     api_key = api_key or os.environ.get('OPENAI_API_KEY')
 
     if not api_key:
@@ -50,11 +49,9 @@ def get_report_data_from_pdf(
 
     text_content = extract_text_from_pdf(pdf_path)
 
-    # Extract FHIR resources
     try:
         fhir_resources = extract_fhir(text_content, api_key)
 
-        # Convert resources to dictionaries
         return {
             resource_type: resource.model_dump()
             for resource_type, resource in fhir_resources.items()
