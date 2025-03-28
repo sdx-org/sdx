@@ -7,7 +7,8 @@ authors = [
   {name = "Ivan Ogasawara", email = "ivan.ogasawara@gmail.com"}
 ]
 license = "BSD 3 Clause"
-requires-python = ">=3.9,<4"
+requires-python = ">=3.9,<3.13"
+
 [build-system]
 requires = ["poetry-core>=2", "poetry>=2"]
 build-backend = "poetry.core.masonry.api"
@@ -23,6 +24,10 @@ exclude = [
   ".env*",
 ]
 
+[tool.poetry.dependencies]
+anamnesisai = ">=0.2.1"
+rago = ">=0.13.0"
+
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.3.2"
 pre-commit = ">=3.3.2"
@@ -32,7 +37,6 @@ bandit = ">=1.7.5"
 vulture = ">=2.7"
 ipython = "<8"
 ipykernel = ">=6.0.0"
-
 Jinja2 = ">=3.1.2"
 mkdocs = ">=1.4.3"
 mkdocs-exclude = ">=1.0.2"
