@@ -3,7 +3,7 @@ channels:
   - nodefaults
   - conda-forge
 dependencies:
-  - python >=3.9,<=3.13
+  - python >=3.9,<3.13
   - pip
   - poetry
   - nodejs # used by semantic-release
