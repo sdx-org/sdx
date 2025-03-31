@@ -1,34 +1,40 @@
 """Pytest configuration for the sdx package tests."""
 
+from __future__ import annotations
+
 import os
+import warnings
 
 from pathlib import Path
 
 import pytest
 
-from dotenv import load_dotenv
-
-
-def pytest_configure(config):
-    """Configure pytest environment."""
-    env_path = Path(__file__).parent / '.env'
-
-    if env_path.exists():
-        load_dotenv(dotenv_path=env_path)
-    else:
-        tpl_path = Path(__file__).parent / '.env.tpl'
-        if tpl_path.exists():
-            load_dotenv(dotenv_path=tpl_path)
+from dotenv import dotenv_values, load_dotenv
 
 
 @pytest.fixture
-def test_data_dir():
+def env() -> dict[str, str | None]:
+    """Return a fixture for the environment variables from .env file."""
+    dotenv_path = Path(__file__).parent / '.env'
+    if not dotenv_path.exists():
+        warnings.warn(
+            f"'.env' file not found at {dotenv_path}. Some "
+            'tests requiring environment variables might fail or be skipped.'
+        )
+        return {}
+
+    load_dotenv(dotenv_path=dotenv_path)
+    return dotenv_values(dotenv_path)
+
+
+@pytest.fixture
+def test_data_dir() -> Path:
     """Fixture providing the path to the test data directory."""
     return Path(__file__).parent / 'data'
 
 
 @pytest.fixture
-def reports_data_dir(test_data_dir):
+def reports_data_dir(test_data_dir: Path) -> Path:
     """Fixture providing the path to the test reports directory."""
     reports_dir = test_data_dir / 'reports'
     if not reports_dir.exists():
@@ -37,11 +43,14 @@ def reports_data_dir(test_data_dir):
 
 
 @pytest.fixture
-def openai_api_key():
+def api_key_openai(env: dict[str, str | None]) -> str:
     """Fixture providing the OpenAI API key from environment variables."""
-    api_key = os.environ.get('OPENAI_API_KEY')
+    api_key = os.getenv('OPENAI_API_KEY')
 
     if not api_key:
-        pytest.skip('OpenAI API key not available for testing')
+        raise EnvironmentError(
+            'Please set the OPENAI_API_KEY environment variable in your .env '
+            'file or system environment for testing.'
+        )
 
     return api_key
