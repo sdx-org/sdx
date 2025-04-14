@@ -30,6 +30,9 @@ def test_extract_text_nonexistent_file():
 @pytest.mark.skipif(not api_key_openai, reason='OpenAI API key not available')
 def test_get_report_data_from_pdf(reports_data_dir, api_key_openai):
     """Test FHIR data extraction from PDF."""
+    if api_key_openai is None:
+        pytest.skip('OpenAI API key not available')
+
     test_files = list(reports_data_dir.glob('*.pdf'))
     if not test_files:
         pytest.skip('No test PDF files available in the reports directory')

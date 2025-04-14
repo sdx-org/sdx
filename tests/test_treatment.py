@@ -92,6 +92,9 @@ class TestSuggestTreatment:
         self, mock_openai_gen, mock_get_data, api_key_openai
     ):
         """Test successful treatment suggestion flow."""
+        if api_key_openai is None:
+            pytest.skip('OpenAI API key not available')
+
         mock_get_data.return_value = {
             'Patient': {'id': '123', 'name': 'John Doe'},
             'Condition': {'code': 'diabetes', 'severity': 'moderate'},
@@ -117,6 +120,9 @@ class TestSuggestTreatment:
         self, mock_get_data, api_key_openai
     ):
         """Test treatment suggestion with custom augmenter."""
+        if api_key_openai is None:
+            pytest.skip('OpenAI API key not available')
+
         mock_get_data.return_value = {
             'Patient': {'id': '123', 'name': 'John Doe'},
         }
