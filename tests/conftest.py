@@ -45,12 +45,17 @@ def reports_data_dir(test_data_dir: Path) -> Path:
 @pytest.fixture
 def api_key_openai(env: dict[str, str | None]) -> str:
     """Fixture providing the OpenAI API key from environment variables."""
-    api_key = os.getenv('OPENAI_API_KEY')
+    api_key = env.get('OPENAI_API_KEY')
 
     if not api_key:
-        raise EnvironmentError(
-            'Please set the OPENAI_API_KEY environment variable in your .env '
-            'file or system environment for testing.'
+        api_key = os.getenv('OPENAI_API_KEY')
+
+    if os.getenv('CI') and not api_key:
+        pytest.skip(
+            'Running in CI environment without OpenAI API key - skipping test'
         )
+
+    if not api_key:
+        pytest.skip('OpenAI API key not available - skipping test')
 
     return api_key
