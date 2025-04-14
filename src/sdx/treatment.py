@@ -7,9 +7,10 @@ import os
 from typing import Any, Dict, Optional, cast
 
 from anamnesisai.openai import extract_fhir
-from medical_reports import get_report_data_from_pdf
 from rago.augmented.base import AugmentedBase
 from rago.generation.openai import OpenAIGen
+
+from sdx.medical_reports import get_report_data_from_pdf
 
 
 class PassThroughAugmented(AugmentedBase):

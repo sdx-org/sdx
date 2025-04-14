@@ -1,10 +1,10 @@
 """Tests for the medical_reports module."""
 
-import os
-
 import pytest
 
 from sdx.medical_reports import extract_text_from_pdf, get_report_data_from_pdf
+
+from tests.conftest import api_key_openai
 
 
 def test_extract_text_from_pdf(reports_data_dir):
@@ -27,9 +27,7 @@ def test_extract_text_nonexistent_file():
         extract_text_from_pdf('nonexistent_file.pdf')
 
 
-@pytest.mark.skipif(
-    not os.environ.get('OPENAI_API_KEY'), reason='OpenAI API key not available'
-)
+@pytest.mark.skipif(not api_key_openai, reason='OpenAI API key not available')
 def test_get_report_data_from_pdf(reports_data_dir, api_key_openai):
     """Test FHIR data extraction from PDF."""
     test_files = list(reports_data_dir.glob('*.pdf'))
