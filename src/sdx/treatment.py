@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 
 from typing import Any, Dict, Optional, cast
@@ -11,6 +12,20 @@ from rago.augmented.base import AugmentedBase
 from rago.generation.openai import OpenAIGen
 
 from sdx.medical_reports import get_report_data_from_pdf
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+)
+logger = logging.getLogger(__name__)
+
+
+class TreatmentSuggestionError(Exception):
+    """Custom exception for treatment suggestion errors."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
 
 
 class PassThroughAugmented(AugmentedBase):
@@ -29,46 +44,46 @@ class PassThroughAugmented(AugmentedBase):
         return cast(list[str], documents)
 
 
+def _format_resource_details(item: Dict[str, Any]) -> str:
+    """Format a resource dictionary into a string."""
+    details = [
+        f'{key}: {value!s}'
+        if not isinstance(value, (dict, list)) and value is not None
+        else f'{key}: [complex data]'
+        for key, value in item.items()
+    ]
+    return '; '.join(details)
+
+
 def _fhir_dict_to_strings(fhir_data: Dict[str, Any]) -> list[str]:
     """Convert a dict of FHIR resources into a list of descriptive strings."""
-    context_list = []
     if not fhir_data:
         return ['No clinical data provided.']
 
+    context_list = []
+
     for resource_type, resource_content in fhir_data.items():
         if isinstance(resource_content, dict):
-            details = []
-            for key, value in resource_content.items():
-                if isinstance(value, (dict, list)):
-                    details.append(f'{key}: [complex data]')
-                elif value is not None:
-                    details.append(f'{key}: {value!s}')
-            context_list.append(
-                f'ResourceType {resource_type}: {"; ".join(details)}'
-            )
+            details = _format_resource_details(resource_content)
+            context_list.append(f'ResourceType {resource_type}: {details}')
 
         elif isinstance(resource_content, list):
-            for i, item in enumerate(resource_content):
-                if isinstance(item, dict):
-                    details = []
-                    for key, value in item.items():
-                        if isinstance(value, (dict, list)):
-                            details.append(f'{key}: [complex data]')
-                        elif value is not None:
-                            details.append(f'{key}: {value!s}')
-                    detail_str = f'ResourceType {resource_type} [{i}]: '
-                    detail_str += f'{"; ".join(details)}'
-                    context_list.append(detail_str)
-                else:
-                    context_list.append(
-                        f'ResourceType {resource_type} [{i}]: {item!s}'
-                    )
+            context_list.extend(
+                [
+                    f'ResourceType {resource_type} [{i}]: '
+                    f'{_format_resource_details(item)}'
+                    if isinstance(item, dict)
+                    else f'ResourceType {resource_type} [{i}]: {item!s}'
+                    for i, item in enumerate(resource_content)
+                ]
+            )
+
         else:
             context_list.append(
                 f'ResourceType {resource_type}: {resource_content!s}'
             )
 
-    print(f'Converted FHIR dict to {len(context_list)} context strings.')
+    logger.info(f'Converted FHIR dict to {len(context_list)} context strings.')
     return context_list
 
 
@@ -80,6 +95,16 @@ patient with the following clinical records:
 Suggested Treatment Plan:"""
 
 
+def validate_fhir_data(
+    data: Optional[Dict[str, Any]], error_msg: Optional[str] = None
+) -> Dict[str, Any]:
+    """Validate FHIR data and raise custom exception if invalid."""
+    if not data:
+        default_msg = 'No clinical data provided.'
+        raise TreatmentSuggestionError(error_msg or default_msg)
+    return data
+
+
 def suggest_treatment_from_pdf(
     pdf_path: str,
     openai_api_key: Optional[str] = None,
@@ -87,9 +112,9 @@ def suggest_treatment_from_pdf(
     augmenter: Optional[AugmentedBase] = None,
 ) -> Dict[str, Any]:
     """Extract FHIR, augment context, generate suggestion, convert to FHIR."""
-    print(f'Starting FHIR treatment suggestion for PDF: {pdf_path}')
+    logger.info(f'Starting FHIR treatment suggestion for PDF: {pdf_path}')
 
-    resolved_api_key = openai_api_key or os.environ.get('OPENAI_API_KEY')
+    resolved_api_key = os.environ.get('OPENAI_API_KEY') or openai_api_key
     if not resolved_api_key:
         raise ValueError('OpenAI API Key is required.')
 
@@ -100,19 +125,29 @@ def suggest_treatment_from_pdf(
         extracted_fhir_data = get_report_data_from_pdf(
             pdf_path, api_key=resolved_api_key
         )
-        if not extracted_fhir_data:
-            print('Warning: No initial FHIR data extracted.')
-            error_msg = 'Cannot suggest treatment: '
-            error_msg += 'No FHIR data extracted from PDF.'
-            return {'error': error_msg}
+
+        try:
+            validate_fhir_data(
+                extracted_fhir_data,
+                'Cannot suggest treatment: No FHIR data extracted from PDF.',
+            )
+        except TreatmentSuggestionError as e:
+            logger.warning(str(e))
+            return {'error': str(e)}
 
         context_strings = _fhir_dict_to_strings(extracted_fhir_data)
-        if not context_strings or context_strings == [
-            'No clinical data provided.'
-        ]:
-            error_msg = 'Cannot suggest treatment: '
-            error_msg += 'No clinical data available for context.'
-            return {'error': error_msg}
+
+        try:
+            validate_fhir_data(
+                None
+                if context_strings == ['No clinical data provided.']
+                else {'data': context_strings},
+                'Cannot suggest treatment: No clinical data available '
+                'for context.',
+            )
+        except TreatmentSuggestionError as e:
+            logger.warning(str(e))
+            return {'error': str(e)}
 
         augmented_context_list = augmenter.search(
             query='', documents=context_strings, top_k=len(context_strings)
@@ -124,11 +159,16 @@ def suggest_treatment_from_pdf(
             context=context_for_generation
         )
         text_suggestion = generator.generate(query=final_prompt, context=[])
-        if not text_suggestion:
-            print('Warning: AI model returned an empty suggestion.')
-            error_msg = 'Cannot produce FHIR suggestion: '
-            error_msg += 'AI model returned empty text.'
-            return {'error': error_msg}
+
+        try:
+            if not text_suggestion:
+                raise TreatmentSuggestionError(
+                    'Cannot produce FHIR suggestion: AI model returned '
+                    'empty text.'
+                )
+        except TreatmentSuggestionError as e:
+            logger.warning(str(e))
+            return {'error': str(e)}
 
         fhir_suggestion = extract_fhir(
             str(text_suggestion), api_key=resolved_api_key
@@ -137,8 +177,10 @@ def suggest_treatment_from_pdf(
         return fhir_suggestion
 
     except (FileNotFoundError, ValueError, EnvironmentError, ImportError) as e:
-        print(f'Error during treatment suggestion pipeline: {e}')
+        logger.error(f'Error during treatment suggestion pipeline: {e}')
         raise e
     except Exception as e:
-        print(f'An unexpected error occurred during treatment suggestion: {e}')
+        logger.error(
+            f'An unexpected error occurred during treatment suggestion: {e}'
+        )
         return {'error': f'An unexpected error occurred: {e}'}

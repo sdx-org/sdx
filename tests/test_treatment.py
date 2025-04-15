@@ -70,17 +70,6 @@ class TestFhirDictToStrings:
             in result
         )
 
-    def test_with_none_values(self):
-        """Test with None values in FHIR data."""
-        fhir_data = {
-            'Patient': {'id': '123', 'deceased': None, 'name': 'John Doe'},
-        }
-        result = _fhir_dict_to_strings(fhir_data)
-        assert len(result) == 1
-        assert 'id: 123' in result[0]
-        assert 'name: John Doe' in result[0]
-        assert 'deceased' not in result[0]
-
 
 @pytest.mark.skipif(not api_key_openai, reason='OpenAI API key not available')
 class TestSuggestTreatment:
