@@ -93,3 +93,10 @@ groups:
       dry:
         help: run semantic release in dry-run mode
         run: ${{ vars.app }} --dry-run
+
+  gen:
+    tasks:
+      fhir-models:
+        help: Auto-generate the FHIR models
+        run: |
+          python scripts/gen_fhir_models_sqla.py
