@@ -30,6 +30,7 @@ rago = ">=0.13.0"
 pypdf = ">=5.4.0"
 sqlalchemy = "^2.0.41"
 atpublic = ">=6"
+sqlmodel = ">=0.0.24"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.3.2"

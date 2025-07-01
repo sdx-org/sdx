@@ -547,3 +547,43 @@ class Procedure(Base):
         JSON, nullable=True, index=True
     )
     used: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+
+
+@public
+class AIOutput(Base):
+    __tablename__ = 'aioutput'
+
+    language: Mapped[Any] = mapped_column(JSON, index=True)
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    encounter_id: Mapped[str] = mapped_column(String, index=True)
+    type: Mapped[Any] = mapped_column(JSON, index=True)
+    content: Mapped[str] = mapped_column(String, index=True)
+    model_version: Mapped[str] = mapped_column(String, index=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
+
+
+@public
+class DeIdentifiedDatasetDescriptor(Base):
+    __tablename__ = 'deidentifieddatasetdescriptor'
+
+    language: Mapped[Any] = mapped_column(JSON, index=True)
+    dataset_id: Mapped[str] = mapped_column(String, index=True)
+    generation_date: Mapped[datetime] = mapped_column(DateTime, index=True)
+    version: Mapped[str] = mapped_column(String, index=True)
+    records: Mapped[int] = mapped_column(Integer, index=True)
+    license: Mapped[str] = mapped_column(String, index=True)
+    url: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+
+
+@public
+class Evaluation(Base):
+    __tablename__ = 'evaluation'
+
+    language: Mapped[Any] = mapped_column(JSON, index=True)
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    aioutput_id: Mapped[str] = mapped_column(String, index=True)
+    output_type: Mapped[Any] = mapped_column(JSON, index=True)
+    ratings: Mapped[Any] = mapped_column(JSON, index=True)
+    safety: Mapped[Any] = mapped_column(JSON, index=True)
+    comments: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)

@@ -99,4 +99,5 @@ groups:
       fhir-models:
         help: Auto-generate the FHIR models
         run: |
-          python scripts/gen_fhir_models_sqla.py
+          python scripts/gen_models/gen_sqla.py
+          python scripts/gen_models/gen_sqlmodel.py

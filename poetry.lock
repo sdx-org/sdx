@@ -7644,6 +7644,22 @@ pymysql = ["pymysql"]
 sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
+name = "sqlmodel"
+version = "0.0.24"
+description = "SQLModel, SQL databases in Python, designed for simplicity, compatibility, and robustness."
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "sqlmodel-0.0.24-py3-none-any.whl", hash = "sha256:6778852f09370908985b667d6a3ab92910d0d5ec88adcaf23dbc242715ff7193"},
+    {file = "sqlmodel-0.0.24.tar.gz", hash = "sha256:cc5c7613c1a5533c9c7867e1aab2fd489a76c9e8a061984da11b4e613c182423"},
+]
+
+[package.dependencies]
+pydantic = ">=1.10.13,<3.0.0"
+SQLAlchemy = ">=2.0.14,<2.1.0"
+
+[[package]]
 name = "srsly"
 version = "2.5.1"
 description = "Modern high-performance serialization utilities for Python"
@@ -9216,4 +9232,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "4819c3a179b6ac3ddd83e0426192105c01d9cfbde02da5145a28a26a50404870"
+content-hash = "f3f9fffe530d396846886d77b549ab5f802f25e554c74651f6300d75b59438d7"

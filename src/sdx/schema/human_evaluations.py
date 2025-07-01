@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from sdx.schema.fhir import BaseLanguage
 
 
-class AIOutput(BaseModel, BaseLanguage):
+class AIOutput(BaseLanguage, BaseModel):
     """Full AI-generated text associated with a particular encounter."""
 
     id: str
@@ -21,7 +21,7 @@ class AIOutput(BaseModel, BaseLanguage):
     timestamp: datetime
 
 
-class Evaluation(BaseModel, BaseLanguage):
+class Evaluation(BaseLanguage, BaseModel):
     """Structured physician rating of an AIOutput instance."""
 
     id: str
@@ -35,7 +35,7 @@ class Evaluation(BaseModel, BaseLanguage):
     timestamp: datetime
 
 
-class DeIdentifiedDatasetDescriptor(BaseModel, BaseLanguage):
+class DeIdentifiedDatasetDescriptor(BaseLanguage, BaseModel):
     """Metadata describing a dataset produced for open publication."""
 
     dataset_id: str

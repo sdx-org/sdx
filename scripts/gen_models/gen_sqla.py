@@ -23,10 +23,6 @@ Notes
 
 from __future__ import annotations
 
-import inspect
-import pkgutil
-import shutil
-import subprocess
 import sys
 
 from datetime import date, datetime
@@ -34,20 +30,18 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any, Dict, Type
 
+from formatting import run_ruff
+from gen_base import is_concrete_model, iter_pydantic_models
 from pydantic import BaseModel
 from sdx.schema.fhir import BaseLanguage
 
-# Package paths to scan for Pydantic models
-PACKAGE_PATHS = [
-    'sdx.schema',
-]
-
 # Target file to (over)write
 OUTPUT_PATH = (
-    Path(__file__).resolve().parent.parent
+    Path(__file__).resolve().parent.parent.parent
     / 'src'
     / 'sdx'
     / 'models'
+    / 'sqla'
     / 'fhir.py'
 )
 
@@ -63,67 +57,6 @@ TYPE_MAP = {
 
 # Fallback SQLAlchemy type for arbitrary / nested data
 FALLBACK_TYPE = 'JSON'
-
-IGNORED_CLASSES = [BaseLanguage, BaseModel]
-
-
-def run_ruff(path: Path, *, fix: bool = True) -> None:
-    """
-    Format / lint the generated file with Ruff.
-
-    Parameters
-    ----------
-        path: Absolute path to the file that was just written.
-        fix:  If True, run Ruff with `--fix`; otherwise `check` only.
-
-    Raises
-    ------
-        RuntimeError: If Ruff is not installed or returns a non-zero exit code.
-    """
-    ruff_exe = shutil.which('ruff')
-    if ruff_exe is None:
-        raise RuntimeError(
-            'Ruff executable not found. '
-            'Install with `pip install ruff` or add it to your PATH.'
-        )
-
-    cmd = [ruff_exe, 'format', str(path)]
-
-    try:
-        subprocess.run(cmd, check=True)
-        print(f'[✓] Ruff {"fixed" if fix else "checked"} {path}')
-    except subprocess.CalledProcessError as exc:
-        raise RuntimeError(
-            f'Ruff reported issues (exit code {exc.returncode}).'
-        ) from exc
-
-
-def _is_concrete_model(model_cls: Type[BaseModel]) -> bool:
-    """
-    Return True if `model_cls` should be mapped to a table.
-
-    Heuristics
-    ----------
-    1. The class advertises itself as abstract via `__abstract__ = True`.
-    2. Inner `Config` / `model_config` sets `table_abstract = True`.
-    3. No own fields ➜ skip (helper alias such as BaseLanguage).
-    """
-    # Rule 1: explicit marker
-    if getattr(model_cls, '__abstract__', False):
-        return False
-
-    # Rule 2: honour Pydantic v1 Config or v2 model_config
-    cfg = getattr(model_cls, 'Config', None) or getattr(
-        model_cls, 'model_config', None
-    )
-    if cfg and getattr(cfg, 'table_abstract', False):
-        return False
-
-    # Rule 3: helper types usually have zero model_fields
-    if not model_cls.model_fields:
-        return False
-
-    return True
 
 
 def python_type_to_sqla(annotation: Any) -> tuple[str, str]:
@@ -150,28 +83,6 @@ def python_type_to_sqla(annotation: Any) -> tuple[str, str]:
 
     # Anything else → JSON
     return FALLBACK_TYPE, 'Any'
-
-
-def iter_pydantic_models() -> Dict[str, Type[BaseModel]]:
-    """
-    Yield (qualified_name, model_cls).
-
-    Yield values for every subclass of BaseModel found in PACKAGE_PATHS.
-    """
-    discovered: Dict[str, Type[BaseModel]] = {}
-    for module_path in PACKAGE_PATHS:
-        module: ModuleType = __import__(module_path, fromlist=['*'])
-        # Walk submodules in case of package
-        for _loader, submod_name, _ispkg in pkgutil.walk_packages(
-            module.__path__, module.__name__ + '.'
-        ):
-            submod = __import__(submod_name, fromlist=['*'])
-            for name, obj in inspect.getmembers(submod, inspect.isclass):
-                if not obj.__module__.startswith('sdx'):
-                    continue
-                if issubclass(obj, BaseModel) and obj not in IGNORED_CLASSES:
-                    discovered[f'{submod.__name__}.{name}'] = obj
-    return discovered
 
 
 def generate_sqla_model(name: str, model_cls: Type[BaseModel]) -> str:
@@ -273,7 +184,7 @@ class Base(DeclarativeBase):
 """
     body = []
     for model_cls in models.values():
-        if not _is_concrete_model(model_cls):
+        if not is_concrete_model(model_cls):
             continue
         body += [
             '@public\n' + generate_sqla_model(model_cls.__name__, model_cls)
