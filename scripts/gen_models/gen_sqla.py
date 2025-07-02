@@ -154,6 +154,7 @@ DO NOT EDIT MANUALLY. Regenerate via `python generate_orm_models.py`.
 
 from __future__ import annotations
 
+import datetime
 import uuid
 
 from typing import Any, Optional, Union  # noqa

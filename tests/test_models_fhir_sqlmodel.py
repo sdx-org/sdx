@@ -28,10 +28,6 @@ from sqlalchemy import JSON as JSONSA
 from sqlalchemy.dialects.postgresql import JSONB  # noqa: F401
 from sqlmodel import Field, Session, SQLModel, create_engine
 
-# --------------------------------------------------------------------------- #
-# Helpers
-# --------------------------------------------------------------------------- #
-
 _SQLA_TYPE_MAP: Dict[Any, Any] = {
     'String': 'sample',
     'Integer': 1,
@@ -68,11 +64,6 @@ def _iter_sqlmodel_tables():
             yield obj
 
 
-# --------------------------------------------------------------------------- #
-# Pytest fixtures
-# --------------------------------------------------------------------------- #
-
-
 @pytest.fixture(scope='session')
 def engine():
     """In-memory SQLite engine."""
@@ -95,11 +86,6 @@ def db_session(engine):
         ses.rollback()
 
 
-# --------------------------------------------------------------------------- #
-# Tests
-# --------------------------------------------------------------------------- #
-
-
 def test_metadata_nonempty():
     """The auto-generated metadata must include at least one table."""
     assert SQLModel.metadata.tables, 'No tables were generated'
@@ -108,13 +94,15 @@ def test_metadata_nonempty():
 @pytest.mark.parametrize('table_cls', list(_iter_sqlmodel_tables()))
 def test_table_basic_crud(table_cls, db_session):
     """
+    Instantiate each auto-generated SQLModel.
+
     Instantiate each auto-generated SQLModel table with dummy data,
     persist, and query back via primary-key lookup.
     """
     # Build kwargs for non-nullable columns with no default
     kwargs: Dict[str, Any] = {}
     for col in table_cls.__table__.columns:
-        if col.default is not None or col.primary_key and col.autoincrement:
+        if col.default is not None or (col.primary_key and col.autoincrement):
             # column self-generates a value
             continue
         if col.primary_key or not col.nullable:

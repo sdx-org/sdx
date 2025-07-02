@@ -115,11 +115,12 @@ def generate_sqlmodel_class(name: str, model_cls: Type[BaseModel]) -> str:
         sa_type = python_to_sa_type(finfo.annotation)
         nullable = not finfo.is_required()
         is_pk = fname == 'id' and not inject_uuid_pk
+        param_1 = 'None' if nullable else '...'
 
         lines.append(
             f'    {fname}: {finfo.annotation.__name__ if hasattr(finfo.annotation, "__name__") else "Any"} '
             f'= Field('
-            f'None if {nullable!r} else ..., '
+            f'{param_1}, '
             f'primary_key={is_pk!r}, '
             f'nullable={nullable!r}, '
             f'index={not is_pk!r}, '

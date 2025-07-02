@@ -34,70 +34,70 @@ class Annotation(SQLModel, table=True):
         sa_type=String(36),
     )
     language: Optional = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     fhir_comments: Union = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     extension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     authorReference: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     authorString: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     authorString__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     text: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     text__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     time: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     time__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
@@ -115,252 +115,252 @@ class ClinicalImpression(SQLModel, table=True):
         sa_type=String(36),
     )
     language: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     fhir_comments: Union = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     language__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     meta: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     contained: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     extension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     modifierExtension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     text: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     changePattern: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     date: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     date__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     description: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     description__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     effectiveDateTime: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     effectiveDateTime__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     effectivePeriod: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     encounter: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     finding: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     identifier: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     note: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     performer: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     previous: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     problem: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     prognosisCodeableConcept: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     prognosisReference: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     protocol: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     protocol__ext: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     status: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     status__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     statusReason: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     subject: ReferenceType = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     summary: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     summary__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     supportingInfo: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
@@ -378,273 +378,273 @@ class Condition(SQLModel, table=True):
         sa_type=String(36),
     )
     language: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     fhir_comments: Union = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     language__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     meta: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     contained: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     extension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     modifierExtension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     text: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     abatementAge: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     abatementDateTime: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     abatementDateTime__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     abatementPeriod: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     abatementRange: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     abatementString: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     abatementString__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     bodySite: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     category: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     clinicalStatus: CodeableConceptType = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     code: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     encounter: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     evidence: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     identifier: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     note: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     onsetAge: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     onsetDateTime: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     onsetDateTime__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     onsetPeriod: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     onsetRange: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     onsetString: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     onsetString__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     participant: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     recordedDate: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     recordedDate__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     severity: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     stage: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     subject: ReferenceType = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     verificationStatus: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
@@ -662,294 +662,294 @@ class Encounter(SQLModel, table=True):
         sa_type=String(36),
     )
     language: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     fhir_comments: Union = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     language__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     meta: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     contained: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     extension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     modifierExtension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     text: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     account: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     actualPeriod: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     admission: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     appointment: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     basedOn: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     careTeam: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     class_fhir: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     diagnosis: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     dietPreference: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     episodeOfCare: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     identifier: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     length: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     location: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     partOf: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     participant: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     plannedEndDate: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     plannedEndDate__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     plannedStartDate: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     plannedStartDate__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     priority: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     reason: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     serviceProvider: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     serviceType: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     specialArrangement: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     specialCourtesy: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     status: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     status__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     subject: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     subjectStatus: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     type: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     virtualService: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     canonicalEpisodeId: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
@@ -967,441 +967,441 @@ class Observation(SQLModel, table=True):
         sa_type=String(36),
     )
     language: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     fhir_comments: Union = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     language__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     meta: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     contained: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     extension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     modifierExtension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     text: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     basedOn: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     bodySite: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     bodyStructure: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     category: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     code: CodeableConceptType = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     component: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     dataAbsentReason: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     derivedFrom: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     device: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     effectiveDateTime: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     effectiveDateTime__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     effectiveInstant: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     effectiveInstant__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     effectivePeriod: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     effectiveTiming: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     encounter: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     focus: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     hasMember: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     identifier: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     instantiatesCanonical: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     instantiatesCanonical__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     instantiatesReference: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     interpretation: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     issued: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     issued__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     method: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     note: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     partOf: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     performer: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     referenceRange: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     specimen: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     status: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     status__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     subject: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     triggeredBy: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueAttachment: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueBoolean: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueBoolean__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueCodeableConcept: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueDateTime: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueDateTime__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueInteger: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueInteger__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valuePeriod: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueQuantity: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueRange: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueRatio: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueReference: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueSampledData: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueString: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueString__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueTime: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     valueTime__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
@@ -1419,245 +1419,245 @@ class Patient(SQLModel, table=True):
         sa_type=String(36),
     )
     language: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     fhir_comments: Union = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     language__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     meta: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     contained: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     extension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     modifierExtension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     text: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     active: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     active__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     address: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     birthDate: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     birthDate__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     communication: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     contact: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     deceasedBoolean: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     deceasedBoolean__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     deceasedDateTime: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     deceasedDateTime__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     gender: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     gender__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     generalPractitioner: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     identifier: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     link: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     managingOrganization: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     maritalStatus: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     multipleBirthBoolean: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     multipleBirthBoolean__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     multipleBirthInteger: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     multipleBirthInteger__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     name: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     photo: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     telecom: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
@@ -1675,357 +1675,357 @@ class Procedure(SQLModel, table=True):
         sa_type=String(36),
     )
     language: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     fhir_comments: Union = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     implicitRules__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     language__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     meta: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     contained: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     extension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     modifierExtension: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     text: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     basedOn: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     bodySite: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     category: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     code: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     complication: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     encounter: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     focalDevice: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     focus: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     followUp: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     identifier: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     instantiatesCanonical: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     instantiatesCanonical__ext: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     instantiatesUri: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     instantiatesUri__ext: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     location: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     note: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     occurrenceAge: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     occurrenceDateTime: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     occurrenceDateTime__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     occurrencePeriod: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     occurrenceRange: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     occurrenceString: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     occurrenceString__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     occurrenceTiming: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     outcome: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     partOf: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     performer: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     reason: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     recorded: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     recorded__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     recorder: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     report: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     reportedBoolean: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     reportedBoolean__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     reportedReference: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     status: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     status__ext: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     statusReason: Any = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     subject: ReferenceType = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     supportingInfo: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     used: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
@@ -2038,49 +2038,49 @@ class AIOutput(SQLModel, table=True):
     __tablename__: str = 'aioutput'
 
     language: Optional = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     id: str = Field(
-        None if False else ...,
+        ...,
         primary_key=True,
         nullable=False,
         index=False,
         sa_type=String,
     )
     encounter_id: str = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=String,
     )
     type: Literal = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     content: str = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=String,
     )
     model_version: str = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=String,
     )
     timestamp: datetime = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
@@ -2093,49 +2093,49 @@ class DeIdentifiedDatasetDescriptor(SQLModel, table=True):
     __tablename__: str = 'deidentifieddatasetdescriptor'
 
     language: Optional = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     dataset_id: str = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=String,
     )
     generation_date: datetime = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=DateTime,
     )
     version: str = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=String,
     )
     records: int = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=Integer,
     )
     license: str = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=String,
     )
     url: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
@@ -2148,56 +2148,56 @@ class Evaluation(SQLModel, table=True):
     __tablename__: str = 'evaluation'
 
     language: Optional = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     id: str = Field(
-        None if False else ...,
+        ...,
         primary_key=True,
         nullable=False,
         index=False,
         sa_type=String,
     )
     aioutput_id: str = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=String,
     )
     output_type: Literal = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     ratings: Dict = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     safety: Literal = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
         sa_type=JSONB,
     )
     comments: Optional = Field(
-        None if True else ...,
+        None,
         primary_key=False,
         nullable=True,
         index=True,
         sa_type=JSONB,
     )
     timestamp: datetime = Field(
-        None if False else ...,
+        ...,
         primary_key=False,
         nullable=False,
         index=True,
