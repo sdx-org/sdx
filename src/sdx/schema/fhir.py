@@ -1,5 +1,6 @@
 """
 FHIR-compatible resource definitions extended for TeleHealthCareAI.
+
 All extensions preserve FHIR element names and validation rules
 via subclassing from `fhir.resources` Pydantic models.
 """
@@ -8,8 +9,7 @@ from __future__ import annotations
 
 import abc
 
-from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from fhir.resources.annotation import Annotation as FhirAnnotation
 from fhir.resources.clinicalimpression import (
@@ -26,6 +26,8 @@ from pydantic import BaseModel, Field
 
 @public
 class BaseLanguage(BaseModel, abc.ABC):
+    """Base class for language."""
+
     language: Optional[str] = Field(
         ...,
         alias='language',

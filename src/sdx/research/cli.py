@@ -7,7 +7,7 @@ import os
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, cast
 
 import questionary
 import typer
@@ -16,18 +16,12 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from rich import print
 
-# ────────────────────────── environment ──────────────────────────
-
 load_dotenv(Path(__file__).parents[3] / '.envs' / '.env')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
 MODEL_NAME = 'o4-mini-2025-04-16'
 
-# ───────────────────────────── paths ─────────────────────────────
-
 RECORDS_DIR = Path.home() / 'config' / '.sdx' / 'records'
 RECORDS_DIR.mkdir(parents=True, exist_ok=True)
-
-# ─────────────────────────── utilities ───────────────────────────
 
 
 def call_openai(system_msg: str, user_msg: str) -> dict[str, Any]:
@@ -64,14 +58,12 @@ def save_record(payload: dict[str, Any]) -> Path:
     return path
 
 
-def multiselect(title: str, items: List[str]) -> List[str]:
+def multiselect(title: str, items: list[str]) -> list[str]:
     """Checkbox UI."""
     return questionary.checkbox(title, choices=items).ask() or []
 
 
 app = typer.Typer(add_completion=False)
-
-# ───────────────────────────── CLI ──────────────────────────────
 
 
 @app.command('consult')
@@ -101,7 +93,6 @@ def consult() -> None:
     print('[bold cyan]\nPrevious exams/tests[/bold cyan]')
     patient['previous_tests'] = typer.prompt("Summary or 'none'")
 
-    # ── differential diagnosis ──
     sys_diag = (
         'You are an experienced physician assistant. '
         "Return a JSON object with keys 'summary' (two sentences) and "
@@ -113,7 +104,6 @@ def consult() -> None:
         'Select diagnoses to investigate', diag_json['options']
     )
 
-    # ── exam suggestions ──
     sys_exam = (
         'You are an experienced physician assistant. '
         "Given the selected diagnoses, return JSON with keys 'summary' "

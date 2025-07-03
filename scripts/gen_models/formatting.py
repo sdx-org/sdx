@@ -30,8 +30,18 @@ def run_ruff(path: Path, *, fix: bool = True) -> None:
 
     try:
         subprocess.run(cmd, check=True)
-        print(f'[✓] Ruff {"fixed" if fix else "checked"} {path}')
+        print(f'[✓] Ruff format {"fixed" if fix else "checked"} {path}')
     except subprocess.CalledProcessError as exc:
         raise RuntimeError(
-            f'Ruff reported issues (exit code {exc.returncode}).'
+            f'Ruff format reported issues (exit code {exc.returncode}).'
+        ) from exc
+
+    cmd = [ruff_exe, 'check', '--fix', str(path)]
+
+    try:
+        subprocess.run(cmd, check=True)
+        print(f'[✓] Ruff check {"fixed" if fix else "checked"} {path}')
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f'Ruff check reported issues (exit code {exc.returncode}).'
         ) from exc

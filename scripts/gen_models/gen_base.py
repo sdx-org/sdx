@@ -1,15 +1,12 @@
+"""Base script for generating models."""
+
 from __future__ import annotations
 
 import inspect
 import pkgutil
-import shutil
-import subprocess
-import sys
 
-from datetime import date, datetime
-from pathlib import Path
 from types import ModuleType
-from typing import Any, Dict, Type
+from typing import Dict, Type
 
 from pydantic import BaseModel
 from sdx.schema.fhir import BaseLanguage

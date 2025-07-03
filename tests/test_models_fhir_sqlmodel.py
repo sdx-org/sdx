@@ -1,4 +1,6 @@
 """
+Test SQLModel models generated.
+
 Smoke-tests for *all* auto-generated SQLModel tables in
 `sdx.models.sqlmodel.fhir`.
 
@@ -23,10 +25,7 @@ from typing import Any, Dict
 
 import pytest
 
-from sqlalchemy import JSON  # JSON for SQLite dialect
-from sqlalchemy import JSON as JSONSA
-from sqlalchemy.dialects.postgresql import JSONB  # noqa: F401
-from sqlmodel import Field, Session, SQLModel, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 
 _SQLA_TYPE_MAP: Dict[Any, Any] = {
     'String': 'sample',
