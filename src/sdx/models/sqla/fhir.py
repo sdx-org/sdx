@@ -5,15 +5,11 @@ DO NOT EDIT MANUALLY. Regenerate via `python generate_orm_models.py`.
 
 from __future__ import annotations
 
-import datetime
 import uuid
 
+from datetime import datetime
 from typing import Any, Literal, Optional, Union  # noqa
 
-from fhir.resources.fhirtypes import (
-    CodeableConceptType,  # noqa
-    ReferenceType,  # noqa
-)
 from public import public
 from sqlalchemy import (
     JSON,

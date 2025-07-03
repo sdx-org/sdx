@@ -149,14 +149,14 @@ DO NOT EDIT MANUALLY. Regenerate via `python generate_orm_models.py`.
 
 from __future__ import annotations
 
-import datetime
+from datetime import datetime
 import uuid
 
 from typing import Any, Literal, Optional, Union  # noqa
 
 from fhir.resources.fhirtypes import (
-    ReferenceType,  # noqa
-    CodeableConceptType,  # noqa
+    ReferenceType,
+    CodeableConceptType,
 )
 from public import public
 from sqlalchemy import (

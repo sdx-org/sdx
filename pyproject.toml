@@ -63,6 +63,7 @@ targets = "./"
 
 [tool.mypy]
 python_version = "3.9"
+allow_subclassing_any = true
 check_untyped_defs = true
 strict = true
 ignore_missing_imports = true
@@ -70,6 +71,9 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
 exclude = ["scripts/"]
+plugins = [
+  "pydantic.mypy",
+]
 
 [tool.pytest.ini_options]
 testpaths = [
