@@ -16,7 +16,7 @@ import uuid
 
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Dict, Type, get_args, get_origin
+from typing import Any, Dict, List, Optional, Type, Union, get_args, get_origin
 
 from formatting import run_ruff
 from gen_base import is_concrete_model, iter_pydantic_models
@@ -44,12 +44,37 @@ TYPE_MAP = {
     date: 'Date',
 }
 
-FALLBACK_TYPE = 'JSONB'  # uses PostgreSQL JSONB by default
+FALLBACK_TYPE = 'JSON'
 
 
-# --------------------------------------------------------------------------- #
-# Helpers
-# --------------------------------------------------------------------------- #
+def _hint_str(annotation: Any) -> str:
+    origin = getattr(annotation, '__origin__', '')
+
+    ann_name = getattr(annotation, '_name', '')
+
+    if not ann_name:
+        return 'Any'
+
+    if origin:
+        ann_name = _hint_str(annotation.__origin__)
+
+    if not getattr(annotation, '__args__', []):
+        return ann_name
+
+    ann_args = []
+    for arg in getattr(annotation, '__args__', []):
+        arg_name = getattr(arg, '__name__', '')
+
+        if not arg_name:
+            continue
+
+        arg_name = 'None' if arg_name == 'NoneType' else arg_name
+        ann_args.append(arg_name)
+
+    if not ann_args:
+        return ann_name
+
+    return f'{ann_name}[{", ".join(ann_args)}]'
 
 
 def python_to_sa_type(annotation: Any) -> str:
@@ -76,56 +101,47 @@ def python_to_sa_type(annotation: Any) -> str:
 
 
 def generate_sqlmodel_class(name: str, model_cls: Type[BaseModel]) -> str:
-    """
-    Create a SQLModel class definition as a *string*.
-
-    Injects a surrogate UUID primary key if the model lacks a scalar field.
-    """
+    """Return the SQLModel table class as source."""
     lines: list[str] = []
     tablename = name.lower()
 
-    lines.append(f'@public')
+    lines.append('@public')
     lines.append(f'class {name}(SQLModel, table=True):')
     lines.append(f"    __tablename__: str = '{tablename}'")
     lines.append('')
 
     fields = model_cls.model_fields
 
-    # Decide if a scalar PK exists
-    has_scalar = any(
-        python_to_sa_type(f.annotation) != FALLBACK_TYPE
-        for f in fields.values()
-    )
-    inject_uuid_pk = not has_scalar
+    inject_uuid_pk = 'id' not in fields
 
     if inject_uuid_pk:
         lines.append(
             '    id: str | None = Field('
-            'default_factory=lambda: str(uuid.uuid4()),'
-            'primary_key=True,'
-            'sa_type=String(36),'
-            ')'
+            'default_factory=lambda: str(uuid.uuid4()), '
+            'primary_key=True, sa_type=String(36))'
         )
 
     for fname, finfo in fields.items():
-        # Skip duplicate id when surrogate already inserted
         if inject_uuid_pk and fname == 'id':
             continue
 
         sa_type = python_to_sa_type(finfo.annotation)
         nullable = not finfo.is_required()
-        is_pk = fname == 'id' and not inject_uuid_pk
-        param_1 = 'None' if nullable else '...'
+
+        is_pk = fname == 'id'
+
+        if is_pk:
+            default_token = 'default_factory=lambda: str(uuid.uuid4())'
+        else:
+            default_token = 'None' if nullable else '...'
 
         lines.append(
-            f'    {fname}: {finfo.annotation.__name__ if hasattr(finfo.annotation, "__name__") else "Any"} '
-            f'= Field('
-            f'{param_1}, '
+            f'    {fname}: {_hint_str(finfo.annotation)} = Field('
+            f'{default_token}, '
             f'primary_key={is_pk!r}, '
             f'nullable={nullable!r}, '
             f'index={not is_pk!r}, '
-            f'sa_type={sa_type},'
-            f')'
+            f'sa_type={sa_type})'
         )
 
     lines.append('')
@@ -143,7 +159,7 @@ DO NOT EDIT MANUALLY:
 from __future__ import annotations
 
 import uuid
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from public import public
 from sqlalchemy import (
@@ -155,7 +171,6 @@ from sqlalchemy import (
     String,
     JSON,
 )
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 """
     body: list[str] = []

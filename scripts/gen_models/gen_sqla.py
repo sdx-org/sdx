@@ -86,59 +86,54 @@ def python_type_to_sqla(annotation: Any) -> tuple[str, str]:
 
 
 def generate_sqla_model(name: str, model_cls: Type[BaseModel]) -> str:
-    """
-    Create a SQLAlchemy declarative model class for a given Pydantic model.
-
-    Rules
-    -----
-    * If the Pydantic model has **no scalar field** that can act
-      as a primary key, inject a surrogate UUID ``id`` column.
-    * Non-scalar or complex fields are mapped to JSON columns.
-    """
+    """Return the SQLAlchemy declarative model as source code."""
     lines: list[str] = []
-    table_name = name.lower()
+    lines.append(f'@public')
     lines.append(f'class {name}(Base):')
-    lines.append(f"    __tablename__ = '{table_name}'")
+    lines.append(f"    __tablename__ = '{name.lower()}'")
     lines.append('')
 
     fields = model_cls.model_fields
 
-    has_scalar_pk_candidate = any(
-        python_type_to_sqla(field.annotation)[0] != FALLBACK_TYPE
-        for field in fields.values()
+    # ── decide whether to add surrogate UUID PK ──────────────────────────
+    id_field = fields.get('id')
+    inject_uuid_pk = (
+        id_field is None
+        or python_type_to_sqla(id_field.annotation)[0] == FALLBACK_TYPE
     )
-    inject_uuid_pk = not has_scalar_pk_candidate
 
     if inject_uuid_pk:
         lines.append(
             '    id: Mapped[str] = mapped_column('
             'String(36), primary_key=True, '
-            'default=lambda: str(uuid.uuid4())'
-            ')'
+            'default=lambda: str(uuid.uuid4()))'
         )
 
+    # ── map every pydantic field ─────────────────────────────────────────
     for field_name, field_info in fields.items():
-        # Skip if surrogate PK already added
+        # skip original id when surrogate already added
         if inject_uuid_pk and field_name == 'id':
             continue
 
         sa_type, py_hint = python_type_to_sqla(field_info.annotation)
-
-        nullable = 'True' if not field_info.is_required() else 'False'
-        primary = (
-            'True' if (field_name == 'id' and not inject_uuid_pk) else 'False'
-        )
+        nullable = not field_info.is_required()
+        is_pk = field_name == 'id' and not inject_uuid_pk
 
         col_args = [
             sa_type,
-            'primary_key=True' if primary == 'True' else None,
-            'nullable=True' if nullable == 'True' else None,
-            'index=True' if primary == 'False' else None,
+            'primary_key=True' if is_pk else None,
+            'nullable=True' if nullable else None,
+            'index=True' if not is_pk else None,
         ]
         col_args = ', '.join(arg for arg in col_args if arg)
 
+        default_token = 'None' if nullable else '...'
+
         lines.append(
-            f'    {field_name}: Mapped[{py_hint}] = mapped_column({col_args})'
+            f'    {field_name}: Mapped[{py_hint}] = mapped_column('
+            f'{col_args}, default={default_token})'
+            if field_name != 'id'
+            else f'    {field_name}: Mapped[{py_hint}] = mapped_column({col_args})'
         )
 
     lines.append('')

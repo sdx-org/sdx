@@ -36,28 +36,44 @@ class Base(DeclarativeBase):
 
 
 @public
+@public
 class Annotation(Base):
     __tablename__ = 'annotation'
 
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    language: Mapped[Any] = mapped_column(JSON, index=True)
-    fhir_comments: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    extension: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language: Mapped[Any] = mapped_column(JSON, index=True, default=...)
+    fhir_comments: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    extension: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     authorReference: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    authorString: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    authorString: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     authorString__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    text: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    text__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    time: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    time__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    text: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    text__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    time: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    time__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
 
 
+@public
 @public
 class ClinicalImpression(Base):
     __tablename__ = 'clinicalimpression'
@@ -65,62 +81,115 @@ class ClinicalImpression(Base):
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    language: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    fhir_comments: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    implicitRules: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    fhir_comments: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    implicitRules: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     implicitRules__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    language__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    meta: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    contained: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    extension: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    meta: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    contained: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    extension: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     modifierExtension: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    text: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    changePattern: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    date: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    date__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    description: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    text: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    changePattern: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    date: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    date__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    description: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     description__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     effectiveDateTime: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     effectiveDateTime__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     effectivePeriod: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    encounter: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    finding: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    identifier: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    note: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    performer: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    previous: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    problem: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    encounter: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    finding: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    identifier: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    note: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    performer: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    previous: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    problem: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     prognosisCodeableConcept: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     prognosisReference: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    protocol: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    protocol__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    status: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    status__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    statusReason: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    subject: Mapped[Any] = mapped_column(JSON, index=True)
-    summary: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    summary__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    protocol: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    protocol__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    status: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    status__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    statusReason: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    subject: Mapped[Any] = mapped_column(JSON, index=True, default=...)
+    summary: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    summary__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     supportingInfo: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
 
 
+@public
 @public
 class Condition(Base):
     __tablename__ = 'condition'
@@ -128,71 +197,122 @@ class Condition(Base):
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    language: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    fhir_comments: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    implicitRules: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    fhir_comments: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    implicitRules: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     implicitRules__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    language__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    meta: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    contained: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    extension: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    meta: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    contained: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    extension: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     modifierExtension: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    text: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    abatementAge: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    text: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    abatementAge: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     abatementDateTime: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     abatementDateTime__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     abatementPeriod: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     abatementRange: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     abatementString: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     abatementString__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    bodySite: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    category: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    clinicalStatus: Mapped[Any] = mapped_column(JSON, index=True)
-    code: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    encounter: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    evidence: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    identifier: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    note: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    onsetAge: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    onsetDateTime: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    bodySite: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    category: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    clinicalStatus: Mapped[Any] = mapped_column(JSON, index=True, default=...)
+    code: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    encounter: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    evidence: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    identifier: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    note: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    onsetAge: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    onsetDateTime: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     onsetDateTime__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    onsetPeriod: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    onsetRange: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    onsetString: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    onsetPeriod: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    onsetRange: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    onsetString: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     onsetString__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    participant: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    recordedDate: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    participant: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    recordedDate: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     recordedDate__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    severity: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    stage: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    subject: Mapped[Any] = mapped_column(JSON, index=True)
+    severity: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    stage: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    subject: Mapped[Any] = mapped_column(JSON, index=True, default=...)
     verificationStatus: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
 
 
+@public
 @public
 class Encounter(Base):
     __tablename__ = 'encounter'
@@ -200,74 +320,135 @@ class Encounter(Base):
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    language: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    fhir_comments: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    implicitRules: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    fhir_comments: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    implicitRules: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     implicitRules__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    language__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    meta: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    contained: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    extension: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    meta: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    contained: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    extension: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     modifierExtension: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    text: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    account: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    actualPeriod: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    admission: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    appointment: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    basedOn: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    careTeam: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    class_fhir: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    diagnosis: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    text: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    account: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    actualPeriod: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    admission: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    appointment: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    basedOn: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    careTeam: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    class_fhir: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    diagnosis: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     dietPreference: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    episodeOfCare: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    identifier: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    length: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    location: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    partOf: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    participant: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    episodeOfCare: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    identifier: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    length: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    location: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    partOf: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    participant: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     plannedEndDate: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     plannedEndDate__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     plannedStartDate: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     plannedStartDate__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    priority: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    reason: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    priority: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    reason: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     serviceProvider: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    serviceType: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    serviceType: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     specialArrangement: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     specialCourtesy: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    status: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    status__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    subject: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    subjectStatus: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    type: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    status: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    status__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    subject: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    subjectStatus: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    type: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     virtualService: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     canonicalEpisodeId: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
 
 
+@public
 @public
 class Observation(Base):
     __tablename__ = 'observation'
@@ -275,117 +456,196 @@ class Observation(Base):
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    language: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    fhir_comments: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    implicitRules: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    fhir_comments: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    implicitRules: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     implicitRules__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    language__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    meta: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    contained: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    extension: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    meta: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    contained: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    extension: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     modifierExtension: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    text: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    basedOn: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    bodySite: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    bodyStructure: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    category: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    code: Mapped[Any] = mapped_column(JSON, index=True)
-    component: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    text: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    basedOn: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    bodySite: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    bodyStructure: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    category: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    code: Mapped[Any] = mapped_column(JSON, index=True, default=...)
+    component: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     dataAbsentReason: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    derivedFrom: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    device: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    derivedFrom: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    device: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     effectiveDateTime: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     effectiveDateTime__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     effectiveInstant: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     effectiveInstant__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     effectivePeriod: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     effectiveTiming: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    encounter: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    focus: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    hasMember: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    identifier: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    encounter: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    focus: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    hasMember: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    identifier: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     instantiatesCanonical: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     instantiatesCanonical__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     instantiatesReference: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     interpretation: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    issued: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    issued__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    method: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    note: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    partOf: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    performer: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    issued: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    issued__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    method: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    note: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    partOf: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    performer: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     referenceRange: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    specimen: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    status: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    status__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    subject: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    triggeredBy: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    specimen: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    status: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    status__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    subject: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    triggeredBy: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     valueAttachment: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    valueBoolean: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    valueBoolean: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     valueBoolean__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     valueCodeableConcept: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    valueDateTime: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    valueDateTime: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     valueDateTime__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    valueInteger: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    valueInteger: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     valueInteger__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    valuePeriod: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    valueQuantity: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    valueRange: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    valueRatio: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    valuePeriod: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    valueQuantity: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    valueRange: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    valueRatio: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     valueReference: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     valueSampledData: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    valueString: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    valueString: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     valueString__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    valueTime: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    valueTime: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     valueTime__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
 
 
+@public
 @public
 class Patient(Base):
     __tablename__ = 'patient'
@@ -393,69 +653,114 @@ class Patient(Base):
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    language: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    fhir_comments: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    implicitRules: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    fhir_comments: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    implicitRules: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     implicitRules__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    language__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    meta: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    contained: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    extension: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    meta: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    contained: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    extension: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     modifierExtension: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    text: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    active: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    active__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    address: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    birthDate: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    text: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    active: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    active__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    address: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    birthDate: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     birthDate__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    communication: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    contact: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    communication: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    contact: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     deceasedBoolean: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     deceasedBoolean__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     deceasedDateTime: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     deceasedDateTime__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    gender: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    gender__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    gender: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    gender__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     generalPractitioner: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    identifier: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    link: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    identifier: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    link: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     managingOrganization: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    maritalStatus: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    maritalStatus: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     multipleBirthBoolean: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     multipleBirthBoolean__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     multipleBirthInteger: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     multipleBirthInteger__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    name: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    photo: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    telecom: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    name: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    photo: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    telecom: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
 
 
+@public
 @public
 class Procedure(Base):
     __tablename__ = 'procedure'
@@ -463,128 +768,210 @@ class Procedure(Base):
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    language: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    fhir_comments: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    implicitRules: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    fhir_comments: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    implicitRules: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     implicitRules__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    language__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    meta: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    contained: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    extension: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    language__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    meta: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    contained: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    extension: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     modifierExtension: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    text: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    basedOn: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    bodySite: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    category: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    code: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    complication: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    encounter: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    focalDevice: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    focus: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    followUp: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    identifier: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    text: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    basedOn: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    bodySite: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    category: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    code: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    complication: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    encounter: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    focalDevice: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    focus: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    followUp: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    identifier: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     instantiatesCanonical: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     instantiatesCanonical__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     instantiatesUri: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     instantiatesUri__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    location: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    note: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    occurrenceAge: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    location: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    note: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    occurrenceAge: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     occurrenceDateTime: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     occurrenceDateTime__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     occurrencePeriod: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     occurrenceRange: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     occurrenceString: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     occurrenceString__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     occurrenceTiming: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    outcome: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    partOf: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    performer: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    reason: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    recorded: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    recorded__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    recorder: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    report: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    outcome: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    partOf: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    performer: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    reason: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    recorded: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    recorded__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    recorder: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    report: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
     reportedBoolean: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     reportedBoolean__ext: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
     reportedReference: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    status: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    status__ext: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    statusReason: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    subject: Mapped[Any] = mapped_column(JSON, index=True)
+    status: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    status__ext: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    statusReason: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    subject: Mapped[Any] = mapped_column(JSON, index=True, default=...)
     supportingInfo: Mapped[Any] = mapped_column(
-        JSON, nullable=True, index=True
+        JSON, nullable=True, index=True, default=None
     )
-    used: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    used: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
 
 
+@public
 @public
 class AIOutput(Base):
     __tablename__ = 'aioutput'
 
-    language: Mapped[Any] = mapped_column(JSON, index=True)
+    language: Mapped[Any] = mapped_column(JSON, index=True, default=...)
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    encounter_id: Mapped[str] = mapped_column(String, index=True)
-    type: Mapped[Any] = mapped_column(JSON, index=True)
-    content: Mapped[str] = mapped_column(String, index=True)
-    model_version: Mapped[str] = mapped_column(String, index=True)
-    timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
+    encounter_id: Mapped[str] = mapped_column(String, index=True, default=...)
+    type: Mapped[Any] = mapped_column(JSON, index=True, default=...)
+    content: Mapped[str] = mapped_column(String, index=True, default=...)
+    model_version: Mapped[str] = mapped_column(String, index=True, default=...)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime, index=True, default=...
+    )
 
 
+@public
 @public
 class DeIdentifiedDatasetDescriptor(Base):
     __tablename__ = 'deidentifieddatasetdescriptor'
 
-    language: Mapped[Any] = mapped_column(JSON, index=True)
-    dataset_id: Mapped[str] = mapped_column(String, index=True)
-    generation_date: Mapped[datetime] = mapped_column(DateTime, index=True)
-    version: Mapped[str] = mapped_column(String, index=True)
-    records: Mapped[int] = mapped_column(Integer, index=True)
-    license: Mapped[str] = mapped_column(String, index=True)
-    url: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    language: Mapped[Any] = mapped_column(JSON, index=True, default=...)
+    dataset_id: Mapped[str] = mapped_column(String, index=True, default=...)
+    generation_date: Mapped[datetime] = mapped_column(
+        DateTime, index=True, default=...
+    )
+    version: Mapped[str] = mapped_column(String, index=True, default=...)
+    records: Mapped[int] = mapped_column(Integer, index=True, default=...)
+    license: Mapped[str] = mapped_column(String, index=True, default=...)
+    url: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
 
 
+@public
 @public
 class Evaluation(Base):
     __tablename__ = 'evaluation'
 
-    language: Mapped[Any] = mapped_column(JSON, index=True)
+    language: Mapped[Any] = mapped_column(JSON, index=True, default=...)
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    aioutput_id: Mapped[str] = mapped_column(String, index=True)
-    output_type: Mapped[Any] = mapped_column(JSON, index=True)
-    ratings: Mapped[Any] = mapped_column(JSON, index=True)
-    safety: Mapped[Any] = mapped_column(JSON, index=True)
-    comments: Mapped[Any] = mapped_column(JSON, nullable=True, index=True)
-    timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
+    aioutput_id: Mapped[str] = mapped_column(String, index=True, default=...)
+    output_type: Mapped[Any] = mapped_column(JSON, index=True, default=...)
+    ratings: Mapped[Any] = mapped_column(JSON, index=True, default=...)
+    safety: Mapped[Any] = mapped_column(JSON, index=True, default=...)
+    comments: Mapped[Any] = mapped_column(
+        JSON, nullable=True, index=True, default=None
+    )
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime, index=True, default=...
+    )

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import uuid
 
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from public import public
 from sqlalchemy import (
@@ -20,7 +20,6 @@ from sqlalchemy import (
     Integer,
     String,
 )
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
 
@@ -28,80 +27,42 @@ from sqlmodel import Field, SQLModel
 class Annotation(SQLModel, table=True):
     __tablename__: str = 'annotation'
 
-    id: str | None = Field(
+    language: Union[str, None] = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
+    )
+    fhir_comments: Any = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    extension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    id: Union[Annotated, None] = Field(
         default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
-        sa_type=String(36),
-    )
-    language: Optional = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
-    )
-    fhir_comments: Union = Field(
-        None,
-        primary_key=False,
         nullable=True,
-        index=True,
-        sa_type=JSONB,
-    )
-    extension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        index=False,
+        sa_type=JSON,
     )
     authorReference: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    authorString: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    authorString: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     authorString__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    text: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    text: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     text__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    time: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    time: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     time__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
 
 
@@ -109,262 +70,120 @@ class Annotation(SQLModel, table=True):
 class ClinicalImpression(SQLModel, table=True):
     __tablename__: str = 'clinicalimpression'
 
-    id: str | None = Field(
+    language: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    fhir_comments: Any = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    id: Union[Annotated, None] = Field(
         default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
-        sa_type=String(36),
-    )
-    language: Optional = Field(
-        None,
-        primary_key=False,
         nullable=True,
-        index=True,
-        sa_type=JSONB,
+        index=False,
+        sa_type=JSON,
     )
-    fhir_comments: Union = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
-    )
-    implicitRules: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    implicitRules: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     implicitRules__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     language__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     meta: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    contained: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    contained: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    extension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    extension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    modifierExtension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    modifierExtension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     text: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     changePattern: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    date: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    date: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     date__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    description: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    description: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     description__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    effectiveDateTime: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    effectiveDateTime: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     effectiveDateTime__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     effectivePeriod: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     encounter: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    finding: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    finding: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    identifier: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    identifier: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    note: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    note: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     performer: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     previous: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    problem: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    problem: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    prognosisCodeableConcept: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    prognosisCodeableConcept: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    prognosisReference: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    prognosisReference: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    protocol: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    protocol: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    protocol__ext: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    protocol__ext: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    status: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    status: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     status__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     statusReason: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    subject: ReferenceType = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    subject: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
-    summary: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    summary: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     summary__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    supportingInfo: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    supportingInfo: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
 
 
@@ -372,283 +191,129 @@ class ClinicalImpression(SQLModel, table=True):
 class Condition(SQLModel, table=True):
     __tablename__: str = 'condition'
 
-    id: str | None = Field(
+    language: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    fhir_comments: Any = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    id: Union[Annotated, None] = Field(
         default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
-        sa_type=String(36),
-    )
-    language: Optional = Field(
-        None,
-        primary_key=False,
         nullable=True,
-        index=True,
-        sa_type=JSONB,
+        index=False,
+        sa_type=JSON,
     )
-    fhir_comments: Union = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
-    )
-    implicitRules: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    implicitRules: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     implicitRules__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     language__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     meta: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    contained: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    contained: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    extension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    extension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    modifierExtension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    modifierExtension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     text: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     abatementAge: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    abatementDateTime: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    abatementDateTime: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     abatementDateTime__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     abatementPeriod: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     abatementRange: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    abatementString: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    abatementString: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     abatementString__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    bodySite: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    bodySite: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    category: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    category: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    clinicalStatus: CodeableConceptType = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    clinicalStatus: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
     code: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     encounter: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    evidence: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    evidence: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    identifier: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    identifier: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    note: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    note: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     onsetAge: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    onsetDateTime: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    onsetDateTime: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     onsetDateTime__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     onsetPeriod: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     onsetRange: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    onsetString: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    onsetString: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     onsetString__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    participant: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    participant: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    recordedDate: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    recordedDate: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     recordedDate__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     severity: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    stage: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    stage: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    subject: ReferenceType = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    subject: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
     verificationStatus: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
 
 
@@ -656,304 +321,138 @@ class Condition(SQLModel, table=True):
 class Encounter(SQLModel, table=True):
     __tablename__: str = 'encounter'
 
-    id: str | None = Field(
+    language: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    fhir_comments: Any = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    id: Union[Annotated, None] = Field(
         default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
-        sa_type=String(36),
-    )
-    language: Optional = Field(
-        None,
-        primary_key=False,
         nullable=True,
-        index=True,
-        sa_type=JSONB,
+        index=False,
+        sa_type=JSON,
     )
-    fhir_comments: Union = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
-    )
-    implicitRules: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    implicitRules: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     implicitRules__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     language__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     meta: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    contained: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    contained: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    extension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    extension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    modifierExtension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    modifierExtension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     text: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    account: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    account: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     actualPeriod: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     admission: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    appointment: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    appointment: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    basedOn: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    basedOn: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    careTeam: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    careTeam: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    class_fhir: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    class_fhir: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    diagnosis: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    diagnosis: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    dietPreference: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    dietPreference: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    episodeOfCare: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    episodeOfCare: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    identifier: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    identifier: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     length: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    location: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    location: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     partOf: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    participant: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    participant: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    plannedEndDate: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    plannedEndDate: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     plannedEndDate__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    plannedStartDate: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    plannedStartDate: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     plannedStartDate__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     priority: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    reason: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    reason: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     serviceProvider: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    serviceType: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    serviceType: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    specialArrangement: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    specialArrangement: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    specialCourtesy: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    specialCourtesy: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    status: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    status: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     status__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     subject: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     subjectStatus: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    type: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    type: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    virtualService: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    virtualService: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    canonicalEpisodeId: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    canonicalEpisodeId: Union[str, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
 
 
@@ -961,451 +460,201 @@ class Encounter(SQLModel, table=True):
 class Observation(SQLModel, table=True):
     __tablename__: str = 'observation'
 
-    id: str | None = Field(
+    language: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    fhir_comments: Any = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    id: Union[Annotated, None] = Field(
         default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
-        sa_type=String(36),
-    )
-    language: Optional = Field(
-        None,
-        primary_key=False,
         nullable=True,
-        index=True,
-        sa_type=JSONB,
+        index=False,
+        sa_type=JSON,
     )
-    fhir_comments: Union = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
-    )
-    implicitRules: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    implicitRules: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     implicitRules__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     language__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     meta: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    contained: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    contained: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    extension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    extension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    modifierExtension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    modifierExtension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     text: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    basedOn: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    basedOn: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     bodySite: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     bodyStructure: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    category: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    category: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    code: CodeableConceptType = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    code: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
-    component: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    component: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     dataAbsentReason: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    derivedFrom: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    derivedFrom: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     device: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    effectiveDateTime: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    effectiveDateTime: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     effectiveDateTime__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    effectiveInstant: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    effectiveInstant: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     effectiveInstant__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     effectivePeriod: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     effectiveTiming: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     encounter: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    focus: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    focus: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    hasMember: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    hasMember: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    identifier: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    identifier: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    instantiatesCanonical: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    instantiatesCanonical: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     instantiatesCanonical__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     instantiatesReference: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    interpretation: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    interpretation: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    issued: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    issued: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     issued__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     method: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    note: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    note: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    partOf: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    partOf: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    performer: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    performer: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    referenceRange: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    referenceRange: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     specimen: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    status: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    status: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     status__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     subject: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    triggeredBy: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    triggeredBy: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueAttachment: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueBoolean: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueBoolean__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueCodeableConcept: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    valueDateTime: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    valueDateTime: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueDateTime__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    valueInteger: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    valueInteger: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueInteger__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valuePeriod: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueQuantity: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueRange: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueRatio: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueReference: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueSampledData: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    valueString: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    valueString: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueString__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    valueTime: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    valueTime: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     valueTime__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
 
 
@@ -1413,255 +662,117 @@ class Observation(SQLModel, table=True):
 class Patient(SQLModel, table=True):
     __tablename__: str = 'patient'
 
-    id: str | None = Field(
+    language: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    fhir_comments: Any = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    id: Union[Annotated, None] = Field(
         default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
-        sa_type=String(36),
-    )
-    language: Optional = Field(
-        None,
-        primary_key=False,
         nullable=True,
-        index=True,
-        sa_type=JSONB,
+        index=False,
+        sa_type=JSON,
     )
-    fhir_comments: Union = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
-    )
-    implicitRules: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    implicitRules: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     implicitRules__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     language__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     meta: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    contained: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    contained: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    extension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    extension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    modifierExtension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    modifierExtension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     text: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     active: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     active__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    address: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    address: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    birthDate: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    birthDate: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     birthDate__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    communication: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    communication: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    contact: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    contact: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     deceasedBoolean: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     deceasedBoolean__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    deceasedDateTime: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    deceasedDateTime: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     deceasedDateTime__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    gender: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    gender: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     gender__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    generalPractitioner: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    generalPractitioner: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    identifier: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    identifier: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    link: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    link: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     managingOrganization: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     maritalStatus: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     multipleBirthBoolean: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     multipleBirthBoolean__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    multipleBirthInteger: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    multipleBirthInteger: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     multipleBirthInteger__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    name: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    name: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    photo: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    photo: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    telecom: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    telecom: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
 
 
@@ -1669,367 +780,165 @@ class Patient(SQLModel, table=True):
 class Procedure(SQLModel, table=True):
     __tablename__: str = 'procedure'
 
-    id: str | None = Field(
+    language: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    fhir_comments: Any = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
+    )
+    id: Union[Annotated, None] = Field(
         default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
-        sa_type=String(36),
-    )
-    language: Optional = Field(
-        None,
-        primary_key=False,
         nullable=True,
-        index=True,
-        sa_type=JSONB,
+        index=False,
+        sa_type=JSON,
     )
-    fhir_comments: Union = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
-    )
-    implicitRules: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    implicitRules: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     implicitRules__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     language__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     meta: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    contained: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    contained: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    extension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    extension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    modifierExtension: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    modifierExtension: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     text: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    basedOn: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    basedOn: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    bodySite: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    bodySite: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    category: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    category: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     code: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    complication: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    complication: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     encounter: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    focalDevice: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    focalDevice: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     focus: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    followUp: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    followUp: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    identifier: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    identifier: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    instantiatesCanonical: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    instantiatesCanonical: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    instantiatesCanonical__ext: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    instantiatesCanonical__ext: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    instantiatesUri: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    instantiatesUri: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    instantiatesUri__ext: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    instantiatesUri__ext: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     location: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    note: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    note: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     occurrenceAge: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    occurrenceDateTime: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    occurrenceDateTime: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     occurrenceDateTime__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     occurrencePeriod: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     occurrenceRange: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    occurrenceString: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    occurrenceString: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     occurrenceString__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     occurrenceTiming: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     outcome: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    partOf: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    partOf: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    performer: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    performer: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    reason: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    reason: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    recorded: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    recorded: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     recorded__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     recorder: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    report: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    report: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     reportedBoolean: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     reportedBoolean__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     reportedReference: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    status: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    status: Union[Annotated, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     status__ext: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
     statusReason: Any = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    subject: ReferenceType = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    subject: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
-    supportingInfo: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    supportingInfo: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    used: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    used: Union[List, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
 
 
@@ -2037,54 +946,30 @@ class Procedure(SQLModel, table=True):
 class AIOutput(SQLModel, table=True):
     __tablename__: str = 'aioutput'
 
-    language: Optional = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    language: Union[str, None] = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
-    id: str = Field(
-        ...,
+    id: Any = Field(
+        default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
         nullable=False,
         index=False,
         sa_type=String,
     )
-    encounter_id: str = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=String,
+    encounter_id: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=String
     )
-    type: Literal = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    type: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
-    content: str = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=String,
+    content: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=String
     )
-    model_version: str = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=String,
+    model_version: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=String
     )
-    timestamp: datetime = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=DateTime,
+    timestamp: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=DateTime
     )
 
 
@@ -2092,54 +977,31 @@ class AIOutput(SQLModel, table=True):
 class DeIdentifiedDatasetDescriptor(SQLModel, table=True):
     __tablename__: str = 'deidentifieddatasetdescriptor'
 
-    language: Optional = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    id: str | None = Field(
+        default_factory=lambda: str(uuid.uuid4()),
+        primary_key=True,
+        sa_type=String(36),
     )
-    dataset_id: str = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=String,
+    language: Union[str, None] = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
-    generation_date: datetime = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=DateTime,
+    dataset_id: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=String
     )
-    version: str = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=String,
+    generation_date: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=DateTime
     )
-    records: int = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=Integer,
+    version: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=String
     )
-    license: str = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=String,
+    records: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=Integer
     )
-    url: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    license: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=String
+    )
+    url: Union[str, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
 
 
@@ -2147,59 +1009,31 @@ class DeIdentifiedDatasetDescriptor(SQLModel, table=True):
 class Evaluation(SQLModel, table=True):
     __tablename__: str = 'evaluation'
 
-    language: Optional = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    language: Union[str, None] = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
-    id: str = Field(
-        ...,
+    id: Any = Field(
+        default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
         nullable=False,
         index=False,
         sa_type=String,
     )
-    aioutput_id: str = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=String,
+    aioutput_id: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=String
     )
-    output_type: Literal = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    output_type: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
-    ratings: Dict = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    ratings: Any[Literal, int] = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
-    safety: Literal = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=JSONB,
+    safety: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=JSON
     )
-    comments: Optional = Field(
-        None,
-        primary_key=False,
-        nullable=True,
-        index=True,
-        sa_type=JSONB,
+    comments: Union[str, None] = Field(
+        None, primary_key=False, nullable=True, index=True, sa_type=JSON
     )
-    timestamp: datetime = Field(
-        ...,
-        primary_key=False,
-        nullable=False,
-        index=True,
-        sa_type=DateTime,
+    timestamp: Any = Field(
+        ..., primary_key=False, nullable=False, index=True, sa_type=DateTime
     )
