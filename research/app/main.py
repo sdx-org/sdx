@@ -43,6 +43,23 @@ app = FastAPI(title='TeleHealthCareAI — Physician Portal')
 app.mount('/static', _STATIC, name='static')
 
 
+@app.get('/', response_class=HTMLResponse)
+def landing(request: Request) -> HTMLResponse:
+    """Render landing page with language selector."""
+    return _render('language.html', request=request)
+
+
+@app.post('/', response_class=RedirectResponse)
+def start_with_language(lang: str = Form(...)) -> RedirectResponse:
+    """Start a new session with selected language."""
+    sess_id = str(uuid.uuid4())
+    _SESSIONS[sess_id] = {
+        'patient': {},
+        'meta': {'uuid': sess_id, 'lang': lang},
+    }
+    return RedirectResponse(f'/demographics?sid={sess_id}', status_code=302)
+
+
 def _render(template: str, **context: Any) -> HTMLResponse:
     """Render a Jinja template located in *templates/*."""
     tpl = TEMPLATES.get_template(template)
@@ -53,20 +70,6 @@ def _render(template: str, **context: Any) -> HTMLResponse:
 def select_language(request: Request) -> HTMLResponse:
     """Display language selection form."""
     return _render('language.html', request=request)
-
-
-@app.post('/', response_class=RedirectResponse)
-def start_with_language(lang: str = Form(...)) -> RedirectResponse:
-    """Initialize session with selected language."""
-    sess_id = str(uuid.uuid4())
-    _SESSIONS[sess_id] = {
-        'patient': {},
-        'meta': {
-            'uuid': sess_id,
-            'lang': lang,  # Store language in session
-        },
-    }
-    return RedirectResponse(f'/demographics?sid={sess_id}', status_code=302)
 
 
 @app.get('/', response_class=HTMLResponse)
