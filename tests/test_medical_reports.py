@@ -4,7 +4,10 @@ import os
 
 import pytest
 
-from sdx.medical_reports import extract_text_from_pdf, get_report_data_from_pdf
+from sdx.agents.extraction.medical_reports import (
+    extract_text_from_pdf,
+    get_report_data_from_pdf,
+)
 
 
 def test_extract_text_from_pdf(reports_data_dir):
