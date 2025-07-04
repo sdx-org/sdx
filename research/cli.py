@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -12,7 +12,6 @@ import questionary
 import typer
 
 from rich import print
-
 from sdx.agents.diagnostics import core as diag
 
 RECORDS_DIR = Path.home() / 'config' / '.sdx' / 'records'
@@ -37,7 +36,7 @@ app = typer.Typer(add_completion=False)
 @app.command('consult')
 def consult() -> None:
     """Interactive consultation workflow."""
-    meta = {'timestamp': datetime.utcnow().isoformat(timespec='seconds')}
+    meta = {'timestamp': datetime.now(UTC).isoformat(timespec='seconds')}
     patient: dict[str, Any] = {}
 
     # ── inputs ──────────────────────────────────────────────────────────
@@ -73,7 +72,6 @@ def consult() -> None:
     print(f'\n[bold magenta]AI summary:[/bold magenta] {exam_json["summary"]}')
     chosen_exams = multiselect('Select exams to request', exam_json['options'])
 
-    # ── persist ─────────────────────────────────────────────────────────
     record = {
         'meta': meta,
         'patient': patient,

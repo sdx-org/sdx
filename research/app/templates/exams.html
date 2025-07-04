@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="wizard-step mx-auto">
+        <h2 class="mb-4">AI Exam&nbsp;/ Test Suggestions</h2>
+        <!-- short model narrative -->
+        <p class="alert alert-info">{{ summary }}</p>
+        <form method="post">
+            <input type="hidden" name="sid" value="{{ sid }}" />
+            <!-- checkbox list of suggested exams -->
+            {% for option in options %}
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="selected"
+                           value="{{ option }}"
+                           id="exam{{ loop.index }}" />
+                    <label class="form-check-label" for="exam{{ loop.index }}">{{ option }}</label>
+                </div>
+            {% endfor %}
+            <button class="btn btn-primary mt-3">Finish</button>
+        </form>
+    </div>
+{% endblock %}

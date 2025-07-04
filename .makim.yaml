@@ -39,8 +39,12 @@ groups:
     tasks:
       cli:
         help: Run the Research CLI
-        dir: src/sdx/research/
+        dir: research/
         run: python cli.py
+      app:
+        help: Run the Research WEB App
+        dir: research/app
+        run: uvicorn main:app --reload
 
   tests:
     tasks:

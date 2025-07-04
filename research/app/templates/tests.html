@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="wizard-step mx-auto">
+        <h2 class="mb-4">Step&nbsp;5 — Previous exams / tests</h2>
+        <form method="post">
+            <input type="hidden" name="sid" value="{{ sid }}" />
+            <div class="mb-3">
+                <label for="previous_tests" class="form-label">
+                    Provide a concise summary of recent lab work or imaging
+                    <small class="text-muted">(enter “none” if not applicable)</small>
+                </label>
+                <textarea class="form-control"
+                          id="previous_tests"
+                          name="previous_tests"
+                          rows="4"
+                          required></textarea>
+            </div>
+            <button class="btn btn-primary">Next</button>
+        </form>
+    </div>
+{% endblock %}

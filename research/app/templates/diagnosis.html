@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="wizard-step mx-auto">
+        <h2 class="mb-4">AI Differential Diagnosis</h2>
+        <p class="alert alert-info">{{ summary }}</p>
+        <form method="post">
+            <input type="hidden" name="sid" value="{{ sid }}" />
+            {% for option in options %}
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="selected"
+                           value="{{ option }}"
+                           id="opt{{ loop.index }}" />
+                    <label class="form-check-label" for="opt{{ loop.index }}">{{ option }}</label>
+                </div>
+            {% endfor %}
+            <button class="btn btn-primary mt-3">Next</button>
+        </form>
+    </div>
+{% endblock %}
