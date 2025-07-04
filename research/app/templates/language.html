@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Select Language{% endblock %}
+{% block content %}
+    <div class="container py-4">
+        <h2 class="mb-4">Select your language</h2>
+        <form action="/" method="post" class="row g-3">
+            <div class="col-md-6 col-lg-4">
+                <label for="lang" class="form-label">Language</label>
+                <select id="lang" name="lang" class="form-select" required>
+                    <option value="en" selected>English</option>
+                    <option value="es">Español</option>
+                    <option value="pt">Português</option>
+                    <option value="it">Italiano</option>
+                    <option value="fr">Français</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Continue</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

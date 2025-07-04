@@ -49,11 +49,34 @@ def _render(template: str, **context: Any) -> HTMLResponse:
     return HTMLResponse(tpl.render(**context))
 
 
+@app.get('/select-language', response_class=HTMLResponse)
+def select_language(request: Request) -> HTMLResponse:
+    """Display language selection form."""
+    return _render('language.html', request=request)
+
+
+@app.post('/', response_class=RedirectResponse)
+def start_with_language(lang: str = Form(...)) -> RedirectResponse:
+    """Initialize session with selected language."""
+    sess_id = str(uuid.uuid4())
+    _SESSIONS[sess_id] = {
+        'patient': {},
+        'meta': {
+            'uuid': sess_id,
+            'lang': lang,  # Store language in session
+        },
+    }
+    return RedirectResponse(f'/demographics?sid={sess_id}', status_code=302)
+
+
 @app.get('/', response_class=HTMLResponse)
 def start() -> HTMLResponse:
     """Kick-off page — redirects immediately to demographics step."""
     sess_id = str(uuid.uuid4())
-    _SESSIONS[sess_id] = {'patient': {}, 'meta': {'uuid': sess_id}}
+    _SESSIONS[sess_id] = {
+        'patient': {},
+        'meta': {'uuid': sess_id, 'lang': 'en'},
+    }  # Default to English
     return RedirectResponse(f'/demographics?sid={sess_id}', status_code=302)
 
 
@@ -67,7 +90,13 @@ def _session_or_404(sid: str) -> Dict[str, Any]:
 @app.get('/demographics', response_class=HTMLResponse)
 def demographics(request: Request, sid: str) -> HTMLResponse:
     """Render demographics form."""
-    return _render('demographics.html', request=request, sid=sid)
+    sess = _session_or_404(sid)
+    return _render(
+        'demographics.html',
+        request=request,
+        sid=sid,
+        lang=sess['meta'].get('lang', 'en'),
+    )
 
 
 @app.post('/demographics')
@@ -88,8 +117,14 @@ def demographics_post(
 
 @app.get('/lifestyle', response_class=HTMLResponse)
 def lifestyle(request: Request, sid: str) -> HTMLResponse:
-    """Handle lifestyle get request."""
-    return _render('lifestyle.html', request=request, sid=sid)
+    """Handle lifestyle GET request."""
+    sess = _session_or_404(sid)
+    return _render(
+        'lifestyle.html',
+        request=request,
+        sid=sid,
+        lang=sess['meta'].get('lang', 'en'),
+    )
 
 
 @app.post('/lifestyle')
@@ -100,7 +135,7 @@ def lifestyle_post(
     physical_activity: str = Form(...),
     mental_exercises: str = Form(...),
 ) -> RedirectResponse:
-    """Handle lifestyle post request."""
+    """Handle lifestyle POST request."""
     sess = _session_or_404(sid)
     sess['patient'].update(
         diet=diet,
@@ -113,13 +148,19 @@ def lifestyle_post(
 
 @app.get('/symptoms', response_class=HTMLResponse)
 def symptoms(request: Request, sid: str) -> HTMLResponse:
-    """Handle sumptoms get request."""
-    return _render('symptoms.html', request=request, sid=sid)
+    """Handle symptoms GET request."""
+    sess = _session_or_404(sid)
+    return _render(
+        'symptoms.html',
+        request=request,
+        sid=sid,
+        lang=sess['meta'].get('lang', 'en'),
+    )
 
 
 @app.post('/symptoms')
 def symptoms_post(sid: str, symptoms: str = Form(...)) -> RedirectResponse:
-    """Handle symptoms post request."""
+    """Handle symptoms POST request."""
     sess = _session_or_404(sid)
     sess['patient']['symptoms'] = symptoms
     return RedirectResponse(f'/mental?sid={sid}', status_code=303)
@@ -127,13 +168,19 @@ def symptoms_post(sid: str, symptoms: str = Form(...)) -> RedirectResponse:
 
 @app.get('/mental', response_class=HTMLResponse)
 def mental(request: Request, sid: str) -> HTMLResponse:
-    """Handle mental get request."""
-    return _render('mental.html', request=request, sid=sid)
+    """Handle mental GET request."""
+    sess = _session_or_404(sid)
+    return _render(
+        'mental.html',
+        request=request,
+        sid=sid,
+        lang=sess['meta'].get('lang', 'en'),
+    )
 
 
 @app.post('/mental')
 def mental_post(sid: str, mental_health: str = Form(...)) -> RedirectResponse:
-    """Handle mental post request."""
+    """Handle mental POST request."""
     sess = _session_or_404(sid)
     sess['patient']['mental_health'] = mental_health
     return RedirectResponse(f'/tests?sid={sid}', status_code=303)
@@ -141,13 +188,19 @@ def mental_post(sid: str, mental_health: str = Form(...)) -> RedirectResponse:
 
 @app.get('/tests', response_class=HTMLResponse)
 def tests(request: Request, sid: str) -> HTMLResponse:
-    """Handle tests get request."""
-    return _render('tests.html', request=request, sid=sid)
+    """Handle tests GET request."""
+    sess = _session_or_404(sid)
+    return _render(
+        'tests.html',
+        request=request,
+        sid=sid,
+        lang=sess['meta'].get('lang', 'en'),
+    )
 
 
 @app.post('/tests')
 def tests_post(sid: str, previous_tests: str = Form(...)) -> RedirectResponse:
-    """Handle tests post request."""
+    """Handle tests POST request."""
     sess = _session_or_404(sid)
     sess['patient']['previous_tests'] = previous_tests
     return RedirectResponse(f'/diagnosis?sid={sid}', status_code=303)
@@ -155,9 +208,10 @@ def tests_post(sid: str, previous_tests: str = Form(...)) -> RedirectResponse:
 
 @app.get('/diagnosis', response_class=HTMLResponse)
 def diagnosis(request: Request, sid: str) -> HTMLResponse:
-    """Handle diagnosis get request."""
+    """Handle diagnosis GET request."""
     sess = _session_or_404(sid)
-    ai = diag.differential(sess['patient'])
+    lang = sess['meta'].get('lang', 'en')
+    ai = diag.differential(sess['patient'], language=lang)
     sess['ai_diag'] = ai
     return _render(
         'diagnosis.html',
@@ -165,6 +219,7 @@ def diagnosis(request: Request, sid: str) -> HTMLResponse:
         sid=sid,
         summary=ai['summary'],
         options=ai['options'],
+        lang=lang,
     )
 
 
@@ -172,7 +227,7 @@ def diagnosis(request: Request, sid: str) -> HTMLResponse:
 def diagnosis_post(
     sid: str, selected: List[str] = Form(...)
 ) -> RedirectResponse:
-    """Handle diagnosis post request."""
+    """Handle diagnosis POST request."""
     sess = _session_or_404(sid)
     sess['selected_diagnoses'] = selected
     return RedirectResponse(f'/exams?sid={sid}', status_code=303)
@@ -180,9 +235,10 @@ def diagnosis_post(
 
 @app.get('/exams', response_class=HTMLResponse)
 def exams(request: Request, sid: str) -> HTMLResponse:
-    """Handle exams get request."""
+    """Handle exams GET request."""
     sess = _session_or_404(sid)
-    ai = diag.exams(sess['selected_diagnoses'])
+    lang = sess['meta'].get('lang', 'en')
+    ai = diag.exams(sess['selected_diagnoses'], language=lang)
     sess['ai_exam'] = ai
     return _render(
         'exams.html',
@@ -190,12 +246,13 @@ def exams(request: Request, sid: str) -> HTMLResponse:
         sid=sid,
         summary=ai['summary'],
         options=ai['options'],
+        lang=lang,
     )
 
 
 @app.post('/exams')
 def exams_post(sid: str, selected: List[str] = Form(...)) -> RedirectResponse:
-    """Handle exams post request."""
+    """Handle exams POST request."""
     sess = _session_or_404(sid)
     sess['selected_exams'] = selected
     sess['meta']['timestamp'] = datetime.utcnow().isoformat(timespec='seconds')
@@ -205,6 +262,11 @@ def exams_post(sid: str, selected: List[str] = Form(...)) -> RedirectResponse:
 
 @app.get('/done', response_class=HTMLResponse)
 def done(request: Request, sid: str) -> HTMLResponse:
-    """Handle done get request."""
+    """Handle done GET request."""
     sess = _session_or_404(sid)
-    return _render('done.html', request=request, record=sess)
+    return _render(
+        'done.html',
+        request=request,
+        record=sess,
+        lang=sess['meta'].get('lang', 'en'),
+    )
