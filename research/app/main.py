@@ -215,13 +215,13 @@ def diagnosis(request: Request, sid: str) -> HTMLResponse:
     sess = _session_or_404(sid)
     lang = sess['meta'].get('lang', 'en')
     ai = diag.differential(sess['patient'], language=lang)
-    sess['ai_diag'] = ai
+    sess['ai_diag'] = ai.model_dump()
     return _render(
         'diagnosis.html',
         request=request,
         sid=sid,
-        summary=ai['summary'],
-        options=ai['options'],
+        summary=ai.summary,
+        options=ai.options,
         lang=lang,
     )
 
@@ -242,13 +242,13 @@ def exams(request: Request, sid: str) -> HTMLResponse:
     sess = _session_or_404(sid)
     lang = sess['meta'].get('lang', 'en')
     ai = diag.exams(sess['selected_diagnoses'], language=lang)
-    sess['ai_exam'] = ai
+    sess['ai_exam'] = ai.model_dump()
     return _render(
         'exams.html',
         request=request,
         sid=sid,
-        summary=ai['summary'],
-        options=ai['options'],
+        summary=ai.summary,
+        options=ai.options,
         lang=lang,
     )
 

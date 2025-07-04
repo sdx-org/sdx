@@ -7,6 +7,7 @@ import json
 from typing import Any, Dict, List
 
 from sdx.agents.client import chat
+from sdx.schema.clinical_outputs import LLMDiagnosis
 
 _DIAG_PROMPTS = {
     'en': (
@@ -74,13 +75,13 @@ _EXAM_PROMPTS = {
 
 def differential(
     patient: Dict[str, Any], language: str = 'en'
-) -> Dict[str, Any]:
+) -> LLMDiagnosis:
     """Return summary + list of differential diagnoses."""
     prompt = _DIAG_PROMPTS.get(language, _DIAG_PROMPTS['en'])
     return chat(prompt, json.dumps(patient, ensure_ascii=False))
 
 
-def exams(selected_dx: List[str], language: str = 'en') -> Dict[str, Any]:
+def exams(selected_dx: List[str], language: str = 'en') -> LLMDiagnosis:
     """Return summary + list of suggested examinations."""
     prompt = _EXAM_PROMPTS.get(language, _EXAM_PROMPTS['en'])
     return chat(prompt, json.dumps(selected_dx, ensure_ascii=False))
