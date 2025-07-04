@@ -3,63 +3,31 @@
 from __future__ import annotations
 
 import json
-import os
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, cast
+from typing import Any
 
 import questionary
 import typer
 
-from dotenv import load_dotenv
-from openai import OpenAI
 from rich import print
 
-load_dotenv(Path(__file__).parents[3] / '.envs' / '.env')
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
-MODEL_NAME = 'o4-mini-2025-04-16'
+from sdx.agents.diagnostics import core as diag
 
 RECORDS_DIR = Path.home() / 'config' / '.sdx' / 'records'
 RECORDS_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def call_openai(system_msg: str, user_msg: str) -> dict[str, Any]:
-    """Query the chat model.
-
-    Parameters
-    ----------
-    system_msg
-        Instruction in the system role.
-    user_msg
-        Prompt content in the user role.
-
-    Returns
-    -------
-    dict
-        Parsed JSON returned by the model.
-    """
-    client = OpenAI(api_key=OPENAI_API_KEY)
-    rsp = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[
-            {'role': 'system', 'content': system_msg},
-            {'role': 'user', 'content': user_msg},
-        ],
-    )
-    result = json.loads(rsp.choices[0].message.content or '{}')
-    return cast(dict[str, Any], result)
-
-
 def save_record(payload: dict[str, Any]) -> Path:
-    """Persist the consultation data."""
+    """Save the record as JSON."""
     path = RECORDS_DIR / f'{payload["meta"]["timestamp"]}.json'
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
     return path
 
 
 def multiselect(title: str, items: list[str]) -> list[str]:
-    """Checkbox UI."""
+    """Provide checkbox field."""
     return questionary.checkbox(title, choices=items).ask() or []
 
 
@@ -70,8 +38,9 @@ app = typer.Typer(add_completion=False)
 def consult() -> None:
     """Interactive consultation workflow."""
     meta = {'timestamp': datetime.utcnow().isoformat(timespec='seconds')}
-    patient: Dict[str, Any] = {}
+    patient: dict[str, Any] = {}
 
+    # ── inputs ──────────────────────────────────────────────────────────
     print('[bold cyan]\nPatient demographics[/bold cyan]')
     patient['age'] = typer.prompt('Age (years)', type=int)
     patient['gender'] = typer.prompt('Gender (M/F/Other)')
@@ -93,28 +62,18 @@ def consult() -> None:
     print('[bold cyan]\nPrevious exams/tests[/bold cyan]')
     patient['previous_tests'] = typer.prompt("Summary or 'none'")
 
-    sys_diag = (
-        'You are an experienced physician assistant. '
-        "Return a JSON object with keys 'summary' (two sentences) and "
-        "'options' (array of differential diagnoses) given the patient data."
-    )
-    diag_json = call_openai(sys_diag, json.dumps(patient, ensure_ascii=False))
+    # ── LLM calls via agents ────────────────────────────────────────────
+    diag_json = diag.differential(patient)
     print(f'\n[bold magenta]AI summary:[/bold magenta] {diag_json["summary"]}')
     chosen_diag = multiselect(
         'Select diagnoses to investigate', diag_json['options']
     )
 
-    sys_exam = (
-        'You are an experienced physician assistant. '
-        "Given the selected diagnoses, return JSON with keys 'summary' "
-        "and 'options' (max 10 exam/procedure names)."
-    )
-    exam_json = call_openai(
-        sys_exam, json.dumps(chosen_diag, ensure_ascii=False)
-    )
+    exam_json = diag.exams(chosen_diag)
     print(f'\n[bold magenta]AI summary:[/bold magenta] {exam_json["summary"]}')
     chosen_exams = multiselect('Select exams to request', exam_json['options'])
 
+    # ── persist ─────────────────────────────────────────────────────────
     record = {
         'meta': meta,
         'patient': patient,
@@ -129,5 +88,5 @@ def consult() -> None:
     print(f'\n[green]Record saved to {path}[/green]')
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     app()

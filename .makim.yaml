@@ -1,7 +1,7 @@
 groups:
   clean:
     tasks:
-      all:
+      tmp:
         help: Clean unnecessary temporary files
         backend: bash
         run: |
@@ -34,6 +34,13 @@ groups:
             - task: docs.build
         run: |
           mkdocs serve --watch docs --config-file mkdocs.yaml
+
+  research:
+    tasks:
+      cli:
+        help: Run the Research CLI
+        dir: src/sdx/research/
+        run: python cli.py
 
   tests:
     tasks:
