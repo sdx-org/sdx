@@ -45,19 +45,19 @@ app.mount('/static', _STATIC, name='static')
 
 @app.get('/', response_class=HTMLResponse)
 def landing(request: Request) -> HTMLResponse:
-    """Render landing page with language selector."""
+    """Show language selector."""
     return _render('language.html', request=request)
 
 
-@app.post('/', response_class=RedirectResponse)
+@app.post('/', response_class=RedirectResponse, status_code=303)
 def start_with_language(lang: str = Form(...)) -> RedirectResponse:
-    """Start a new session with selected language."""
-    sess_id = str(uuid.uuid4())
-    _SESSIONS[sess_id] = {
+    """Create a session after the physician chooses a language."""
+    sid = str(uuid.uuid4())
+    _SESSIONS[sid] = {
         'patient': {},
-        'meta': {'uuid': sess_id, 'lang': lang},
+        'meta': {'uuid': sid, 'lang': lang},
     }
-    return RedirectResponse(f'/demographics?sid={sess_id}', status_code=302)
+    return RedirectResponse(url=f'/demographics?sid={sid}', status_code=303)
 
 
 def _render(template: str, **context: Any) -> HTMLResponse:
@@ -72,6 +72,13 @@ def select_language(request: Request) -> HTMLResponse:
     return _render('language.html', request=request)
 
 
+def _session_or_404(sid: str) -> Dict[str, Any]:
+    """Return the session dict or raise 404."""
+    if sid not in _SESSIONS:
+        raise HTTPException(status_code=404, detail='Session expired')
+    return _SESSIONS[sid]
+
+
 @app.get('/', response_class=HTMLResponse)
 def start() -> HTMLResponse:
     """Kick-off page — redirects immediately to demographics step."""
@@ -81,13 +88,6 @@ def start() -> HTMLResponse:
         'meta': {'uuid': sess_id, 'lang': 'en'},
     }  # Default to English
     return RedirectResponse(f'/demographics?sid={sess_id}', status_code=302)
-
-
-def _session_or_404(sid: str) -> Dict[str, Any]:
-    """Return the session dict or raise 404."""
-    if sid not in _SESSIONS:
-        raise HTTPException(status_code=404, detail='Session expired')
-    return _SESSIONS[sid]
 
 
 @app.get('/demographics', response_class=HTMLResponse)
@@ -214,7 +214,7 @@ def diagnosis(request: Request, sid: str) -> HTMLResponse:
     """Handle diagnosis GET request."""
     sess = _session_or_404(sid)
     lang = sess['meta'].get('lang', 'en')
-    ai = diag.differential(sess['patient'], language=lang)
+    ai = diag.differential(sess['patient'], language=lang, session_id=sid)
     sess['ai_diag'] = ai.model_dump()
     return _render(
         'diagnosis.html',
@@ -241,12 +241,12 @@ def exams(request: Request, sid: str) -> HTMLResponse:
     """Handle exams GET request."""
     sess = _session_or_404(sid)
     lang = sess['meta'].get('lang', 'en')
-    ai = diag.exams(sess['selected_diagnoses'], language=lang)
+    ai = diag.exams(sess['selected_diagnoses'], language=lang, session_id=sid)
     sess['ai_exam'] = ai.model_dump()
     return _render(
         'exams.html',
         request=request,
-        sid=sid,
+        session_id=sid,
         summary=ai.summary,
         options=ai.options,
         lang=lang,
