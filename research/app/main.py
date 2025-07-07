@@ -299,3 +299,18 @@ def patient(patient_id: str) -> HTMLResponse:
     context = {'title': 'Patient', 'patient': patient}
 
     return _render('patient.html', **context)
+
+
+@app.get(
+    '/delete-patient/{patient_id}',
+    response_class=RedirectResponse,
+    status_code=303,
+)
+def delete_patient(request: Request, patient_id: str) -> RedirectResponse:
+    """Delete one patient by id."""
+    # The page the request came from
+    referer = request.headers.get('referer')
+    repo = PatientRepository()
+    repo.delete(patient_id)
+
+    return RedirectResponse(referer, status_code=303)
