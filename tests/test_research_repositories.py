@@ -78,5 +78,7 @@ def test_update_patient(patient_repository, patient_id):
 
 def test_delete_patient(patient_repository, patient_id):
     """Test repository to delete one patient by id."""
+    patient = patient_repository.get(patient_id)
+    assert patient is not None
     patient_repository.delete(patient_id)
     assert patient_repository.get(patient_id) is None
