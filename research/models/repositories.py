@@ -6,7 +6,8 @@ import json
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Optional, TypeVar
+from typing import Any, TypeVar
+from uuid import UUID
 
 T = TypeVar('T')
 # Patient type is an alias for now
@@ -24,22 +25,22 @@ class RepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def get(self, id) -> Optional[T]:
+    def get(self, id: str | int) -> T | None:
         """Return a single record."""
         pass
 
     @abstractmethod
-    def create(self, data) -> T:
+    def create(self, data: T) -> T:
         """Create a new record."""
         pass
 
     @abstractmethod
-    def update(self, id, data) -> bool:
+    def update(self, id: str | int, data: T) -> bool:
         """Update a record."""
         pass
 
     @abstractmethod
-    def delete(self, id) -> bool:
+    def delete(self, id: str | int) -> bool:
         """Delete a record."""
         pass
 
@@ -63,21 +64,21 @@ class PatientRepository(RepositoryInterface):
         """Return all patients."""
         return self.patients
 
-    def get(self, id) -> Optional[Patient]:
+    def get(self, id: UUID) -> Patient | None:
         """Return a single patient if exists."""
         for patient in self.patients:
             if patient['meta']['uuid'] == id:
                 return patient
         return None
 
-    def create(self, data) -> Patient:
+    def create(self, data: Patient) -> Patient:
         """Create a new patient."""
         self.patients.append(data)
         with open(self.DATA_PATH, 'w') as f:
             json.dump(self.patients, f)
         return data
 
-    def update(self, id, data) -> bool:
+    def update(self, id: UUID, data: Patient) -> bool:
         """Update a patient. Returns true if successful."""
         for index, patient in enumerate(self.patients):
             if patient['meta']['uuid'] == id:
@@ -89,7 +90,7 @@ class PatientRepository(RepositoryInterface):
         # return false if patient does not exist
         return False
 
-    def delete(self, id) -> bool:
+    def delete(self, id: UUID) -> bool:
         """Delete a patient. Returns true if successful."""
         for index, patient in enumerate(self.patients):
             if patient['meta']['uuid'] == id:
