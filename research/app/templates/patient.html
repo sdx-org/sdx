@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="my-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+            </ol>
+        </nav>
+    </div>
+    <nav>
+        <div class="nav nav-tabs" id="nav-profile-tab" role="tablist">
+            <button class="nav-link active"
+                    id="nav-profile-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#nav-profile"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-profile"
+                    aria-selected="true">Profile</button>
+            <button class="nav-link"
+                    id="nav-symptoms-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#nav-symptoms"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-symptoms"
+                    aria-selected="false">Symptoms</button>
+            <button class="nav-link"
+                    id="nav-diagnosis-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#nav-diagnosis"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-diagnosis"
+                    aria-selected="false">Diagnosis</button>
+            <button class="nav-link"
+                    id="nav-exams-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#nav-exams"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-exams"
+                    aria-selected="false">Exams</button>
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <!-- Profile -->
+        <div class="tab-pane fade show active"
+             id="nav-profile"
+             role="tabpanel"
+             aria-labelledby="nav-profile-tab">
+            <h3 class="mt-4">Demographics</h3>
+            <hr>
+            <ul class="list-group list-group-flush py-2 mb-4">
+                <li class="list-group-item">
+                    <span class="fw-bold">Patient Identifier:</span> {{ patient.meta.uuid }}
+                </li>
+                <li class="list-group-item">
+                    <span class="fw-bold">Gender:</span> {{ patient.patient.gender }}
+                </li>
+                <li class="list-group-item">
+                    <span class="fw-bold">Age:</span> {{ patient.patient.age }}
+                </li>
+                <li class="list-group-item">
+                    <span class="fw-bold">Weight(kg):</span> {{ patient.patient.weight_kg }}
+                </li>
+                <li class="list-group-item">
+                    <span class="fw-bold">Height (cm):</span> {{ patient.patient.height_cm }}
+                </li>
+            </ul>
+            <h3 class="">
+                Habits
+            </h2>
+            <hr>
+            <ul class="list-group list-group-flush py-2 mb-4">
+                <li class="list-group-item">
+                    <span class="fw-bold">Diet:</span> {{ patient.patient.diet }}
+                </li>
+                <li class="list-group-item">
+                    <span class="fw-bold">Sleep:</span> {{ patient.patient.sleep_hours }} hours
+                </li>
+                <li class="list-group-item">
+                    <span class="fw-bold">Physical Activity:</span> {{ patient.patient.physical_activity }}
+                </li>
+                <li class="list-group-item">
+                    <span class="fw-bold">Mental Exercises:</span> {{ patient.patient.mental_exercises }}
+                </li>
+            </ul>
+        </div>
+        <!-- Profile End -->
+        <div class="tab-pane fade"
+             id="nav-symptoms"
+             role="tabpanel"
+             aria-labelledby="nav-symptoms-tab">
+            <h3 class="mt-4">Symptoms</h3>
+            <hr>
+            <ul class="list-group list-group-flush py-2 mb-4">
+                <li class="list-group-item">
+                    <span class="fw-bold">Mental Health:</span> {{ patient.patient.mental_health }}
+                </li>
+                <li class="list-group-item">
+                    <span class="fw-bold">Symptoms:</span> {{ patient.patient.symptoms }}
+                </li>
+            </ul>
+            <h3 class="mt-4">Summary</h3>
+            <hr>
+            <p class="w-75">{{ patient.ai_diag.summary }}</p>
+        </div>
+        <div class="tab-pane fade"
+             id="nav-diagnosis"
+             role="tabpanel"
+             aria-labelledby="nav-diagnosis-tab">
+            <h3 class="mt-4">Diagnosis</h3>
+            <hr>
+            <div class="container">
+                <div class="row">
+                    <div class="col-4">
+                        <h4>Ai Suggested Diagnosis</h4>
+                        <ul>
+                            {% for option in patient.ai_diag.options %}<li>{{ option }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-4">
+                        <h4>Selected Diagnosis</h4>
+                        <ul>
+                            {% for option in patient.selected_diagnoses %}<li>{{ option }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <h3 class="mt-4">Summary</h3>
+                <small>This summary of the patient's condition is based on the selected diagnosis</small>
+                <hr>
+                <p class="w-75">{{ patient.ai_exam.summary }}</p>
+            </div>
+        </div>
+        <div class="tab-pane fade"
+             id="nav-exams"
+             role="tabpanel"
+             aria-labelledby="nav-exams-tab">
+            <h3 class="mt-4">Exams</h3>
+            <hr>
+            <div class="container">
+                <div class="row">
+                    <div class="col-4">
+                        <h4>Ai Suggested Exams</h4>
+                        <ul>
+                            {% for option in patient.ai_exam.options %}<li>{{ option }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-4">
+                        <h4>Selected Exams</h4>
+                        <ul>
+                            {% for option in patient.selected_exams %}<li>{{ option }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% endblock %}
