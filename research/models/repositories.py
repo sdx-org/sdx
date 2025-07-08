@@ -52,13 +52,22 @@ class PatientRepository(RepositoryInterface):
         Path(__file__).parent.parent / 'app/data/patients/patients.json'
     )
 
-    patients = list[Patient]
+    patients: list[Patient]
 
     def __init__(self) -> None:
         """Load patients from file."""
-        with self.DATA_PATH.open('r') as f:
-            # TODO: swap for parquet in future updates
-            self.patients = json.load(f)
+        self.DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+        if self.DATA_PATH.exists():
+            # loads existing database
+            with self.DATA_PATH.open('r') as f:
+                # TODO: swap for parquet in future updates
+                self.patients = json.load(f)
+        else:
+            # initializes empty database
+            with self.DATA_PATH.open('w') as f:
+                self.patients = []
+                json.dump(self.patients, f)
 
     def all(self) -> list[Patient]:
         """Return all patients."""

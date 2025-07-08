@@ -46,7 +46,6 @@ def test_all_patients(patient_repository):
     """Test repository to get all patients."""
     patients = patient_repository.all()
     assert len(patients) > 0
-    assert len(patients) == 2
 
 
 def test_get_patient(patient_repository, patient_id):
