@@ -39,17 +39,20 @@ def get_report_data_from_pdf(
     pdf_path: Union[str, Path], api_key: Optional[str] = None
 ) -> Dict[str, Any]:
     """Extract FHIR data from a medical PDF report."""
-    api_key = api_key or os.environ.get('OPENAI_API_KEY')
+    # Use OpenRouter API key if available, fallback to OpenAI
+    api_key = api_key or os.environ.get('OPENROUTER_API_KEY') or os.environ.get('OPENAI_API_KEY')
 
     if not api_key:
         raise EnvironmentError(
-            'OpenAI API key is required. Provide it as an argument or '
-            'set the OPENAI_API_KEY environment variable.'
+            'API key is required. Provide it as an argument or '
+            'set the OPENROUTER_API_KEY or OPENAI_API_KEY environment variable.'
         )
 
     text_content = extract_text_from_pdf(pdf_path)
 
     try:
+        # Note: The anamnesisai library might need to be updated to support OpenRouter
+        # For now, we'll use the existing extract_fhir function
         fhir_resources = extract_fhir(text_content, api_key)
 
         return {

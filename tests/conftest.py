@@ -45,11 +45,26 @@ def reports_data_dir(test_data_dir: Path) -> Path:
 @pytest.fixture
 def api_key_openai(env: dict[str, str | None]) -> str:
     """Fixture providing the OpenAI API key from environment variables."""
-    api_key = os.getenv('OPENAI_API_KEY')
+    # Try OpenRouter first, then fallback to OpenAI
+    api_key = os.getenv('OPENROUTER_API_KEY') or os.getenv('OPENAI_API_KEY')
 
     if not api_key:
         raise EnvironmentError(
-            'Please set the OPENAI_API_KEY environment variable in your .env '
+            'Please set the OPENROUTER_API_KEY or OPENAI_API_KEY environment variable in your .env '
+            'file or system environment for testing.'
+        )
+
+    return api_key
+
+
+@pytest.fixture
+def api_key_openrouter(env: dict[str, str | None]) -> str:
+    """Fixture providing the OpenRouter API key from environment variables."""
+    api_key = os.getenv('OPENROUTER_API_KEY')
+
+    if not api_key:
+        raise EnvironmentError(
+            'Please set the OPENROUTER_API_KEY environment variable in your .env '
             'file or system environment for testing.'
         )
 

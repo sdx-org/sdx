@@ -31,7 +31,8 @@ def test_extract_text_nonexistent_file():
 
 
 @pytest.mark.skipif(
-    not os.environ.get('OPENAI_API_KEY'), reason='OpenAI API key not available'
+    not (os.environ.get('OPENROUTER_API_KEY') or os.environ.get('OPENAI_API_KEY')), 
+    reason='API key not available'
 )
 def test_get_report_data_from_pdf(reports_data_dir, api_key_openai):
     """Test FHIR data extraction from PDF."""

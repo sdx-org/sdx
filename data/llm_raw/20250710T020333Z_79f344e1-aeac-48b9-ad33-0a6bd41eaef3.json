@@ -1,0 +1,15 @@
+{
+  "summary": "The patient presents with respiratory and psychological symptoms. The respiratory differential diagnoses include pneumonia, bronchitis, pleurisy, and pneumothorax. The psychological differential diagnoses include major depressive disorder, anxiety disorder with panic attacks, and somatization disorder.",
+  "options": [
+    "Chest X-ray",
+    "Complete Blood Count (CBC)",
+    "Basic Metabolic Panel (BMP)",
+    "C-reactive Protein (CRP)",
+    "Sputum Culture",
+    "Arterial Blood Gas (ABG)",
+    "Electrocardiogram (ECG)",
+    "Pulmonary Function Test (PFT)",
+    "Mental State Examination (MSE)",
+    "Depression, Anxiety, and Stress Scale (DASS-21)"
+  ]
+}
