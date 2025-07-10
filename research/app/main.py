@@ -18,17 +18,21 @@ swap in Redis or a DB for production.
 
 from __future__ import annotations
 
+import sys
 import uuid
 
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
+# Add the src directory to Python path to enable sdx module imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'src'))
+
 from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from sdx.agents.diagnostics import core as diag  # OpenAI helpers
+from sdx.agents.diagnostics import core as diag  # OpenRouter/Mistral helpers
 
 from research.models.repositories import PatientRepository
 

@@ -1,5 +1,5 @@
 """
-Shared OpenAI helper used by all agents.
+Shared OpenRouter/Mistral helper used by all agents.
 
 * Forces JSON responses (`response_format={"type": "json_object"}`).
 * Validates with ``LLMDiagnosis.from_llm``.
@@ -23,8 +23,17 @@ from sdx.schema.clinical_outputs import LLMDiagnosis
 
 load_dotenv(Path(__file__).parents[3] / '.envs' / '.env')
 
-_MODEL_NAME = os.getenv('OPENAI_MODEL', 'o4-mini-2025-04-16')
-_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY', ''))
+# OpenRouter configuration
+_OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY', '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')
+_MODEL_NAME = os.getenv('OPENROUTER_MODEL', 'mistralai/mistral-small-3.2-24b-instruct:free')
+_SITE_URL = os.getenv('SITE_URL', 'https://telehealthcareai.com')
+_SITE_NAME = os.getenv('SITE_NAME', 'TeleHealthCareAI')
+
+# Initialize OpenRouter client
+_client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=_OPENROUTER_API_KEY,
+)
 
 _RAW_DIR = Path('data') / 'llm_raw'
 _RAW_DIR.mkdir(parents=True, exist_ok=True)
@@ -49,6 +58,11 @@ def chat(
 ) -> LLMDiagnosis:
     """Send system / user prompts and return a validated ``LLMDiagnosis``."""
     rsp = _client.chat.completions.create(
+        extra_headers={
+            "HTTP-Referer": _SITE_URL,
+            "X-Title": _SITE_NAME,
+        },
+        extra_body={},
         model=_MODEL_NAME,
         response_format={'type': 'json_object'},
         messages=[

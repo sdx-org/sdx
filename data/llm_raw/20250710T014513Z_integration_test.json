@@ -1,0 +1,15 @@
+{
+    "summary": "The patient is a 45-year-old male presenting with chest pain, shortness of breath, and fatigue. Due to the lack of previous diagnostic tests, further cardiovascular and pulmonary evaluations are likely needed.",
+    "options": [
+        "Acute coronary syndrome (e.g., myocardial infarction, unstable angina)",
+        "Gastroesophageal reflux disease (GERD) or esophageal spasm",
+        "Pneumonia or other pulmonary infections",
+        "Pulmonary embolism",
+        "Pericarditis",
+        "Anxiety or panic disorder",
+        "Hypertrophic cardiomyopathy",
+        "Valvular heart disease",
+        "Arrythmia",
+        "Congestive heart failure"
+    ]
+}
