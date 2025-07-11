@@ -63,7 +63,7 @@ class Deidentifier:
             text=text, entities=entities, language=language
         )
 
-    def deidentify(self, text: str, strategy: str = 'redact') -> str:
+    def deidentify(self, text: str, strategy: str = 'mask') -> str:
         """
         Anonymize detected PII in the text using a specified strategy.
 
@@ -98,7 +98,6 @@ class Deidentifier:
                     operator_name='hash', params={'hash_type': 'sha256'}
                 )
             },
-            'redact': {'DEFAULT': OperatorConfig('redact')},
         }
 
         operators = strategy_configs.get(strategy)
