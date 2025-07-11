@@ -30,11 +30,14 @@ from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from sdx.agents.diagnostics import core as diag  # OpenAI helpers
 
+from research.models.repositories import PatientRepository
+
 APP_DIR = Path(__file__).parent
 TEMPLATES = Environment(
     loader=FileSystemLoader(APP_DIR / 'templates'),
     autoescape=select_autoescape(),
 )
+
 
 _STATIC = StaticFiles(directory=APP_DIR / 'static')
 _SESSIONS: Dict[str, Dict[str, Any]] = {}  # swap with redis if needed
@@ -44,12 +47,23 @@ app.mount('/static', _STATIC, name='static')
 
 
 @app.get('/', response_class=HTMLResponse)
+def dashboard() -> HTMLResponse:
+    """Dashboard page view with all recorded patients."""
+    repo = PatientRepository()
+    patients = repo.all()
+
+    context = {'title': 'Dashboard', 'patients': patients}
+
+    return _render('dashboard.html', **context)
+
+
+@app.get('/start', response_class=HTMLResponse)
 def landing(request: Request) -> HTMLResponse:
     """Show language selector."""
     return _render('language.html', request=request)
 
 
-@app.post('/', response_class=RedirectResponse, status_code=303)
+@app.post('/start', response_class=RedirectResponse, status_code=303)
 def start_with_language(lang: str = Form(...)) -> RedirectResponse:
     """Create a session after the physician chooses a language."""
     sid = str(uuid.uuid4())
@@ -79,7 +93,7 @@ def _session_or_404(sid: str) -> Dict[str, Any]:
     return _SESSIONS[sid]
 
 
-@app.get('/', response_class=HTMLResponse)
+@app.get('/start', response_class=HTMLResponse)
 def start() -> HTMLResponse:
     """Kick-off page — redirects immediately to demographics step."""
     sess_id = str(uuid.uuid4())
@@ -259,7 +273,8 @@ def exams_post(sid: str, selected: List[str] = Form(...)) -> RedirectResponse:
     sess = _session_or_404(sid)
     sess['selected_exams'] = selected
     sess['meta']['timestamp'] = datetime.utcnow().isoformat(timespec='seconds')
-    # TODO: persist using the same mechanism as CLI (e.g. save_record)
+    repo = PatientRepository()
+    repo.create(sess)
     return RedirectResponse(f'/done?sid={sid}', status_code=303)
 
 
@@ -273,3 +288,29 @@ def done(request: Request, sid: str) -> HTMLResponse:
         record=sess,
         lang=sess['meta'].get('lang', 'en'),
     )
+
+
+@app.get('/patient/{patient_id}', response_class=HTMLResponse)
+def patient(patient_id: str) -> HTMLResponse:
+    """View all patients."""
+    repo = PatientRepository()
+    patient = repo.get(patient_id)
+
+    context = {'title': 'Patient', 'patient': patient}
+
+    return _render('patient.html', **context)
+
+
+@app.get(
+    '/delete-patient/{patient_id}',
+    response_class=RedirectResponse,
+    status_code=303,
+)
+def delete_patient(request: Request, patient_id: str) -> RedirectResponse:
+    """Delete one patient by id."""
+    # The page the request came from
+    referer = request.headers.get('referer')
+    repo = PatientRepository()
+    repo.delete(patient_id)
+
+    return RedirectResponse(referer, status_code=303)

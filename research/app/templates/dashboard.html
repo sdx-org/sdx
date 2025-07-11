@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2 class="my-4">{{ title }}</h2>
+    <a href="/start" class="btn btn-outline-primary mb-3">&#43; Add Patient</a>
+    {% if patients|length > 0 %}
+        <div class="list-group"></div>
+        <!-- list-group -->
+        {% for patient in patients %}
+            <div class="list-group-item list-group-item-action border border-2 rounded p-2 mb-2 w-75">
+                <a href="/patient/{{ patient.meta.uuid }}">
+                    <div class="d-flex flex-row justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1 text-primary">Patient {{ patient.meta.uuid [0:8] }}</h5>
+                            <p class="mb-1">
+                                <span class="badge text-bg-secondary">{{ patient.patient.gender }}</span>
+                                <span class="badge text-bg-secondary">{{ patient.patient.age }} years</span>
+                            </p>
+                        </div>
+                    </a>
+                    <div>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal"
+                                data-bs-uuid="{{ patient.meta.uuid }}">Delete Patient</button>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <!-- list-group end -->
+{% endif %}
+<!-- Modal Confirm Deletion -->
+<div class="modal fade"
+     id="deleteModal"
+     tabindex="-1"
+     aria-labelledby="deleteModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deletaModalLabel">Confirm Deletion</h1>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <h5>Do you confirm the deletion of this patient?</h5>
+                    </div>
+                    <div class="mb-3">
+                        <p>
+                            <span class="fw-bold">Patient ID</span>: <span class="patient-id"></span>
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a id="confirmDeletion" href="" type="button" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', event => {
+
+    const deleteButton = event.relatedTarget // Button that triggered the modal
+    const modalPatientId = deleteModal.querySelector('.patient-id'); // get data-bs-uuid attribute
+    const confirmDeletionButton = deleteModal.querySelector('#confirmDeletion');
+
+
+    // Extract info from data-bs-* attributes
+    const patientId = deleteButton.getAttribute('data-bs-uuid')
+
+    // update modal data
+    modalPatientId.textContent = patientId;
+    confirmDeletionButton.setAttribute('href', `/delete-patient/${patientId}`);
+
+    })
+});
+</script>
+{% endblock %}
