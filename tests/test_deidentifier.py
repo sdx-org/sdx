@@ -1,86 +1,169 @@
-"""Tests for the Deidentifier class."""
+"""Tests for the Deidentifier class, updated with parameterized testing."""
 
 import pytest
 
 from research.models.deidenitfier import Deidentifier
 
-# Sample text containing various PII
-SAMPLE_TEXT = 'My name is John Doe and my phone number is (555) 123-4567.'
-CUSTOM_ID_TEXT = 'My user ID is CUST-12345.'
+PII_TEST_CASES = [
+    ('T1_SIMPLE_EMAIL_NAME', 'Contact Jane Doe at jane.d@example.com.', True),
+    ('T2_US_PHONE', 'My phone number is 415-555-0132.', True),
+    (
+        'T3_UK_PHONE_LOCATION',
+        'Call from +44 20 7946 0958, located at 10 Downing St, London.',
+        True,
+    ),
+    ('T4_CREDIT_CARD', 'Do not use card 4111-1111-1111-1111.', True),
+    (
+        'T5_US_DRIVER_LICENSE',
+        "Driver's license number is H123-4567-8901.",
+        True,
+    ),
+    (
+        'T6_NO_PII',
+        'This is a perfectly safe sentence with no sensitive data.',
+        False,
+    ),
+    ('T7_DATE_OF_BIRTH', 'Her date of birth is 1990-01-15.', True),
+    (
+        'T8_IP_ADDRESS',
+        "The user's IP address was 203.0.113.55.",
+        True,
+    ),
+    (
+        'T9_MULTIPLE_NAMES',
+        'A meeting between Alice, Bob, and Carol.',
+        True,
+    ),
+    (
+        'T10_IBAN_CODE',
+        'Please transfer to IBAN DE89 3704 0044 0532 0130 00.',
+        True,
+    ),
+    (
+        'T11_US_SSN',
+        "The applicant's SSN is 987-65-4321.",
+        True,
+    ),
+    (
+        'T12_UK_PASSPORT',
+        'Her UK Passport number is 500000000.',
+        True,
+    ),
+    (
+        'T13_LOCATION_ONLY',
+        'He is currently in Paris for a business trip.',
+        True,
+    ),
+    (
+        'T14_COMPLEX_MIX',
+        'On 2023-05-10, Mr. Smith (john.p.smith@corp.com, '
+        'cell: (202) 555-0177) filed a report from IP 203.0.113.55.',
+        True,
+    ),
+    (
+        'T15_SPANISH_PII',
+        'Mi nombre es María López y mi correo es maria.lopez@email.es.',
+        True,
+    ),
+    (
+        'T16_US_ADDRESS',
+        'Ship to 1600 Pennsylvania Avenue, Washington, DC 20500.',
+        True,
+    ),
+    (
+        'T17_CRYPTO_ADDRESS',
+        'Send 1 BTC to 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa.',
+        True,
+    ),
+    (
+        'T18_URL_WITH_CREDENTIALS',
+        'Do not use ftp://user:password@ftp.example.com/',
+        True,
+    ),
+    (
+        'T19_MEDICAL_ACCOUNT',
+        'Patient MRN is MED-987654321.',
+        True,
+    ),
+    (
+        'T20_MIXED_NUMBERS',
+        'Order #12345 contains item #67890 but my phone is (555) 123-4567.',
+        True,
+    ),
+]
 
 
 @pytest.fixture
 def deidentifier() -> Deidentifier:
-    """Provide a fresh instance of the Deidentifier class for each test.
-
-    This ensures that tests are isolated from each other.
-    """
+    """Provide a fresh instance of the Deidentifier class for each test."""
     return Deidentifier()
 
 
-def test_initialization(deidentifier: Deidentifier):
-    """Test 1: Verify that the Deidentifier class initializes correctly.
-
-    Checks if the analyzer and anonymizer engines are not None.
+@pytest.mark.parametrize(
+    'test_id, text, should_find_pii',
+    PII_TEST_CASES,
+    ids=[case[0] for case in PII_TEST_CASES],  # test_id for clearer reporting
+)
+@pytest.mark.parametrize('strategy', ['mask', 'hash'])
+def test_pii_detection_and_deidentification(
+    deidentifier: Deidentifier,
+    strategy: str,
+    test_id: str,
+    text: str,
+    should_find_pii: bool,
+):
     """
-    assert deidentifier.analyzer is not None, (
-        'AnalyzerEngine should be initialized.'
-    )
-    assert deidentifier.anonymizer is not None, (
-        'AnonymizerEngine should be initialized.'
-    )
+    Verify PII detection and de-identification for various data samples.
 
+    This test checks two key things:
+    * That the `analyze` method finds PII when it's expected to exist.
+    * That after de-identification, the original text is successfully altered.
+    """
+    analyzer_results = deidentifier.analyze(text)
 
-def test_analyze_finds_pii(deidentifier: Deidentifier):
-    """Test 2: Check if the analyze method finds default PII entities."""
-    analyzer_results = deidentifier.analyze(SAMPLE_TEXT)
-    entities_found = {result.entity_type for result in analyzer_results}
+    if should_find_pii:
+        assert len(analyzer_results) > 0, (
+            f'Failed: Expected to find PII in {test_id}, but found none.'
+        )
 
-    assert 'PERSON' in entities_found
-    assert 'PHONE_NUMBER' in entities_found
+        deidentified_text = deidentifier.deidentify(text, strategy=strategy)
+        assert deidentified_text != text, (
+            f"De-identification failed for strategy '{strategy}' on {test_id}"
+        )
+
+        print(text)
+        print(deidentified_text)
+        for result in analyzer_results:
+            original_pii_slice = text[result.start : result.end]
+            deidentified_slice = deidentified_text[result.start : result.end]
+            assert original_pii_slice != deidentified_slice, (
+                f"Original PII '{original_pii_slice}' at slice "
+                f'[{result.start}:{result.end}] was not altered.'
+            )
+
+    else:
+        assert len(analyzer_results) == 0, (
+            f'Failed: Expected no PII in {test_id}, but found '
+            f'{len(analyzer_results)} entities.'
+        )
 
 
 def test_add_custom_recognizer_and_analyze(deidentifier: Deidentifier):
-    """Test 3: Ensure a custom recognizer can be added & used for analysis."""
-    # Define a custom entity for a specific ID format
-    entity_name = 'CUSTOM_ID'
-    regex_pattern = r'CUST-\d{5}'
-    deidentifier.add_custom_recognizer(entity_name, regex_pattern)
+    """Test: Ensure a custom recognizer can be added and used for analysis."""
+    entity_name = 'ORDER_ID'
+    regex_pattern = r'ORD-\d{4}'
+    text_with_custom_id = 'The order confirmation is ORD-1234.'
 
-    analyzer_results = deidentifier.analyze(CUSTOM_ID_TEXT)
+    deidentifier.add_custom_recognizer(entity_name, regex_pattern)
+    analyzer_results = deidentifier.analyze(text_with_custom_id)
     entities_found = {result.entity_type for result in analyzer_results}
 
     assert entity_name in entities_found
 
 
-def test_deidentify_with_mask_strategy(deidentifier: Deidentifier):
-    """Test 4: Verify the 'mask' de-identification strategy.
-
-    Checks if the PII is replaced with masking characters.
-    """
-    deidentified_text = deidentifier.deidentify(SAMPLE_TEXT, strategy='mask')
-    # The exact masked output can vary, so we check for the masking character
-    # and ensure the original PII is gone.
-    assert 'John Doe' not in deidentified_text
-    assert '(555) 123-4567' not in deidentified_text
-    assert '*' in deidentified_text
-
-
-def test_deidentify_with_hash_strategy(deidentifier: Deidentifier):
-    """Test 5: Verify the 'hash' de-identification strategy.
-
-    The original PII should be replaced by its SHA-256 hash.
-    """
-    deidentified_text = deidentifier.deidentify(SAMPLE_TEXT, strategy='hash')
-    assert 'John Doe' not in deidentified_text
-    assert '(555) 123-4567' not in deidentified_text
-    # Hashed values are long strings of hex characters
-    assert len(deidentified_text.split()[-1]) > 20
-
-
 def test_unsupported_strategy_raises_error(deidentifier: Deidentifier):
-    """Test 6: Ensure that an unsupported strategy raises a ValueError."""
+    """Test: Ensure that an unsupported strategy raises a ValueError."""
     with pytest.raises(ValueError) as excinfo:
-        deidentifier.deidentify(SAMPLE_TEXT, strategy='encrypt')
+        deidentifier.deidentify('Some text', strategy='encrypt')
 
     assert "Unsupported strategy: 'encrypt'" in str(excinfo.value)
