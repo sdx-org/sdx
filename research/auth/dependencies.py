@@ -5,7 +5,7 @@ with RBAC and audit logging.
 """
 
 from functools import wraps
-from typing import Callable, Optional
+from typing import Callable,Optional
 
 from fastapi import Cookie, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
@@ -135,7 +135,7 @@ def require_permission(permission: Permission):
                 else '',
                 resource_id=None,
                 endpoint=str(request.url.path),
-                ip_address=request.client.host if request.client else None,
+                ip_address=request.client.host if request.client else "unknown",
                 required_permission=permission.value,
             )
 
@@ -183,7 +183,7 @@ def require_role(role_name: str):
                 resource_type='role_restricted',
                 resource_id=None,
                 endpoint=str(request.url.path),
-                ip_address=request.client.host if request.client else None,
+                ip_address=request.client.host if request.client else "unknown",
                 required_permission=f'role:{role_name}',
             )
 
@@ -229,7 +229,7 @@ def require_any_permission(*permissions: Permission):
                 resource_type='multi_permission',
                 resource_id=None,
                 endpoint=str(request.url.path),
-                ip_address=request.client.host if request.client else None,
+                ip_address=request.client.host if request.client else "unknown",
                 required_permission=f'any_of:{",".join(perm_names)}',
             )
 

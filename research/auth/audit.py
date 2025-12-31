@@ -4,30 +4,26 @@ Implements comprehensive audit trail as required by HIPAA Security Rule
 §164.308(a)(1)(ii)(D) and §164.312(b).
 """
 
-import json
-from datetime import datetime
-from typing import (
-        Any,
-        Dict,
-        List,
-        Optional
-)
-
+import os
+from dotenv import load_dotenv
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy.object import Security
 from research.models.rbac import AuditLog, User
+
+load_dotenv()
+MAX_FAILED_ACCESS_ATTEMPTS = int(
+    os.getenv('MAX_FAILED_ACCESS_ATTEMPTS', '100')
+)
 
 
 class AuditLogger:
     """Manages audit logging for HIPAA compliance."""
 
-    def __init__(
-            self,
-            db: Session
-    ) -> None:
+    def __init__(self, db: Session) -> None:
         """Initialize audit logger.
 
-        :Args:
+        Args:
             db: Database session
         """
         self.db = db
@@ -84,6 +80,7 @@ class AuditLogger:
         )
 
         # Create audit log
+        # Note: action is intentionally separate from Permission enum.
         log = AuditLog(
             user_id=user.id,
             username=user.username,
@@ -93,7 +90,7 @@ class AuditLogger:
             resource_id=resource_id,
             endpoint=endpoint,
             ip_address=ip_address,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             justification=justification,
             success=success,
             status_code=status_code,
@@ -115,7 +112,7 @@ class AuditLogger:
         self,
         username: str,
         success: bool,
-        ip_address: str,
+        ip_address: Optional[str],
         user_agent: Optional[str] = None,
         error_message: Optional[str] = None,
     ) -> None:
@@ -139,7 +136,7 @@ class AuditLogger:
             resource_id=None,
             endpoint='/auth/login',
             ip_address=ip_address,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             success=success,
             error_message=error_message,
             request_data={'user_agent': user_agent} if user_agent else None,
@@ -213,6 +210,12 @@ class AuditLogger:
         """Sanitize data for logging.
 
         Removes or masks sensitive information like passwords, tokens, etc.
+        from dictionary data (e.g., request/response objects).
+
+        Note:
+            For text string sanitization (PII/secrets redaction), use
+            research.auth.scan.detect() which provides advanced PII and
+            secret detection using Presidio and regex patterns.
 
         Args:
             data: Data to sanitize
@@ -308,7 +311,7 @@ class AuditLogger:
     def get_failed_access_attempts(
         self,
         start_date: Optional[datetime] = None,
-        limit: int = 100,
+        limit: int = MAX_FAILED_ACCESS_ATTEMPTS,
     ) -> List[AuditLog]:
         """Get failed access attempts.
 
@@ -321,7 +324,7 @@ class AuditLogger:
         Returns:
             List of failed audit logs
         """
-        query = self.db.query(AuditLog).filter(AuditLog.success == False)  # noqa: E712
+        query = self.db.query(AuditLog).filter(AuditLog.success.is_(False))
 
         if start_date:
             query = query.filter(AuditLog.timestamp >= start_date)
