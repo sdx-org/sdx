@@ -6,10 +6,9 @@ authorization following HIPAA Security Rule requirements for access
 control and audit trails.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import List, Literal, Optional
-
 from sqlalchemy import (
     Boolean,
     Column,
@@ -21,7 +20,6 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from src.hiperhealth.models.sqla.fhirx import Base
 
 
@@ -137,16 +135,16 @@ class User(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
     updated_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc)
     )
     last_login: Mapped[Optional[datetime]] = mapped_column(
         DateTime, nullable=True
     )
     password_changed_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, default=datetime.utcnow
+        DateTime, default=lambda: datetime.now(timezone.utc)
     )
 
     # Relationships
@@ -159,7 +157,6 @@ class User(Base):
     sessions: Mapped[List['UserSession']] = relationship(
         'UserSession', back_populates='user'
     )
-
 
 class Role(Base):
     """Role model for RBAC."""
@@ -178,10 +175,10 @@ class Role(Base):
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
     updated_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc)
     )
 
     # Relationships
@@ -220,7 +217,7 @@ class RolePermission(Base):
     ] = mapped_column(String(50), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
 
     # Relationships
@@ -250,11 +247,11 @@ class UserSession(Base):
 
     # Session lifecycle
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     last_activity: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, default=datetime.utcnow
+        DateTime, default=lambda: datetime.now(timezone.utc)
     )
     revoked: Mapped[bool] = mapped_column(Boolean, default=False)
     revoked_at: Mapped[Optional[datetime]] = mapped_column(
@@ -306,7 +303,7 @@ class AuditLog(Base):
 
     # When
     timestamp: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False, index=True
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True
     )
 
     # Why (optional - business justification)
@@ -336,4 +333,3 @@ class AuditLog(Base):
 
     # Relationships
     user: Mapped['User'] = relationship('User', back_populates='audit_logs')
-    user = relationship('User', back_populates='audit_logs')
