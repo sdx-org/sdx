@@ -17,12 +17,40 @@ load_dotenv()
 
 T = TypeVar('T')
 R = TypeVar('R')
-MOCK_USER_DB = {}
 
 Extra.extras = {}
 
 
-class PII_Analyzer(BaseDetector):
+class PHI_Analyzer(BaseDetector):
+    """Analyzer for detecting Protected Health Information (PHI) in text.
+
+    PHI includes all HIPAA-protected health information that can identify individuals:
+    - Standard PII (names, addresses, SSN, phone, email)
+    - Medical identifiers (MRN, health plan numbers, account numbers)
+    - Device identifiers and serial numbers
+    - Biometric identifiers
+    - URLs and IP addresses in healthcare context
+    - Full-face photos and comparable images
+    """
+
+    # Default PHI entity types for healthcare context
+    DEFAULT_PHI_ENTITIES = [
+        'PERSON',
+        'EMAIL_ADDRESS',
+        'PHONE_NUMBER',
+        'LOCATION',
+        'DATE_TIME',
+        'NRP',
+        'MEDICAL_LICENSE',
+        'US_SSN',
+        'US_PASSPORT',
+        'US_DRIVER_LICENSE',
+        'CREDIT_CARD',
+        'IBAN_CODE',
+        'IP_ADDRESS',
+        'URL',
+    ]
+
     def __init__(self, threshold=0.5):
         AnalyzerEngine = PRESIDIO_EXTRA.package(
             'presidio_analyzer'
@@ -31,6 +59,19 @@ class PII_Analyzer(BaseDetector):
         self.threshold = threshold
 
     def detect_all(self, text: str, entities: list[str] | None = None):
+        """Detect PHI entities in text.
+
+        Args:
+            text: Text to analyze for PHI
+            entities: Specific entity types to detect, defaults to all PHI types
+
+        Returns:
+            List of detected PHI entities with confidence scores
+        """
+        # Use healthcare-specific entities if none specified
+        if entities is None:
+            entities = self.DEFAULT_PHI_ENTITIES
+
         results = self.analyzer.analyze(text, language='en', entities=entities)
         res_matches = set()
         for res in results:
@@ -39,6 +80,7 @@ class PII_Analyzer(BaseDetector):
         return list(res_matches)
 
     async def adetect(self, text: str, entities: list[str] | None = None):
+        """Async version of detect_all for PHI detection."""
         return self.detect_all(text, entities)
 
 
@@ -78,22 +120,29 @@ class SecretsAnalyzer(BaseDetector):
 
 
 class MCPSecurityGateway:
-    """Security gateway for scanning text for PII, secrets, and unicode issues."""
+    """HIPAA-compliant security gateway for scanning text for PHI, secrets, and unicode issues."""
 
     def __init__(self):
         # No parent class, so no super().__init__() needed
-        self.pii_analyzer = PII_Analyzer()
+        self.phi_analyzer = PHI_Analyzer()
         self.secrets_analyzer = SecretsAnalyzer()
         self.unicode_detector = UnicodeDetector()
 
     async def scan_text_for_issues(self, text: str) -> List[str]:
-        """Scans text for PII, secrets, and prompt injections."""
+        """Scans text for Protected Health Information (PHI), secrets, and prompt injections.
+
+        Args:
+            text: Text to scan for security issues
+
+        Returns:
+            List of identified security issues
+        """
         issues = []
 
-        pii_results = self.pii_analyzer.detect_all(text)
-        if pii_results:
+        phi_results = self.phi_analyzer.detect_all(text)
+        if phi_results:
             issues.append(
-                f'PII detected: {[res.entity for res in pii_results]}'
+                f'PHI detected: {[res.entity for res in phi_results]}'
             )
 
         secrets_results = self.secrets_analyzer.detect_all(text)

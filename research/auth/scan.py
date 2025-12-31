@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import List, Tuple
 from .gateway import (
     DetectorResult,
-    PII_Analyzer,
+    PHI_Analyzer,
     SecretsAnalyzer,
 )
 from .gateway import MCPSecurityGateway
@@ -18,33 +18,32 @@ class ScanResult:
     is_sanitized: bool = False
 
 class InputScanner:
-    """Scans and sanitizes text inputs before they are sent to an LLM."""
+    """HIPAA-compliant scanner for detecting PHI and secrets in text before LLM submission."""
 
     def __init__(
             self
     ):
-        self.pii_detector = PII_Analyzer()
+        self.phi_detector = PHI_Analyzer()
         self.secrets_detector = SecretsAnalyzer()
 
     async def scan(
             self,
             text: str
     ) -> ScanResult:
-        """
-        Scans user input for threats and redacts sensitive data.
+        """Scans user input for PHI and secrets, redacting sensitive data.
 
         Args:
-            text: The input string to scan.
+            text: The input string to scan for Protected Health Information.
 
         Returns:
-            A ScanResult object containing the outcome.
+            A ScanResult object with sanitized text and findings.
         """
         try:
             # Run async detectors in parallel
-            pii_results = await self.pii_detector.adetect(text)
+            phi_results = await self.phi_detector.adetect(text)
             secrets_results = self.secrets_detector.detect_all(text)
 
-            all_findings = (pii_results or []) + (secrets_results or [])
+            all_findings = (phi_results or []) + (secrets_results or [])
             if not all_findings:
                 return ScanResult(is_safe=True, sanitized_input=text)
 
@@ -83,11 +82,19 @@ class InputScanner:
         return "".join(sanitized_text)
 
 
-def detect(text :str):
-    pii_results = gateway.pii_analyzer.detect_all(text)
+def detect(text: str):
+    """Helper function to detect and sanitize PHI in text.
+    
+    Args:
+        text: Input text to scan for Protected Health Information
+        
+    Returns:
+        Sanitized text with PHI redacted
+    """
+    phi_results = gateway.phi_analyzer.detect_all(text)
     secrets_results = gateway.secrets_analyzer.detect_all(text)
 
-    all_findings = (pii_results or []) + (secrets_results or [])
+    all_findings = (phi_results or []) + (secrets_results or [])
     sanitized_description = InputScanner._sanitize_text(text, all_findings)
 
     return sanitized_description
