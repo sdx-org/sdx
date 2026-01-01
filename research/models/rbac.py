@@ -5,7 +5,6 @@ This module implements database models for user authentication and
 authorization following HIPAA Security Rule requirements for access
 control and audit trails.
 """
-
 from datetime import datetime, timezone
 from enum import Enum
 from typing import List, Literal, Optional
@@ -21,7 +20,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.hiperhealth.models.sqla.fhirx import Base
-
 
 class HealthcareRole(str, Enum):
     """Standard healthcare roles with defined access levels."""

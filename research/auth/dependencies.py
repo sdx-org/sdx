@@ -3,18 +3,17 @@
 Provides dependency injection functions for protecting endpoints
 with RBAC and audit logging.
 """
-
 from functools import wraps
 from typing import Callable,Optional
 
 from fastapi import Cookie, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
-from research.app.database import SessionLocal
-from research.auth.audit import AuditLogger
-from research.auth.rbac import RBACManager
-from research.auth.session import SessionManager
-from research.models.rbac import Permission, User
+from ..app.database import SessionLocal
+from .audit import AuditLogger
+from .rbac import RBACManager
+from .session import SessionManager
+from ..models.rbac import Permission, User
 
 
 def get_db():

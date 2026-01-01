@@ -6,8 +6,9 @@ permissions and enforcing the minimum necessary rule.
 
 from typing import List, Set
 from sqlalchemy.orm import Session
-from research.models._valid_mappings import ROLE_PERMISSION_DEFAULTS
-from research.models.rbac import (
+from sqlalchemy.exc import IntegrityError
+from ..models._valid_mappings import ROLE_PERMISSION_DEFAULTS
+from ..models.rbac import (
     HealthcareRole,
     Permission,
     Role,
@@ -104,8 +105,12 @@ class RBACManager:
         Returns:
             True if role was assigned, False if already assigned or not found
         """
-        # Check if user already has role
-        if self.user_has_role(user, role_name):
+        # Do not modify inactive/locked users
+        if self._activity_condition(user):
+            return False
+
+        # check if user already has some role
+        if any(r.name == role_name for r in user.roles):
             return False
 
         # Get role
@@ -115,7 +120,11 @@ class RBACManager:
 
         # Assign role
         user.roles.append(role)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
 
         return True
 
@@ -141,7 +150,11 @@ class RBACManager:
 
         # Remove role
         user.roles.remove(role_to_remove)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
 
         return True
 
@@ -163,24 +176,30 @@ class RBACManager:
         Returns:
             Created Role object
         """
-        # Create role
-        role = Role(name=name, description=description, is_system=is_system)
-        self.db.add(role)
-        self.db.flush()
+        try:
+            # Create role
+            role = Role(
+                name=name, description=description, is_system=is_system
+            )
+            self.db.add(role)
+            self.db.flush()
 
-        # Assign permissions
-        for permission in permissions:
-            perm = self._get_or_create_permission(permission)
-            role.permissions.append(perm)
+            # Assign permissions
+            for permission in permissions:
+                perm = self._get_or_create_permission(permission)
+                role.permissions.append(perm)
 
-        self.db.commit()
-        self.db.refresh(role)
+            self.db.commit()
+            self.db.refresh(role)
 
-        return role
+            return role
+        except Exception:
+            self.db.rollback()
+            raise
 
     def _get_or_create_permission(
         self, permission: Permission
-    ) -> RolePermission:
+    ) -> RolePermission | None:
         """Get or create a permission entry.
 
         Args:
@@ -207,8 +226,16 @@ class RBACManager:
                 resource=resource,
                 action=action,
             )
-            self.db.add(perm)
-            self.db.flush()
+            try:
+                self.db.add(perm)
+                self.db.flush()
+            except IntegrityError:
+                self.db.rollback()
+                perm = (
+                    self.db.query(RolePermission)
+                    .filter(RolePermission.name == permission.value)
+                    .first()
+                )
 
         return perm
 

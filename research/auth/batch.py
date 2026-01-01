@@ -1,3 +1,9 @@
+"""Async batch accumulator for efficient processing.
+
+This module provides batching functionality for API calls and database operations.
+Custom implementation optimized for healthcare data processing.
+"""
+
 import asyncio
 from typing import (
     Awaitable,
@@ -8,23 +14,19 @@ from typing import (
     TypeVar,
 )
 
-from ._sanitize import (
-   BaseDetector,
-   Extra,
-   ExtrasImport
-)
+from .sanitize import BaseDetector, Extra, ExtrasImport
 
-T = TypeVar("T")
-R = TypeVar("R")
-
-Extra.extras = {}
+T = TypeVar('T')
+R = TypeVar('R')
 
 PRESIDIO_EXTRA = Extra(
-    "PII and Secrets Scanning (using Presidio)",
-    "Enables the detection of personally identifiable information (PII) and secret scanning in text",
-    {
-        "presidio_analyzer": ExtrasImport("presidio_analyzer", "presidio-analyzer", ">=2.2.354"),
-        "spacy": ExtrasImport("spacy", "spacy", ">=3.7.5"),
+    'PII and Secrets Scanning (using Presidio)',
+    'Enables the detection of personally identifiable information (PII) and secret scanning in text'
+    ,{
+        'presidio_analyzer': ExtrasImport(
+            'presidio_analyzer', 'presidio-analyzer', '>=2.2.354'
+        ),
+        'spacy': ExtrasImport('spacy', 'spacy', '>=3.7.5'),
     },
 )
 
@@ -81,7 +83,7 @@ class BatchAccumulator(Generic[T, R]):
             try:
                 await self._timer_task
             except asyncio.CancelledError:
-               pass
+                pass
 
         # Process any remaining items
         if self._items:
@@ -98,17 +100,20 @@ class BatchAccumulator(Generic[T, R]):
             A Future that resolves to the result of processing the item
         """
         if not self._running:
-            raise RuntimeError("BatchAccumulator is not running. Call start() first.")
+            raise RuntimeError(
+                'BatchAccumulator is not running. Call start() first.'
+            )
 
         future: asyncio.Future[R] = asyncio.Future()
+        should_process = False
 
         async with self._lock:
             self._items.append(item)
             self._queue.append(future)
+            should_process = len(self._items) >= self.max_batch_size
 
-            if len(self._items) >= self.max_batch_size:
-                # We've hit the max batch size, process immediately
-                await self._process_batch()
+        if should_process:
+            await self._process_batch()
 
         return await future
 
@@ -117,27 +122,28 @@ class BatchAccumulator(Generic[T, R]):
         try:
             while self._running:
                 await asyncio.sleep(self.max_wait_time)
+                has_items = False
                 async with self._lock:
-                    if self._items:
-                        await self._process_batch()
+                    has_items = bool(self._items)
+                if has_items:
+                    await self._process_batch()
         except asyncio.CancelledError:
             # if this gets cancelled, we are shutting down this instance
             # new start() call will re-initialize the instance
             self._running = False
         except Exception:
             import traceback
-
             traceback.print_exc()
 
     async def _process_batch(self) -> None:
-        """Process the current batch of items."""
-        if not self._items:
-            return
-
-        items = self._items.copy()
-        futures = self._queue.copy()
-        self._items = []
-        self._queue = []
+        """Process the current batch of items without holding the lock during awaits."""
+        async with self._lock:
+            if not self._items:
+                return
+            items = self._items.copy()
+            futures = self._queue.copy()
+            self._items = []
+            self._queue = []
 
         try:
             results = await self.batch_processor(items)
@@ -145,7 +151,7 @@ class BatchAccumulator(Generic[T, R]):
             # Resolve futures with results
             if len(results) != len(futures):
                 error = ValueError(
-                    f"Batch processor returned {len(results)} results for {len(futures)} items"
+                    f'Batch processor returned {len(results)} results for {len(futures)} items'
                 )
                 for future in futures:
                     if not future.done():
@@ -159,7 +165,6 @@ class BatchAccumulator(Generic[T, R]):
             for future in futures:
                 if not future.done():
                     future.set_exception(e)
-
 
 
 class BatchedDetector(BaseDetector):
@@ -176,7 +181,8 @@ class BatchedDetector(BaseDetector):
         self.max_wait_time = max_wait_time
 
     def get_accumulator(self, args, kwargs):
-        key = (args, tuple(kwargs.items()))
+        # Sort kwargs items for stable key generation regardless of insertion order
+        key = (args, tuple(sorted(kwargs.items())))
         if key not in self.accumulators:
 
             async def batch_processor(texts):
@@ -190,7 +196,9 @@ class BatchedDetector(BaseDetector):
         return self.accumulators[key]
 
     async def adetect_all_batch(self, texts, *args, **kwargs):
-        raise NotImplementedError("Subclasses must implement the adetect_all_batch method")
+        raise NotImplementedError(
+            'Subclasses must implement the adetect_all_batch method'
+        )
 
     async def adetect(self, text, *args, **kwargs):
         result = await self.adetect_all(text, *args, **kwargs)
@@ -201,17 +209,12 @@ class BatchedDetector(BaseDetector):
         await accumulator.start()
         return await accumulator.add(text)
 
-    def detect(
-            self,
-            text,
-            *args,
-            **kwargs
-    ):
+    def detect(self, text, *args, **kwargs):
         raise NotImplementedError(
-            "Batched detectors do not support synchronous detect(). Please use adetect() instead"
+            'Batched detectors do not support synchronous detect(). Please use adetect() instead'
         )
 
     def detect_all(self, text, *args, **kwargs):
         raise NotImplementedError(
-            "Batched detectors do not support synchronous detect_all(). Please use adetect_all() instead"
+            'Batched detectors do not support synchronous detect_all(). Please use adetect_all() instead'
         )

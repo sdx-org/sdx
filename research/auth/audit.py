@@ -7,26 +7,46 @@ Implements comprehensive audit trail as required by HIPAA Security Rule
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 from sqlalchemy.orm import Session
-from research.models.rbac import AuditLog, User
+from ..models.rbac import AuditLog, User
 
 load_dotenv()
-MAX_FAILED_ACCESS_ATTEMPTS = int(
-    os.getenv('MAX_FAILED_ACCESS_ATTEMPTS', '100')
-)
-
+MAX_FAILED_ACCESS_ATTEMPTS = int(os.getenv('MAX_FAILED_ACCESS_ATTEMPTS', '100'))
 
 class AuditLogger:
     """Manages audit logging for HIPAA compliance."""
 
-    def __init__(self, db: Session) -> None:
+    def __init__(
+        self,
+        db: Session,
+        session_factory: Optional[Callable[[], Session]] = None,
+    ) -> None:
         """Initialize audit logger.
 
         Args:
             db: Database session
+            session_factory: Optional session factory for isolated audit transactions
         """
         self.db = db
+        self._session_factory = session_factory
+
+    def _persist(self, log: AuditLog) -> None:
+        """Persist audit log in an isolated transaction.
+
+        Args:
+            log: AuditLog object to persist
+        """
+        try:
+            if self._session_factory:
+                with self._session_factory() as s:
+                    s.add(log)
+                    s.commit()
+            else:
+                self.db.add(log)
+                self.db.commit()
+        except Exception:
+            pass
 
     def log_access(
         self,
@@ -102,8 +122,7 @@ class AuditLogger:
             phi_fields_accessed=phi_fields_accessed or [],
         )
 
-        self.db.add(log)
-        self.db.commit()
+        self._persist(log)
         self.db.refresh(log)
 
         return log
@@ -143,8 +162,7 @@ class AuditLogger:
             phi_accessed=False,
         )
 
-        self.db.add(log)
-        self.db.commit()
+        self._persist(log)
 
     def log_logout(
         self,
@@ -206,6 +224,23 @@ class AuditLogger:
             phi_accessed=False,
         )
 
+    # TODO: More masking patterns
+    def _mask_value(self, value: Any) -> Any:
+        """Mask obvious credentials/tokens in strings.
+
+        Args:
+            value: Value to potentially mask
+
+        Returns:
+            Masked value if it looks like a credential, otherwise original value
+        """
+        if isinstance(value, str):
+            v = value.strip()
+            # JWT-like tokens have at least 2 dots
+            if v.lower().startswith('bearer ') or v.count('.') >= 2:
+                return 'REDACTED'
+        return value
+
     def _sanitize_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Sanitize data for logging.
 
@@ -229,10 +264,25 @@ class AuditLogger:
         sensitive_fields = {
             'password',
             'token',
+            'access_token',
+            'refresh_token',
+            'id_token',
+            'jwt',
+            'authorization',
+            'auth',
             'secret',
+            'client_secret',
             'api_key',
+            'private_key',
+            'session',
+            'session_id',
+            'cookie',
+            'set-cookie',
             'ssn',
             'credit_card',
+            'pin',
+            'otp',
+            'mfa',
         }
 
         sanitized = {}
@@ -246,11 +296,13 @@ class AuditLogger:
                 sanitized[key] = [
                     self._sanitize_data(item)
                     if isinstance(item, dict)
+                    else self._mask_value(item)
+                    if isinstance(item, str)
                     else item
                     for item in value
                 ]
             else:
-                sanitized[key] = value
+                sanitized[key] = self._mask_value(value)
 
         return sanitized
 

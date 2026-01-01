@@ -4,10 +4,8 @@ This module defines default permission mappings for healthcare roles,
 implementing the principle of least privilege and minimum necessary access
 as required by HIPAA.
 """
-
 from typing import Final
-
-from research.models.rbac import HealthcareRole, Permission
+from .rbac import HealthcareRole, Permission
 
 # Type alias for role-permission mapping
 RolePermissionMapping = dict[HealthcareRole, list[Permission]]
@@ -49,13 +47,13 @@ ROLE_PERMISSION_DEFAULTS: Final[RolePermissionMapping] = {
         Permission.VIEW_APPOINTMENTS,
     ],
     HealthcareRole.BILLING_CLERK: [
-        Permission.VIEW_PATIENT_DEMOGRAPHICS,  # Minimum necessary for billing
+        Permission.VIEW_PATIENT_DEMOGRAPHICS,
         Permission.VIEW_BILLING,
         Permission.EDIT_BILLING,
         Permission.PROCESS_PAYMENTS,
     ],
     HealthcareRole.RECEPTIONIST: [
-        Permission.VIEW_PATIENT_DEMOGRAPHICS,  # Name, contact info only
+        Permission.VIEW_PATIENT_DEMOGRAPHICS,
         Permission.VIEW_APPOINTMENTS,
         Permission.MANAGE_APPOINTMENTS,
     ],

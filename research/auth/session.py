@@ -3,14 +3,13 @@
 Implements session handling with automatic timeout and activity tracking
 as required by HIPAA Security Rule §164.312(a)(2)(iii).
 """
-
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
-from research.models.rbac import User, UserSession
+from ..models.rbac import User, UserSession
 
 load_dotenv()
 

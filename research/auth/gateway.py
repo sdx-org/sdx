@@ -1,9 +1,16 @@
+"""Security gateway for PHI and secret detection.
+
+This module provides healthcare-specific implementations for detecting
+Protected Health Information (PHI) and secrets in text before LLM submission.
+Custom implementations optimized for HIPAA compliance.
+"""
+
 import re
 from dotenv import load_dotenv
 from pydantic.dataclasses import dataclass
 from typing import TypeVar, List
 
-from ._sanitize import (
+from .sanitize import (
     DetectorResult,
     BaseDetector,
     Extra,
@@ -118,7 +125,7 @@ class SecretsAnalyzer(BaseDetector):
         return res
 
 
-class MCPSecurityGateway:
+class SecurityGateway:
     """HIPAA-compliant security gateway for scanning text for PHI, secrets, and unicode issues."""
 
     def __init__(self):

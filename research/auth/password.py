@@ -24,6 +24,14 @@ class PasswordManager:
         plain_password: The plain text password to be processed.
         hashed_password: Optional pre-hashed password for verification.
     """
+    # TODO: Make this an env varibale(comma-separated list)
+    COMMON_PASSWORDS = [
+        'password',
+        'password123',
+        'admin123',
+        'healthcare',
+        'medical123',
+    ]
 
     def __init__(
         self, plain_password: str, hashed_password: str = None
@@ -125,15 +133,7 @@ class PasswordManager:
                 'Password must contain at least one special character'
             )
 
-        # Check for common patterns
-        common_passwords = [
-            'password',
-            'password123',
-            'admin123',
-            'healthcare',
-            'medical123',
-        ]
-        if password.lower() in common_passwords:
+        if password.lower() in PasswordManager.COMMON_PASSWORDS:
             errors.append('Password is too common')
 
         return len(errors) == 0, errors
