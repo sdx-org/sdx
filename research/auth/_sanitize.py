@@ -266,7 +266,7 @@ _SECRETS_PATTERNS = {
         re.compile(r'\bAIza[0-9A-Za-z\-_]{35}\b'),
         re.compile(r'\bya29\.[0-9A-Za-z\-_\.]{40,}\b'),
     ],
-    "GEMINI_aPI_KEY": [
+    "GEMINI_API_KEY": [
         re.compile(r'\bAIza[0-9A-Za-z\-_]{35}\b'),
         re.compile(r'\bya29\.[0-9A-Za-z\-_\.]{40,}\b'),
         re.compile(r'\bgemini-[A-Za-z0-9_\-]{20,120}\b', flags=re.IGNORECASE),

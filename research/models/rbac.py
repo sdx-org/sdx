@@ -327,7 +327,7 @@ class AuditLog(Base):
 
     # Data accessed (for minimum necessary compliance)
     phi_accessed: Mapped[bool] = mapped_column(Boolean, default=False)
-    data_fields_accessed: Mapped[Optional[str]] = mapped_column(
+    phi_fields_accessed: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True
     )  # JSON string of PHI fields accessed
 
