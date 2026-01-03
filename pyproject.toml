@@ -78,6 +78,16 @@ dev = [
   "python-multipart >=0.0.20",
 ]
 
+research-poc = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.38.0",
+    "sqlalchemy>=2.0.41",
+    "alembic>=1.17.2",
+    "python-multipart>=0.0.20",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+]
+
 [tool.bandit]
 exclude_dirs = ["tests"]
 targets = "./"
