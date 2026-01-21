@@ -4,9 +4,7 @@ from datetime import datetime
 from typing import Any, Dict, List
 from uuid import UUID
 
-from sqlalchemy.orm import Session
-
-from research.models.ui import (
+from app.models.ui import (
     Consultation,
     ConsultationDiagnosis,
     ConsultationExam,
@@ -14,7 +12,8 @@ from research.models.ui import (
     Exam,
     Patient,
 )
-from research.schema.ui import ConsultationCreate, PatientCreate
+from schema.ui import ConsultationCreate, PatientCreate
+from sqlalchemy.orm import Session
 
 
 class ResearchRepository:
@@ -121,11 +120,20 @@ class ResearchRepository:
         ):
             for diag_name in full_patient_record['selected_diagnoses']:
                 diagnosis_obj = self.get_or_create_diagnosis(diag_name)
-                eval_data = (
-                    evaluations.get('ai_diag', {})
-                    .get(diag_name, {})
-                    .get('ratings', {})
-                )
+                rating_obj = evaluations.get('ai_diag', {}).get(diag_name)
+                if rating_obj:
+                    rating_dict = (
+                        rating_obj.model_dump()
+                        if hasattr(rating_obj, 'model_dump')
+                        else rating_obj
+                    )
+                    eval_data = (
+                        rating_obj.get('ratings', {})
+                        if 'ratings' in rating_dict
+                        else rating_dict
+                    )
+                else:
+                    eval_data = {}
 
                 assoc = ConsultationDiagnosis(
                     consultation_id=consultation.id,
@@ -140,11 +148,20 @@ class ResearchRepository:
         ):
             for exam_name in full_patient_record['selected_exams']:
                 exam_obj = self.get_or_create_exam(exam_name)
-                eval_data = (
-                    evaluations.get('ai_exam', {})
-                    .get(exam_name, {})
-                    .get('ratings', {})
-                )
+                rating_obj = evaluations.get('ai_exam', {}).get(exam_name)
+                if rating_obj:
+                    rating_dict = (
+                        rating_obj.model_dump()
+                        if hasattr(rating_obj, 'model_dump')
+                        else rating_obj
+                    )
+                    eval_data = (
+                        rating_obj.get('ratings', {})
+                        if 'ratings' in rating_dict
+                        else rating_dict
+                    )
+                else:
+                    eval_data = {}
 
                 assoc = ConsultationExam(
                     consultation_id=consultation.id,

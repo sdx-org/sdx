@@ -1,10 +1,15 @@
 """Test cases for the ResearchRepository class."""
 
+# ruff: noqa: E402
+import sys
+
+from pathlib import Path
 from uuid import uuid4
 
+BACKEND_DIR = Path(__file__).parents[1] / 'research' / 'backend'
+sys.path.insert(0, str(BACKEND_DIR))
+from app.models.repositories import ResearchRepository
 from sqlalchemy.orm import Session
-
-from research.models.repositories import ResearchRepository
 
 
 def test_create_patient_and_consultation(db_session: Session) -> None:

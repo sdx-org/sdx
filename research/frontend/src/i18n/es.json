@@ -1,0 +1,65 @@
+{
+  "dashboard.title": "Panel de Control",
+  "dashboard.addPatient": "Agregar Paciente",
+  "dashboard.noRecords": "No se encontraron registros de pacientes. Haz clic en 'Agregar Paciente' para iniciar una nueva consulta.",
+
+  "language.title": "Selecciona tu idioma",
+  "language.label": "Idioma",
+  "language.continue": "Continuar",
+
+  "demographics.title": "Paso 1 — Datos Demográficos",
+  "demographics.age": "Edad (años)",
+  "demographics.gender": "Género",
+  "demographics.weight": "Peso (kg)",
+  "demographics.height": "Altura (cm)",
+  "demographics.next": "Siguiente",
+
+  "lifestyle.title": "Paso 2 — Detalles del Estilo de Vida",
+  "lifestyle.diet": "Patrón alimenticio",
+  "lifestyle.sleep": "Horas de sueño por noche",
+  "lifestyle.exercise": "Ejercicio físico",
+  "lifestyle.mental": "Actividades mentales",
+  "lifestyle.next": "Siguiente",
+   "symptoms.title": "Paso 3 — Síntomas actuales",
+  "symptoms.describe": "Describe los síntomas principales",
+  "symptoms.placeholder": "separados por comas o en párrafo",
+
+  "mentalhealth.title": "Paso 4 — Salud mental",
+  "mentalhealth.label": "Preocupaciones de salud mental (estrés, ansiedad, estado de ánimo, etc.)",
+
+  "exams.title": "Paso 5 — Exámenes o pruebas previas",
+  "exams.label": "Proporciona un resumen conciso de los análisis o imágenes recientes (escribe 'ninguno' si no aplica)",
+   "wearable": {
+    "title": "Datos de Dispositivo Portátil",
+    "description": "Los datos del dispositivo portátil del paciente pueden proporcionar información valiosa para el análisis actual y futuro, ayudándonos a comprender mejor su condición.",
+    "question": "¿Deseas subir los datos del dispositivo portátil para este paciente?",
+    "yes": "Sí, Subir Datos",
+    "no": "No, Omitir Este Paso",
+    "uploadInstruction": "Selecciona un archivo CSV o JSON que contenga los datos del dispositivo portátil del paciente.",
+    "upload": "Subir y Continuar",
+    "back": "Atrás"
+  },
+  "validation": {
+    "ageRequired": "La edad es obligatoria",
+    "genderRequired": "El género es obligatorio",
+    "weightRequired": "El peso es obligatorio",
+    "heightRequired": "La altura es obligatoria",
+    "dietRequired": "El patrón alimenticio es obligatorio",
+    "sleepRequired": "La duración del sueño es obligatoria",
+    "exerciseRequired": "La información sobre el ejercicio es obligatoria",
+    "mentalRequired": "La actividad mental es obligatoria",
+    "symptomsRequired": "Los síntomas son obligatorios",
+    "mentalHealthRequired": "Las preocupaciones de salud mental son obligatorias",
+    "previousExamsRequired": "Este campo es obligatorio"
+  },
+
+  "navbar": {
+    "brand": "TeleHealthCareAI",
+    "dashboard": "Panel de Control",
+    "patients": "Pacientes",
+    "addPatient": "Agregar Paciente",
+    "language": "Idioma",
+    "english": "English",
+    "spanish": "Español"
+  }
+}

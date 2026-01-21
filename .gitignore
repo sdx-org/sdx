@@ -146,7 +146,7 @@ cython_debug/
 
 # vscode
 .vscode/
-research/app/data/
+research/backend/data
 #backend database
 research-poc\backend\backend.db
 uvicorn.log

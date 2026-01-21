@@ -1,0 +1,65 @@
+{
+  "dashboard.title": "Dashboard",
+  "dashboard.addPatient": "Add Patient",
+  "dashboard.noRecords": "No patient records found. Click 'Add Patient' to start a new consultation.",
+
+  "language.title": "Select your language",
+  "language.label": "Language",
+  "language.continue": "Continue",
+
+  "demographics.title": "Step 1 — Demographics",
+  "demographics.age": "Age (years)",
+  "demographics.gender": "Gender",
+  "demographics.weight": "Weight (kg)",
+  "demographics.height": "Height (cm)",
+  "demographics.next": "Next",
+
+  "lifestyle.title": "Step 2 — Lifestyle details",
+  "lifestyle.diet": "Diet pattern",
+  "lifestyle.sleep": "Sleep per night (h)",
+  "lifestyle.exercise": "Physical exercise",
+  "lifestyle.mental": "Mental activities",
+  "lifestyle.next": "Next",
+   "symptoms.title": "Step 3 — Current symptoms",
+  "symptoms.describe": "Describe the main symptoms",
+  "symptoms.placeholder": "comma-separated or paragraph",
+
+  "mentalhealth.title": "Step 4 — Mental health",
+  "mentalhealth.label": "Mental health concerns (stress, anxiety, mood, etc.)",
+
+  "exams.title": "Step 5 — Previous exams / tests",
+  "exams.label": "Provide a concise summary of recent lab work or imaging (enter 'none' if not applicable)",
+   "wearable": {
+    "title": "Wearable Data",
+    "description": "Patient's wearable device data can provide valuable insights for both current and future analysis, helping us gain a deeper understanding of the patient's condition.",
+    "question": "Do you want to upload wearable data for this patient?",
+    "yes": "Yes, Upload Data",
+    "no": "No, Skip This Step",
+    "uploadInstruction": "Please select a CSV or JSON file containing the patient's wearable device data.",
+    "upload": "Upload & Continue",
+    "back": "Back"
+  },
+   "validation": {
+    "ageRequired": "Age is required",
+    "genderRequired": "Gender is required",
+    "weightRequired": "Weight is required",
+    "heightRequired": "Height is required",
+    "dietRequired": "Diet pattern is required",
+    "sleepRequired": "Sleep duration is required",
+    "exerciseRequired": "Exercise info is required",
+    "mentalRequired": "Mental activity is required",
+    "symptomsRequired": "Symptoms are required",
+    "mentalHealthRequired": "Mental health concerns are required",
+    "previousExamsRequired": "This field is required"
+  },
+
+  "navbar": {
+    "brand": "TeleHealthCareAI",
+    "dashboard": "Dashboard",
+    "patients": "Patients",
+    "addPatient": "Add Patient",
+    "language": "Language",
+    "english": "English",
+    "spanish": "Español"
+  }
+}

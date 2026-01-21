@@ -39,12 +39,16 @@ groups:
     tasks:
       cli:
         help: Run the Research CLI
-        dir: research/
+        dir: research/backend
         run: python cli.py
-      app:
-        help: Run the Research WEB App
-        dir: research/app
-        run: uvicorn main:app --reload
+      backend:
+        help: Run the Research backend (FastAPI)
+        dir: research/backend
+        run: uvicorn app.main:app --reload
+      frontend:
+        help: Run the Research frontend (React/Vite)
+        dir: research/frontend
+        run: npm run dev
       seed:
         help: Run the script to migrate legacy patient data to the DB
         dir: scripts
@@ -128,7 +132,9 @@ groups:
     tasks:
       setup:
         help: Creates and migrates the database to the latest version
-        run: alembic upgrade head
+        run: |
+           mkdir -p research/backend/data
+           alembic upgrade head
       revision:
         help: Autogenerates a new database revision script
         args:

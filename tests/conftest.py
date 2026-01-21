@@ -1,15 +1,23 @@
 """Pytest configuration for the hiperhealth package tests."""
 
+# ruff: noqa: E402
 from __future__ import annotations
 
 import json
 import os
+import sys
 import warnings
 
 from pathlib import Path
 
 import pytest
 
+BACKEND_DIR = Path(__file__).parents[1] / 'research' / 'backend'
+sys.path.insert(0, str(BACKEND_DIR))
+
+from app.main import app
+from app.models.repositories import ResearchRepository
+from app.models.ui import Base
 from dotenv import dotenv_values, load_dotenv
 from fastapi.testclient import TestClient
 from hiperhealth.agents.extraction.medical_reports import (
@@ -18,10 +26,6 @@ from hiperhealth.agents.extraction.medical_reports import (
 from hiperhealth.agents.extraction.wearable import WearableDataFileExtractor
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from research.app.main import app
-from research.models.repositories import ResearchRepository
-from research.models.ui import Base
 
 
 @pytest.fixture
