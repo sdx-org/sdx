@@ -25,7 +25,7 @@ import uuid
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
 
@@ -35,7 +35,7 @@ load_dotenv(env_path)
 
 from app.database import SessionLocal
 from app.models.repositories import ResearchRepository
-from app.models.ui import Patient
+from app.models.ui import Consultation, Patient
 from app.reports import (
     load_fhir_reports,
     process_uploaded_reports,
@@ -246,12 +246,21 @@ def patient_to_dict(patient: Patient) -> Dict[str, Any]:
     return patient_dict
 
 
+def _get_latest_consultation(patient: Patient) -> Optional[Consultation]:
+    """Return latest consultation by created_at."""
+    return (
+        max(patient.consultations, key=lambda c: c.timestamp)
+        if patient.consultations
+        else None
+    )
+
+
 def patient_to_ui_data(patient: Patient) -> Dict[str, Any]:
     """Structure patient data into separate tabs/categories for the UI."""
     if not patient:
         return {}
 
-    consultation = patient.consultations[-1] if patient.consultations else None
+    consultation = _get_latest_consultation(patient)
 
     # 1. Demographics
     demographics = {
@@ -286,11 +295,14 @@ def patient_to_ui_data(patient: Patient) -> Dict[str, Any]:
     # 5. Medical Reports
     reports_list = []
     if consultation:
-        reports_list = extract_medical_reports_for_ui(consultation)
+        reports_list = extract_medical_reports_for_ui(consultation) or []
 
     medical_reports = {
         'files': [
-            {'name': r['file_name'], 'type': r['resource_type']}
+            {
+                'name': r.get('file_name', ''),
+                'type': r.get('resource_type', ''),
+            }
             for r in reports_list
         ],
         'skipped': (
@@ -301,24 +313,29 @@ def patient_to_ui_data(patient: Patient) -> Dict[str, Any]:
     }
 
     # 6. Wearable Data
+    def _is_explicitly_skipped_list(value: Optional[List[Any]]) -> bool:
+        """Return True when field was provided but empty."""
+        return isinstance(value, list) and len(value) == 0
+
+    wd: Optional[List[Any]] = (
+        consultation.wearable_data if consultation else None
+    )
+
     wearable_data = {
-        'data': consultation.wearable_data if consultation else [],
-        'skipped': (
-            not consultation.wearable_data
-            and consultation.wearable_data is not None
-        )
-        if consultation
-        else False,
+        'data': wd or [],
+        'skipped': _is_explicitly_skipped_list(wd),
     }
 
     # 7. Diagnosis
+    diag_raw: Dict[str, Any] = (
+        consultation.ai_diag_raw
+        if consultation and isinstance(consultation.ai_diag_raw, dict)
+        else {}
+    )
+
     diagnosis = {
-        'suggestions': consultation.ai_diag_raw.get('options', [])
-        if consultation and consultation.ai_diag_raw
-        else [],
-        'summary': consultation.ai_diag_raw.get('summary', '')
-        if consultation and consultation.ai_diag_raw
-        else '',
+        'suggestions': diag_raw.get('options', []),
+        'summary': diag_raw.get('summary', ''),
         'selected': [
             assoc.diagnosis.name for assoc in consultation.selected_diagnoses
         ]
@@ -327,13 +344,14 @@ def patient_to_ui_data(patient: Patient) -> Dict[str, Any]:
     }
 
     # 8. Exams
+    exam_raw: Dict[str, Any] = (
+        consultation.ai_exam_raw
+        if consultation and isinstance(consultation.ai_exam_raw, dict)
+        else {}
+    )
     exams = {
-        'suggestions': consultation.ai_exam_raw.get('options', [])
-        if consultation and consultation.ai_exam_raw
-        else [],
-        'summary': consultation.ai_exam_raw.get('summary', '')
-        if consultation and consultation.ai_exam_raw
-        else '',
+        'suggestions': exam_raw.get('options', []),
+        'summary': exam_raw.get('summary', ''),
         'selected': [assoc.exam.name for assoc in consultation.selected_exams]
         if consultation
         else [],

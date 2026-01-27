@@ -115,7 +115,7 @@ export default function PatientView() {
     );
   }
 
-  const { formData } = patient;
+  const formData = patient?.formData ?? {};
 
   return (
     <Container className="py-4">

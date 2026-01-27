@@ -1,6 +1,13 @@
 import React from 'react';
 import { Row, Col } from 'react-bootstrap';
 
+// Helper to format numeric values with units, handling 0 correctly
+function formatNumeric(value, unit) {
+  return value === null || value === undefined
+    ? 'Not provided'
+    : `${value} ${unit}`;
+}
+
 export default function DemographicsTab({ data }) {
   if (!data) return <p className="text-muted">No data available</p>;
 
@@ -11,7 +18,7 @@ export default function DemographicsTab({ data }) {
       <Row className="g-3">
         <Col md={6}>
           <p>
-            <strong>Age:</strong> {age ? `${age} years` : 'Not provided'}
+            <strong>Age:</strong> {formatNumeric(age, 'years')}
           </p>
         </Col>
         <Col md={6}>
@@ -21,12 +28,12 @@ export default function DemographicsTab({ data }) {
         </Col>
         <Col md={6}>
           <p>
-            <strong>Weight:</strong> {weight ? `${weight} kg` : 'Not provided'}
+            <strong>Weight:</strong> {formatNumeric(weight, 'kg')}
           </p>
         </Col>
         <Col md={6}>
           <p>
-            <strong>Height:</strong> {height ? `${height} cm` : 'Not provided'}
+            <strong>Height:</strong> {formatNumeric(height, 'cm')}
           </p>
         </Col>
       </Row>

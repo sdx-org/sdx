@@ -1,6 +1,20 @@
 import React from 'react';
 import { Badge } from 'react-bootstrap';
 
+/** Compute a stable key for an exam item. */
+function getExamKey(exam, idx) {
+    if (typeof exam === 'string') return exam;
+    if (exam?.id != null) return String(exam.id);
+    if (exam?.name) return exam.name;
+    return `exam-${idx}`;
+}
+
+/** Get a human-readable label for an exam item. */
+function getExamLabel(exam) {
+    if (typeof exam === 'string') return exam;
+    return exam?.name ?? 'Unknown exam';
+}
+
 export default function ExamsTab({ data }) {
     if (!data) return <p className="text-muted">No data available</p>;
 
@@ -22,8 +36,11 @@ export default function ExamsTab({ data }) {
                     </p>
                     <ul className="list-group mb-3">
                         {suggestions.map((exam, idx) => (
-                            <li key={idx} className="list-group-item">
-                                {typeof exam === 'string' ? exam : exam.name}
+                            <li
+                                key={getExamKey(exam, idx)}
+                                className="list-group-item"
+                            >
+                                {getExamLabel(exam)}
                             </li>
                         ))}
                     </ul>
@@ -37,8 +54,8 @@ export default function ExamsTab({ data }) {
                     </p>
                     <div className="d-flex flex-wrap gap-2">
                         {selected.map((exam, idx) => (
-                            <Badge key={idx} bg="success">
-                                {exam}
+                            <Badge key={getExamKey(exam, idx)} bg="success">
+                                {getExamLabel(exam)}
                             </Badge>
                         ))}
                     </div>

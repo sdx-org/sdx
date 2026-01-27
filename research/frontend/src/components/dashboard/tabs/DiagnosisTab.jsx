@@ -1,6 +1,21 @@
 import React from 'react';
 import { Badge } from 'react-bootstrap';
 
+// Helpers for stable keys and labels
+const getDiagKey = (diag, idx) => {
+    if (typeof diag === 'string') return `s:${diag}`;
+    if (diag && (diag.id ?? diag.code ?? diag.name)) {
+        const val = diag.id ?? diag.code ?? diag.name;
+        return `o:${String(val)}`;
+    }
+    return `idx:${idx}`;
+};
+
+const getDiagLabel = (diag) => {
+    if (typeof diag === 'string') return diag;
+    return diag?.name ?? '';
+};
+
 export default function DiagnosisTab({ data }) {
     if (!data) return <p className="text-muted">No data available</p>;
 
@@ -22,8 +37,11 @@ export default function DiagnosisTab({ data }) {
                     </p>
                     <ul className="list-group mb-3">
                         {suggestions.map((diag, idx) => (
-                            <li key={idx} className="list-group-item">
-                                {typeof diag === 'string' ? diag : diag.name}
+                            <li
+                                key={getDiagKey(diag, idx)}
+                                className="list-group-item"
+                            >
+                                {getDiagLabel(diag)}
                             </li>
                         ))}
                     </ul>
@@ -37,8 +55,8 @@ export default function DiagnosisTab({ data }) {
                     </p>
                     <div className="d-flex flex-wrap gap-2">
                         {selected.map((diag, idx) => (
-                            <Badge key={idx} bg="primary">
-                                {diag}
+                            <Badge key={getDiagKey(diag, idx)} bg="primary">
+                                {getDiagLabel(diag)}
                             </Badge>
                         ))}
                     </div>

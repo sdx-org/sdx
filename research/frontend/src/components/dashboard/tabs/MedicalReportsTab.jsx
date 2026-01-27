@@ -1,6 +1,8 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import { Alert } from 'react-bootstrap';
 
+/** MedicalReportsTab */
 export default function MedicalReportsTab({ data }) {
     if (!data) return <p className="text-muted">No data available</p>;
 
@@ -25,12 +27,31 @@ export default function MedicalReportsTab({ data }) {
             </p>
             <ul className="list-group">
                 {files.map((file, idx) => (
-                    <li key={idx} className="list-group-item d-flex justify-content-between align-items-center">
+                    <li
+                        key={file.id || file.name || idx}
+                        className="list-group-item d-flex justify-content-between align-items-center"
+                    >
                         <span>📄 {file.name || `File ${idx + 1}`}</span>
-                        <span className="badge bg-secondary rounded-pill">{file.type}</span>
+                        <span className="badge bg-secondary rounded-pill">
+                            {file.type}
+                        </span>
                     </li>
                 ))}
             </ul>
         </div>
     );
 }
+
+/** MedicalReportsTab.propTypes */
+MedicalReportsTab.propTypes = {
+    data: PropTypes.shape({
+        skipped: PropTypes.bool,
+        files: PropTypes.arrayOf(
+            PropTypes.shape({
+                id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+                name: PropTypes.string,
+                type: PropTypes.string,
+            })
+        ),
+    }),
+};
