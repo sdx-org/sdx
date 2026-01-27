@@ -246,6 +246,111 @@ def patient_to_dict(patient: Patient) -> Dict[str, Any]:
     return patient_dict
 
 
+def patient_to_ui_data(patient: Patient) -> Dict[str, Any]:
+    """Structure patient data into separate tabs/categories for the UI."""
+    if not patient:
+        return {}
+
+    consultation = patient.consultations[-1] if patient.consultations else None
+
+    # 1. Demographics
+    demographics = {
+        'age': patient.age,
+        'gender': patient.gender,
+        'weight': consultation.weight_kg if consultation else None,
+        'height': consultation.height_cm if consultation else None,
+    }
+
+    # 2. Lifestyle
+    lifestyle = {
+        'diet': consultation.diet if consultation else None,
+        'sleep_hours': consultation.sleep_hours if consultation else None,
+        'physical_activity': consultation.physical_activity
+        if consultation
+        else None,
+        'mental_exercises': consultation.mental_exercises
+        if consultation
+        else None,
+    }
+
+    # 3. Symptoms
+    symptoms = {
+        'symptoms': consultation.symptoms if consultation else None,
+    }
+
+    # 4. Mental Health
+    mental = {
+        'mental_health': consultation.mental_health if consultation else None,
+    }
+
+    # 5. Medical Reports
+    reports_list = []
+    if consultation:
+        reports_list = extract_medical_reports_for_ui(consultation)
+
+    medical_reports = {
+        'files': [
+            {'name': r['file_name'], 'type': r['resource_type']}
+            for r in reports_list
+        ],
+        'skipped': (
+            not reports_list and consultation.previous_tests is not None
+        )
+        if consultation
+        else False,
+    }
+
+    # 6. Wearable Data
+    wearable_data = {
+        'data': consultation.wearable_data if consultation else [],
+        'skipped': (
+            not consultation.wearable_data
+            and consultation.wearable_data is not None
+        )
+        if consultation
+        else False,
+    }
+
+    # 7. Diagnosis
+    diagnosis = {
+        'suggestions': consultation.ai_diag_raw.get('options', [])
+        if consultation and consultation.ai_diag_raw
+        else [],
+        'summary': consultation.ai_diag_raw.get('summary', '')
+        if consultation and consultation.ai_diag_raw
+        else '',
+        'selected': [
+            assoc.diagnosis.name for assoc in consultation.selected_diagnoses
+        ]
+        if consultation
+        else [],
+    }
+
+    # 8. Exams
+    exams = {
+        'suggestions': consultation.ai_exam_raw.get('options', [])
+        if consultation and consultation.ai_exam_raw
+        else [],
+        'summary': consultation.ai_exam_raw.get('summary', '')
+        if consultation and consultation.ai_exam_raw
+        else '',
+        'selected': [assoc.exam.name for assoc in consultation.selected_exams]
+        if consultation
+        else [],
+    }
+
+    return {
+        'demographics': demographics,
+        'lifestyle': lifestyle,
+        'symptoms': symptoms,
+        'mental': mental,
+        'medicalReports': medical_reports,
+        'wearableData': wearable_data,
+        'diagnosis': diagnosis,
+        'exams': exams,
+    }
+
+
 def _get_next_step(patient: Patient) -> str:
     """Determine the next step by checking for missing data."""
     if not patient.consultations:
@@ -381,6 +486,7 @@ def get_consultation_status(
         completed_steps=completed_steps,
         is_complete=next_step == 'confirmation',
         patient_dict=record,
+        formData=patient_to_ui_data(patient),
         lang=record.get('meta', {}).get('lang', 'en'),
     )
 

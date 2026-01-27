@@ -302,6 +302,9 @@ class ConsultationStatusResponse(BaseModel):
     patient_dict: Dict[str, Any] = Field(
         ..., description='Dictionary representation of the patient data.'
     )
+    formData: Dict[str, Any] = Field(
+        ..., description='UI-friendly data structured by category.'
+    )
     lang: str = Field(..., description="Language code, e.g. 'en' or 'es'.")
 
 
