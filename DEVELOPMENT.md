@@ -128,6 +128,7 @@ All common development tasks are managed via `makim` commands defined in
   The app will be available at `http://127.0.0.1:5173`.
 
 - **To run the Research Backend:**
+
   ```bash
   makim research.backend
   ```
@@ -199,12 +200,12 @@ Our test suite uses `pytest`.
 - **Run All Tests:**
 
   ```bash
-  makim test.run
+  makim tests.run
   ```
 
 - **Run Tests with Coverage Report:**
   ```bash
-  makim test.coverage
+  makim tests.coverage
   ```
 
 ---
