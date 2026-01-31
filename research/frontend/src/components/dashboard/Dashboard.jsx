@@ -396,7 +396,7 @@ export default function Dashboard() {
                                 size="sm"
                                 onClick={() =>
                                   handleDeletePatient(
-                                    patient.patient_id
+                                    patient.patient_id,patient.patientName
                                   )
                                 }
                               >
