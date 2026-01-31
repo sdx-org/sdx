@@ -15,12 +15,14 @@ import Exam from "./components/consultation/Exam";
 import Completion from "./components/consultation/Confirmation";
 import { ConsultationProvider } from "./context/ConsultationContext";
 import Confirmation from "./components/consultation/Confirmation";
+import Navbar from "./components/Navbar";
 
 
 export default function App() {
   return (
     <ConsultationProvider>
       <Router>
+        <Navbar />
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/patients/:id" element={<PatientView />} />

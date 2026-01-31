@@ -187,7 +187,7 @@ export default function Dashboard() {
   return (
     <>
       <Navbar />
-      <div className="bg-light min-vh-100 py-4">
+      <div className="bg-light min-vh-100 py-4" style={{ paddingTop: '4.5rem' }}>
         <Container>
           {/* Header */}
           <div className="mb-4 d-flex justify-content-between align-items-center">
@@ -396,7 +396,6 @@ export default function Dashboard() {
                                 size="sm"
                                 onClick={() =>
                                   handleDeletePatient(
-                                    patient.patient_id,
                                     patient.patient_id
                                   )
                                 }
