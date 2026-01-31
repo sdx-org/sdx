@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./components/dashboard/Dashboard";
 import PatientView from "./components/dashboard/PatientView";
 import LanguageSelection from "./components/consultation/LanguageSelection";
-import "./i18";
+import "./i18n.js";
 import Demographics from "./components/consultation/Demographics";
 import Lifestyle from "./components/consultation/Lifestyle";
 import Symptoms from "./components/consultation/Symptoms";

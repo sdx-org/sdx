@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { ConsultationProvider } from './context/ConsultationContext';
 
 import App from './App.jsx'
+import './i18n.js';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -3,11 +3,15 @@ import {useNavigate} from 'react-router-dom';
 import {Container, Row, Col, Button, Alert, Spinner} from 'react-bootstrap';
 import {useConsultation, consultationActions} from '../../context/ConsultationContext';
 import consultationAPI from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
 
 export default function LanguageSelection(){
   const navigate= useNavigate();
   const {dispatch}= useConsultation();
+
+  const { t, i18n } = useTranslation();
+
   const [selectedLanguage, setSelectedLanguage]=useState(null);
   const [isLoading,setIsLoading]= useState(false);
   const [error, setError]=useState(null);
@@ -21,6 +25,9 @@ export default function LanguageSelection(){
     setSelectedLanguage(languageCode);
     setIsLoading(true);
     setError(null);
+
+    i18n.changeLanguage(languageCode);
+
     try{
       const response= await consultationAPI.createPatient(languageCode);
       if(!response.patient_id){
@@ -37,7 +44,7 @@ export default function LanguageSelection(){
       localStorage.setItem('currentLanguage', languageCode);
       navigate('/demographics')
     }catch(err){
-      console.error('Error creating patient: err');
+      console.error('Error creating patient:', err);
       setError(err.message || 'Failed to create patient. Please try again.');
       setSelectedLanguage(null);
     }finally{
