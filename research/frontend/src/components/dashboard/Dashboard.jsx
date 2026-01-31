@@ -186,7 +186,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="bg-light min-vh-100 py-4" style={{ paddingTop: '4.5rem' }}>
         <Container>
           {/* Header */}
