@@ -1,0 +1,68 @@
+{
+  "dashboard.title": "Painel",
+  "dashboard.addPatient": "Adicionar Paciente",
+  "dashboard.noRecords": "Nenhum registro de paciente encontrado. Clique em 'Adicionar Paciente' para iniciar uma nova consulta.",
+
+  "language.title": "Selecione o seu idioma",
+  "language.label": "Idioma",
+  "language.continue": "Continuar",
+
+  "demographics.title": "Etapa 1 — Informações Demográficas",
+  "demographics.age": "Idade (anos)",
+  "demographics.gender": "Gênero",
+  "demographics.weight": "Peso (kg)",
+  "demographics.height": "Altura (cm)",
+  "demographics.next": "Próximo",
+
+  "lifestyle.title": "Etapa 2 — Estilo de Vida",
+  "lifestyle.diet": "Padrão alimentar",
+  "lifestyle.sleep": "Horas de sono por noite",
+  "lifestyle.exercise": "Exercício físico",
+  "lifestyle.mental": "Atividades mentais",
+  "lifestyle.next": "Próximo",
+
+  "symptoms.title": "Etapa 3 — Sintomas atuais",
+  "symptoms.describe": "Descreva os principais sintomas",
+  "symptoms.placeholder": "separados por vírgula ou em parágrafo",
+
+  "mentalhealth.title": "Etapa 4 — Saúde mental",
+  "mentalhealth.label": "Preocupações relacionadas à saúde mental (estresse, ansiedade, humor etc.)",
+
+  "exams.title": "Etapa 5 — Exames anteriores",
+  "exams.label": "Forneça um resumo conciso de exames laboratoriais ou de imagem recentes (digite 'none' se não aplicável)",
+
+  "wearable": {
+    "title": "Dados de Wearable",
+    "description": "Os dados de dispositivos vestíveis do paciente podem fornecer informações valiosas para análises atuais e futuras, ajudando-nos a compreender melhor a condição do paciente.",
+    "question": "Você deseja enviar dados de wearable para este paciente?",
+    "yes": "Sim, Enviar Dados",
+    "no": "Não, Pular Esta Etapa",
+    "uploadInstruction": "Selecione um arquivo CSV ou JSON contendo os dados do dispositivo vestível do paciente.",
+    "upload": "Enviar e Continuar",
+    "back": "Voltar"
+  },
+
+  "validation": {
+    "ageRequired": "A idade é obrigatória",
+    "genderRequired": "O gênero é obrigatório",
+    "weightRequired": "O peso é obrigatório",
+    "heightRequired": "A altura é obrigatória",
+    "dietRequired": "O padrão alimentar é obrigatório",
+    "sleepRequired": "A duração do sono é obrigatória",
+    "exerciseRequired": "As informações de exercício são obrigatórias",
+    "mentalRequired": "A atividade mental é obrigatória",
+    "symptomsRequired": "Os sintomas são obrigatórios",
+    "mentalHealthRequired": "As informações de saúde mental são obrigatórias",
+    "previousExamsRequired": "Este campo é obrigatório"
+  },
+
+  "navbar": {
+    "brand": "TeleHealthCareAI",
+    "dashboard": "Painel",
+    "patients": "Pacientes",
+    "addPatient": "Adicionar Paciente",
+    "language": "Idioma",
+    "english": "Inglês",
+    "spanish": "Espanhol"
+  }
+}
