@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import ReactPaginate from 'react-paginate';
 import consultationAPI from '../../services/api';
 import { useConsultation, consultationActions } from '../../context/ConsultationContext';
+import Navbar from '../Navbar';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -184,254 +185,257 @@ export default function Dashboard() {
   const hasPatients = patients && patients.length > 0;
 
   return (
-    <div className="bg-light min-vh-100 py-4">
-      <Container>
-        {/* Header */}
-        <div className="mb-4 d-flex justify-content-between align-items-center">
-          <div>
-            <h1 className="display-6 fw-bold text-primary mb-2">
-              {t('dashboard.title')}
-            </h1>
-            <p className="text-muted lead mb-0">
-              Manage and track patient records efficiently
-            </p>
+    <>
+      <Navbar />
+      <div className="bg-light min-vh-100 py-4">
+        <Container>
+          {/* Header */}
+          <div className="mb-4 d-flex justify-content-between align-items-center">
+            <div>
+              <h1 className="display-6 fw-bold text-primary mb-2">
+                {t('dashboard.title')}
+              </h1>
+              <p className="text-muted lead mb-0">
+                Manage and track patient records efficiently
+              </p>
+            </div>
+
+            <Button
+              onClick={handleAddPatient}
+              variant="primary"
+              size="lg"
+              className="d-flex align-items-center gap-2"
+            >
+              <span style={{ fontSize: '1.2rem' }}>➕</span>
+              <span>Add Patient</span>
+            </Button>
           </div>
 
-          <Button
-            onClick={handleAddPatient}
-            variant="primary"
-            size="lg"
-            className="d-flex align-items-center gap-2"
-          >
-            <span style={{ fontSize: '1.2rem' }}>➕</span>
-            <span>Add Patient</span>
-          </Button>
-        </div>
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="danger" dismissible onClose={() => setError(null)}>
+              <Alert.Heading>Error</Alert.Heading>
+              <p>{error}</p>
+            </Alert>
+          )}
 
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="danger" dismissible onClose={() => setError(null)}>
-            <Alert.Heading>Error</Alert.Heading>
-            <p>{error}</p>
-          </Alert>
-        )}
+          {/* Stats Cards */}
+          <Row className="g-4 mb-4">
+            {/* Total Patients */}
+            <Col md={6} lg={4}>
+              <Card className="border-0 shadow-sm h-100">
+                <Card.Body className="p-4">
+                  <div className="d-flex align-items-center">
+                    <div className="bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                      <span style={{ fontSize: '1.5rem' }}>📋</span>
+                    </div>
+                    <div>
+                      <h3 className="mb-0 fw-bold">
+                        {isLoading ? (
+                          <Spinner animation="border" size="sm" />
+                        ) : (
+                          stats.total_patients
+                        )}
+                      </h3>
+                      <p className="text-muted mb-0 small">Total Patients</p>
+                    </div>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
 
-        {/* Stats Cards */}
-        <Row className="g-4 mb-4">
-          {/* Total Patients */}
-          <Col md={6} lg={4}>
-            <Card className="border-0 shadow-sm h-100">
-              <Card.Body className="p-4">
-                <div className="d-flex align-items-center">
-                  <div className="bg-primary bg-opacity-10 p-3 rounded-3 me-3">
-                    <span style={{ fontSize: '1.5rem' }}>📋</span>
+            {/* Active Records */}
+            <Col md={6} lg={4}>
+              <Card className="border-0 shadow-sm h-100">
+                <Card.Body className="p-4">
+                  <div className="d-flex align-items-center">
+                    <div className="bg-success bg-opacity-10 p-3 rounded-3 me-3">
+                      <span style={{ fontSize: '1.5rem' }}>✅</span>
+                    </div>
+                    <div>
+                      <h3 className="mb-0 fw-bold">
+                        {isLoading ? (
+                          <Spinner animation="border" size="sm" />
+                        ) : (
+                          stats.active_records
+                        )}
+                      </h3>
+                      <p className="text-muted mb-0 small">Active Records</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="mb-0 fw-bold">
-                      {isLoading ? (
-                        <Spinner animation="border" size="sm" />
-                      ) : (
-                        stats.total_patients
-                      )}
-                    </h3>
-                    <p className="text-muted mb-0 small">Total Patients</p>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            {/* This Month */}
+            <Col md={6} lg={4}>
+              <Card className="border-0 shadow-sm h-100">
+                <Card.Body className="p-4">
+                  <div className="d-flex align-items-center">
+                    <div className="bg-info bg-opacity-10 p-3 rounded-3 me-3">
+                      <span style={{ fontSize: '1.5rem' }}>📊</span>
+                    </div>
+                    <div>
+                      <h3 className="mb-0 fw-bold">
+                        {isLoading ? (
+                          <Spinner animation="border" size="sm" />
+                        ) : (
+                          stats.this_month
+                        )}
+                      </h3>
+                      <p className="text-muted mb-0 small">This Month</p>
+                    </div>
                   </div>
-                </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          {/* Patients Table */}
+          {isLoading && !hasPatients ? (
+            <Card className="border-0 shadow-sm">
+              <Card.Body className="p-5 text-center">
+                <Spinner animation="border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+                <p className="text-muted mt-3">Loading patients...</p>
               </Card.Body>
             </Card>
-          </Col>
-
-          {/* Active Records */}
-          <Col md={6} lg={4}>
-            <Card className="border-0 shadow-sm h-100">
-              <Card.Body className="p-4">
-                <div className="d-flex align-items-center">
-                  <div className="bg-success bg-opacity-10 p-3 rounded-3 me-3">
-                    <span style={{ fontSize: '1.5rem' }}>✅</span>
-                  </div>
-                  <div>
-                    <h3 className="mb-0 fw-bold">
-                      {isLoading ? (
-                        <Spinner animation="border" size="sm" />
-                      ) : (
-                        stats.active_records
-                      )}
-                    </h3>
-                    <p className="text-muted mb-0 small">Active Records</p>
-                  </div>
-                </div>
+          ) : !hasPatients ? (
+            <Card className="border-0 shadow-sm">
+              <Card.Body className="p-5 text-center">
+                <h5 className="mb-3 fw-semibold">
+                  {t('dashboard.noRecords')}
+                </h5>
+                <p className="text-muted mb-4">
+                  Get started by adding your first patient record
+                </p>
+                <Button
+                  onClick={handleAddPatient}
+                  variant="primary"
+                  size="lg"
+                  className="px-4"
+                >
+                  <span className="me-2">➕</span>
+                  Add New Patient
+                </Button>
               </Card.Body>
             </Card>
-          </Col>
-
-          {/* This Month */}
-          <Col md={6} lg={4}>
-            <Card className="border-0 shadow-sm h-100">
+          ) : (
+            <Card className="border-0 shadow-sm">
               <Card.Body className="p-4">
-                <div className="d-flex align-items-center">
-                  <div className="bg-info bg-opacity-10 p-3 rounded-3 me-3">
-                    <span style={{ fontSize: '1.5rem' }}>📊</span>
-                  </div>
-                  <div>
-                    <h3 className="mb-0 fw-bold">
-                      {isLoading ? (
-                        <Spinner animation="border" size="sm" />
-                      ) : (
-                        stats.this_month
-                      )}
-                    </h3>
-                    <p className="text-muted mb-0 small">This Month</p>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+                <h5 className="mb-4 fw-semibold">
+                  Recent Patients ({patients.length})
+                </h5>
 
-        {/* Patients Table */}
-        {isLoading && !hasPatients ? (
-          <Card className="border-0 shadow-sm">
-            <Card.Body className="p-5 text-center">
-              <Spinner animation="border" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </Spinner>
-              <p className="text-muted mt-3">Loading patients...</p>
-            </Card.Body>
-          </Card>
-        ) : !hasPatients ? (
-          <Card className="border-0 shadow-sm">
-            <Card.Body className="p-5 text-center">
-              <h5 className="mb-3 fw-semibold">
-                {t('dashboard.noRecords')}
-              </h5>
-              <p className="text-muted mb-4">
-                Get started by adding your first patient record
-              </p>
-              <Button
-                onClick={handleAddPatient}
-                variant="primary"
-                size="lg"
-                className="px-4"
-              >
-                <span className="me-2">➕</span>
-                Add New Patient
-              </Button>
-            </Card.Body>
-          </Card>
-        ) : (
-          <Card className="border-0 shadow-sm">
-            <Card.Body className="p-4">
-              <h5 className="mb-4 fw-semibold">
-                Recent Patients ({patients.length})
-              </h5>
-
-              <div className="table-responsive">
-                <Table hover className="align-middle">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Patient ID</th>
-                      <th>Language</th>
-                      <th>Status</th>
-                      <th>Created</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentItems.map((patient, index) => (
-                      <tr key={patient.patient_id}>
-                        <td>{itemOffset + index + 1}</td>
-                        <td>
-                          <code className="text-truncate" style={{ maxWidth: '150px' }}>
-                            {patient.patient_id}
-                          </code>
-                        </td>
-                        <td>{patient.lang || 'N/A'}</td>
-                        <td>
-                          <Badge
-                            bg={
-                              patient.is_complete === true
-                                ? 'success'
-                                : 'warning'
-                            }
-                          >
-                            {patient.is_complete === true
-                              ? '✓ Complete'
-                              : '⏳ In Progress'}
-                          </Badge>
-                        </td>
-                        <td className="small">
-                          {patient.created_at
-                            ? new Date(patient.created_at).toLocaleDateString()
-                            : 'N/A'}
-                        </td>
-                        <td>
-                          <div className="d-flex gap-2">
-                            {patient.is_complete === true ? (
-                              <Button
-                                variant="outline-primary"
-                                size="sm"
-                                onClick={() =>
-                                  handleViewPatient(patient.patient_id)
-                                }
-                              >
-                                View
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="outline-primary"
-                                size="sm"
-                                onClick={() =>
-                                  handleResumePatient(patient.patient_id)
-                                }
-                              >
-                                Resume
-                              </Button>
-                            )}
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              onClick={() =>
-                                handleDeletePatient(
-                                  patient.patient_id,
-                                  patient.patient_id
-                                )
+                <div className="table-responsive">
+                  <Table hover className="align-middle">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Patient ID</th>
+                        <th>Language</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentItems.map((patient, index) => (
+                        <tr key={patient.patient_id}>
+                          <td>{itemOffset + index + 1}</td>
+                          <td>
+                            <code className="text-truncate" style={{ maxWidth: '150px' }}>
+                              {patient.patient_id}
+                            </code>
+                          </td>
+                          <td>{patient.lang || 'N/A'}</td>
+                          <td>
+                            <Badge
+                              bg={
+                                patient.is_complete === true
+                                  ? 'success'
+                                  : 'warning'
                               }
                             >
-                              Delete
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </div>
+                              {patient.is_complete === true
+                                ? '✓ Complete'
+                                : '⏳ In Progress'}
+                            </Badge>
+                          </td>
+                          <td className="small">
+                            {patient.created_at
+                              ? new Date(patient.created_at).toLocaleDateString()
+                              : 'N/A'}
+                          </td>
+                          <td>
+                            <div className="d-flex gap-2">
+                              {patient.is_complete === true ? (
+                                <Button
+                                  variant="outline-primary"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleViewPatient(patient.patient_id)
+                                  }
+                                >
+                                  View
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="outline-primary"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleResumePatient(patient.patient_id)
+                                  }
+                                >
+                                  Resume
+                                </Button>
+                              )}
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() =>
+                                  handleDeletePatient(
+                                    patient.patient_id,
+                                    patient.patient_id
+                                  )
+                                }
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
 
-              {/* Pagination */}
-              {pageCount > 1 && (
-                <ReactPaginate
-                  breakLabel="..."
-                  nextLabel="›"
-                  previousLabel="‹"
-                  onPageChange={handlePageClick}
-                  pageRangeDisplayed={3}
-                  pageCount={pageCount}
-                  renderOnZeroPageCount={null}
-                  containerClassName="pagination justify-content-center mt-4"
-                  pageClassName="page-item"
-                  pageLinkClassName="page-link"
-                  previousClassName="page-item"
-                  previousLinkClassName="page-link"
-                  nextClassName="page-item"
-                  nextLinkClassName="page-link"
-                  activeClassName="active"
-                />
-              )}
-            </Card.Body>
-          </Card>
-        )}
-      </Container>
-    </div>
+                {/* Pagination */}
+                {pageCount > 1 && (
+                  <ReactPaginate
+                    breakLabel="..."
+                    nextLabel="›"
+                    previousLabel="‹"
+                    onPageChange={handlePageClick}
+                    pageRangeDisplayed={3}
+                    pageCount={pageCount}
+                    renderOnZeroPageCount={null}
+                    containerClassName="pagination justify-content-center mt-4"
+                    pageClassName="page-item"
+                    pageLinkClassName="page-link"
+                    previousClassName="page-item"
+                    previousLinkClassName="page-link"
+                    nextClassName="page-item"
+                    nextLinkClassName="page-link"
+                    activeClassName="active"
+                  />
+                )}
+              </Card.Body>
+            </Card>
+          )}
+        </Container>
+      </div>
+    </>
   );
 }
