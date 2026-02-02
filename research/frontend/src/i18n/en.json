@@ -8,11 +8,22 @@
   "language.continue": "Continue",
 
   "demographics.title": "Step 1 — Demographics",
+  "demographics.subtitle": "Please provide your basic demographic information",
   "demographics.age": "Age (years)",
   "demographics.gender": "Gender",
   "demographics.weight": "Weight (kg)",
   "demographics.height": "Height (cm)",
   "demographics.next": "Next",
+
+  "placeholders.age": "e.g., 30",
+  "placeholders.weight": "e.g., 70",
+  "placeholders.height": "e.g., 175",
+  "placeholders.selectGender": "Select your gender",
+
+  "gender.male": "Male",
+  "gender.female": "Female",
+  "gender.other": "Other",
+  "gender.nosay": "Prefer not to say",
 
   "lifestyle.title": "Step 2 — Lifestyle details",
   "lifestyle.diet": "Diet pattern",
@@ -20,7 +31,8 @@
   "lifestyle.exercise": "Physical exercise",
   "lifestyle.mental": "Mental activities",
   "lifestyle.next": "Next",
-   "symptoms.title": "Step 3 — Current symptoms",
+
+  "symptoms.title": "Step 3 — Current symptoms",
   "symptoms.describe": "Describe the main symptoms",
   "symptoms.placeholder": "comma-separated or paragraph",
 
@@ -29,7 +41,8 @@
 
   "exams.title": "Step 5 — Previous exams / tests",
   "exams.label": "Provide a concise summary of recent lab work or imaging (enter 'none' if not applicable)",
-   "wearable": {
+
+  "wearable": {
     "title": "Wearable Data",
     "description": "Patient's wearable device data can provide valuable insights for both current and future analysis, helping us gain a deeper understanding of the patient's condition.",
     "question": "Do you want to upload wearable data for this patient?",
@@ -39,7 +52,8 @@
     "upload": "Upload & Continue",
     "back": "Back"
   },
-   "validation": {
+
+  "validation": {
     "ageRequired": "Age is required",
     "genderRequired": "Gender is required",
     "weightRequired": "Weight is required",
@@ -52,6 +66,27 @@
     "mentalHealthRequired": "Mental health concerns are required",
     "previousExamsRequired": "This field is required"
   },
+
+  "bmi.title": "Body Mass Index (BMI)",
+  "bmi.underweight": "Underweight",
+  "bmi.normal": "Normal",
+  "bmi.overweight": "Overweight",
+  "bmi.obese": "Obese",
+
+  "info.confidentiality": "All information is kept confidential and securely stored.",
+
+  "common.back": "Back",
+  "common.saving": "Saving...",
+  "common.next": "Next: Lifestyle",
+
+  "steps.step1": "Step 1 of 10",
+  "steps.percent10": "10% Complete",
+
+  "errors.title": "Error",
+  "errors.patientIdMissing": "Patient ID not found. Please start over.",
+  "errors.saveFailed": "Failed to save information. Please try again.",
+
+  "footer.faq": "Questions? Check our",
 
   "navbar": {
     "brand": "TeleHealthCareAI",

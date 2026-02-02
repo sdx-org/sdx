@@ -8,11 +8,22 @@
   "language.continue": "Continuar",
 
   "demographics.title": "Paso 1 — Datos Demográficos",
+  "demographics.subtitle": "Por favor proporciona tu información demográfica básica",
   "demographics.age": "Edad (años)",
   "demographics.gender": "Género",
   "demographics.weight": "Peso (kg)",
   "demographics.height": "Altura (cm)",
   "demographics.next": "Siguiente",
+
+  "placeholders.age": "ej., 30",
+  "placeholders.weight": "ej., 70",
+  "placeholders.height": "ej., 175",
+  "placeholders.selectGender": "Selecciona tu género",
+
+  "gender.male": "Hombre",
+  "gender.female": "Mujer",
+  "gender.other": "Otro",
+  "gender.nosay": "Prefiero no decirlo",
 
   "lifestyle.title": "Paso 2 — Detalles del Estilo de Vida",
   "lifestyle.diet": "Patrón alimenticio",
@@ -20,7 +31,8 @@
   "lifestyle.exercise": "Ejercicio físico",
   "lifestyle.mental": "Actividades mentales",
   "lifestyle.next": "Siguiente",
-   "symptoms.title": "Paso 3 — Síntomas actuales",
+
+  "symptoms.title": "Paso 3 — Síntomas actuales",
   "symptoms.describe": "Describe los síntomas principales",
   "symptoms.placeholder": "separados por comas o en párrafo",
 
@@ -29,7 +41,8 @@
 
   "exams.title": "Paso 5 — Exámenes o pruebas previas",
   "exams.label": "Proporciona un resumen conciso de los análisis o imágenes recientes (escribe 'ninguno' si no aplica)",
-   "wearable": {
+
+  "wearable": {
     "title": "Datos de Dispositivo Portátil",
     "description": "Los datos del dispositivo portátil del paciente pueden proporcionar información valiosa para el análisis actual y futuro, ayudándonos a comprender mejor su condición.",
     "question": "¿Deseas subir los datos del dispositivo portátil para este paciente?",
@@ -39,6 +52,7 @@
     "upload": "Subir y Continuar",
     "back": "Atrás"
   },
+
   "validation": {
     "ageRequired": "La edad es obligatoria",
     "genderRequired": "El género es obligatorio",
@@ -53,13 +67,34 @@
     "previousExamsRequired": "Este campo es obligatorio"
   },
 
+  "bmi.title": "Índice de Masa Corporal (IMC)",
+  "bmi.underweight": "Bajo peso",
+  "bmi.normal": "Normal",
+  "bmi.overweight": "Sobrepeso",
+  "bmi.obese": "Obesidad",
+
+  "info.confidentiality": "Toda la información es confidencial y se almacena de forma segura.",
+
+  "common.back": "Atrás",
+  "common.saving": "Guardando...",
+  "common.next": "Siguiente: Estilo de vida",
+
+  "steps.step1": "Paso 1 de 10",
+  "steps.percent10": "10% Completado",
+
+  "errors.title": "Error",
+  "errors.patientIdMissing": "ID del paciente no encontrado. Por favor, comienza de nuevo.",
+  "errors.saveFailed": "No se pudo guardar la información. Inténtalo nuevamente.",
+
+  "footer.faq": "¿Tienes preguntas? Consulta nuestro",
+
   "navbar": {
     "brand": "TeleHealthCareAI",
     "dashboard": "Panel de Control",
     "patients": "Pacientes",
     "addPatient": "Agregar Paciente",
     "language": "Idioma",
-    "english": "English",
+    "english": "Inglés",
     "spanish": "Español"
   }
 }
