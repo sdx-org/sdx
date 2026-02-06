@@ -20,7 +20,7 @@ import Navbar from '../Navbar';
 export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { dispatch } = useConsultation();
+  const { state, dispatch } = useConsultation();
   const [patients, setPatients] = useState([]);
   const [stats, setStats] = useState({
     total_patients: 0,
@@ -165,6 +165,15 @@ export default function Dashboard() {
 
     try {
       await consultationAPI.deletePatient(patientId);
+
+      // Remove any persisted consultation state for this patient
+      localStorage.removeItem(`consultationState_${patientId}`);
+
+      // If the deleted patient is the active consultation, clear context state
+      if (state?.patientId === patientId) {
+        dispatch(consultationActions.resetState());
+        localStorage.removeItem('consultationState_temp');
+      }
 
       // Remove from local list
       setPatients((prev) => prev.filter((p) => p.patient_id !== patientId));
