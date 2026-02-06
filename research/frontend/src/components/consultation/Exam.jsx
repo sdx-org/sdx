@@ -14,11 +14,13 @@ import {
   InputGroup,
 } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConsultation, consultationActions } from '../../context/ConsultationContext';
 import consultationAPI from '../../services/api';
 
 export default function Exams() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { state, dispatch } = useConsultation();
 
   const {
@@ -35,6 +37,14 @@ export default function Exams() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [evaluations, setEvaluations] = useState({});
   const [manualText, setManualText] = useState('');
+  const ratingFields = ['accuracy', 'relevance', 'usefulness', 'coherence', 'safety'];
+  const ratingLabels = {
+    accuracy: t('ratings.accuracy'),
+    relevance: t('ratings.relevance'),
+    usefulness: t('ratings.usefulness'),
+    coherence: t('ratings.coherence'),
+    safety: t('ratings.safety'),
+  };
 
 
   useEffect(() => {
@@ -81,7 +91,7 @@ export default function Exams() {
       setApiError(null);
 
       if (!state.patientId) {
-        throw new Error('Patient ID not found. Please start over.');
+        throw new Error(t('errors.patientIdMissing'));
       }
 
       const response = await consultationAPI.getExamSuggestions(state.patientId);
@@ -110,7 +120,7 @@ export default function Exams() {
       );
     } catch (err) {
       console.error('Error fetching exam suggestions:', err);
-      setApiError(err.message || 'Failed to load exam suggestions. Please try again.');
+      setApiError(err.message || t('errors.loadExamsFailed'));
     } finally {
       setIsLoadingSuggestions(false);
     }
@@ -209,11 +219,11 @@ export default function Exams() {
       setApiError(null);
 
       if (!state.patientId) {
-        throw new Error('Patient ID not found. Please start over.');
+        throw new Error(t('errors.patientIdMissing'));
       }
 
       if (selectedIds.length === 0) {
-        setApiError('Please select at least one exam/test.');
+        setApiError(t('exams.errors.selectAtLeastOne'));
         return;
       }
 
@@ -222,7 +232,9 @@ export default function Exams() {
         const names = examItems
           .filter((item) => incomplete.includes(item.id))
           .map((item) => item.name);
-        setApiError(`Please complete ratings for: ${names.join(', ')}`);
+        setApiError(
+          t('exams.errors.completeRatings', { names: names.join(', ') })
+        );
         return;
       }
 
@@ -252,7 +264,7 @@ export default function Exams() {
       navigate('/confirmation');
     } catch (err) {
       console.error('Error saving exam selections:', err);
-      setApiError(err.message || 'Failed to save selections. Please try again.');
+      setApiError(err.message || t('errors.saveExamsFailed'));
       window.scrollTo(0, 0);
     }
   };
@@ -265,8 +277,12 @@ export default function Exams() {
         {/* Progress */}
         <div className="mb-4">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <small className="text-muted fw-semibold">Step 8 of 10</small>
-            <small className="text-muted">80% complete</small>
+            <small className="text-muted fw-semibold">
+              {t('steps.ofTen', { step: 8 })}
+            </small>
+            <small className="text-muted">
+              {t('steps.percentComplete', { percent: 80 })}
+            </small>
           </div>
           <ProgressBar now={80} style={{ height: '8px' }} />
         </div>
@@ -279,7 +295,9 @@ export default function Exams() {
             onClose={() => setApiError(null)}
             className="mb-3"
           >
-            <Alert.Heading className="h6 mb-2">Error</Alert.Heading>
+            <Alert.Heading className="h6 mb-2">
+              {t('errors.title')}
+            </Alert.Heading>
             <p className="mb-0 small">{apiError}</p>
           </Alert>
         )}
@@ -290,7 +308,7 @@ export default function Exams() {
             <Card.Body className="p-5 text-center">
               <Spinner animation="border" variant="primary" className="mb-3" />
               <p className="text-muted mb-0">
-                Generating exam and test suggestions…
+                {t('exams.loading')}
               </p>
             </Card.Body>
           </Card>
@@ -300,10 +318,10 @@ export default function Exams() {
               {/* Header */}
               <div className="mb-4">
                 <h1 className="h3 fw-bold text-primary mb-1">
-                  AI Exam / Test Suggestions
+                  {t('exams.title')}
                 </h1>
                 <p className="text-muted mb-0 small">
-                  Select recommended exams, rate each one, and add any additional tests.
+                  {t('exams.subtitle')}
                 </p>
               </div>
 
@@ -312,7 +330,7 @@ export default function Exams() {
                 <Card className="bg-light border-0 mb-4">
                   <Card.Body className="p-3">
                     <p className="small mb-1 fw-semibold text-muted">
-                      AI exam summary
+                      {t('exams.aiSummaryTitle')}
                     </p>
                     <p className="small mb-0 text-muted">{aiSummary}</p>
                   </Card.Body>
@@ -321,10 +339,12 @@ export default function Exams() {
 
               {/* Add manual exam */}
               <div className="mb-4">
-                <p className="small fw-semibold mb-2">Add manual exam / test</p>
+                <p className="small fw-semibold mb-2">
+                  {t('exams.addManualTitle')}
+                </p>
                 <InputGroup>
                   <Form.Control
-                    placeholder="Type a custom exam/test and click Add"
+                    placeholder={t('exams.addManualPlaceholder')}
                     value={manualText}
                     onChange={(e) => setManualText(e.target.value)}
                     size="sm"
@@ -334,7 +354,7 @@ export default function Exams() {
                     size="sm"
                     onClick={handleAddManualExam}
                   >
-                    + Add
+                    + {t('common.add')}
                   </Button>
                 </InputGroup>
               </div>
@@ -343,13 +363,13 @@ export default function Exams() {
               {examItems.length === 0 ? (
                 <Alert variant="info" className="border-0">
                   <p className="small mb-0">
-                    No exam suggestions available. Please ensure previous steps are completed.
+                    {t('exams.empty')}
                   </p>
                 </Alert>
               ) : (
                 <div className="mb-4">
                   <p className="small fw-semibold mb-2">
-                    Review each exam suggestion. Click a row to expand and rate.
+                    {t('exams.reviewHint')}
                   </p>
 
                   {examItems.map((item) => {
@@ -395,7 +415,9 @@ export default function Exams() {
                                       }
                                       pill
                                     >
-                                      {item.source === 'ai' ? 'AI' : 'Manual'}
+                                      {item.source === 'ai'
+                                        ? t('exams.sourceAi')
+                                        : t('exams.sourceManual')}
                                     </Badge>
                                   </div>
                                   {item.description && (
@@ -408,7 +430,7 @@ export default function Exams() {
                                 <div className="text-end">
                                   {average > 0 && (
                                     <div className="small text-muted">
-                                      Avg: <strong>{average}/10</strong>
+                                      {t('common.avg')}: <strong>{average}/10</strong>
                                     </div>
                                   )}
                                   {isSelected && (
@@ -416,7 +438,7 @@ export default function Exams() {
                                       bg={complete ? 'success' : 'warning'}
                                       className="mt-1"
                                     >
-                                      {complete ? 'Complete' : 'Pending'}
+                                      {complete ? t('status.complete') : t('status.pending')}
                                     </Badge>
                                   )}
                                 </div>
@@ -428,16 +450,16 @@ export default function Exams() {
                           <Collapse in={item.expanded}>
                             <div className="mt-3 border-top pt-3">
                               <p className="small fw-semibold mb-2">
-                                Rate this exam / test (1–10)
+                                {t('exams.rateTitle')}
                               </p>
 
                               {/* Ratings grid */}
                               <div className="row g-2 mb-3">
-                                {['accuracy', 'relevance', 'usefulness', 'coherence', 'safety'].map(
+                                {ratingFields.map(
                                   (field) => (
                                     <div className="col-12 col-md-6" key={field}>
                                       <Form.Label className="small mb-1 text-muted text-capitalize">
-                                        {field}
+                                        {ratingLabels[field]}
                                       </Form.Label>
                                       <Form.Select
                                         size="sm"
@@ -446,7 +468,9 @@ export default function Exams() {
                                           setRating(item.id, field, e.target.value)
                                         }
                                       >
-                                        <option value="">Select</option>
+                                        <option value="">
+                                          {t('common.select')}
+                                        </option>
                                         {Array.from({ length: 10 }).map((_, i) => (
                                           <option key={i + 1} value={i + 1}>
                                             {i + 1}
@@ -461,13 +485,13 @@ export default function Exams() {
                               {/* Comments */}
                               <Form.Group className="mb-1">
                                 <Form.Label className="small mb-1 text-muted">
-                                  Comments (optional)
+                                  {t('common.commentsOptional')}
                                 </Form.Label>
                                 <Form.Control
                                   as="textarea"
                                   rows={2}
                                   size="sm"
-                                  placeholder="Rationale..."
+                                  placeholder={t('common.rationalePlaceholder')}
                                   value={evalForItem.comments || ''}
                                   onChange={(e) =>
                                     setComment(item.id, e.target.value)
@@ -488,7 +512,7 @@ export default function Exams() {
                 <Card className="bg-light border-0 mb-4">
                   <Card.Body className="p-3">
                     <p className="small fw-semibold mb-2">
-                      Selected exams / tests ({selectedIds.length})
+                      {t('exams.selectedSummary', { count: selectedIds.length })}
                     </p>
                     <ListGroup variant="flush">
                       {selectedIds.map((id) => {
@@ -504,11 +528,11 @@ export default function Exams() {
                             <div>
                               <p className="mb-1 small fw-semibold">{item.name}</p>
                               <small className="text-muted">
-                                Score: {score}/10
+                                {t('common.scoreValue', { score })}
                               </small>
                             </div>
                             <Badge bg={complete ? 'success' : 'warning'}>
-                              {complete ? 'Complete' : 'Pending'}
+                              {complete ? t('status.complete') : t('status.pending')}
                             </Badge>
                           </ListGroup.Item>
                         );
@@ -523,22 +547,22 @@ export default function Exams() {
                 variant="info"
                 className="border-0 bg-info bg-opacity-10 mb-4 small"
               >
-                <p className="fw-semibold mb-1">How to rate exams:</p>
+                <p className="fw-semibold mb-1">{t('exams.howToRateTitle')}</p>
                 <ul className="mb-0 ps-3">
                   <li>
-                    <strong>Accuracy:</strong> Appropriateness for diagnosis.
+                    <strong>{t('ratings.accuracy')}:</strong> {t('exams.howToRate.accuracy')}
                   </li>
                   <li>
-                    <strong>Relevance:</strong> Relevance to clinical question.
+                    <strong>{t('ratings.relevance')}:</strong> {t('exams.howToRate.relevance')}
                   </li>
                   <li>
-                    <strong>Usefulness:</strong> Impact on management.
+                    <strong>{t('ratings.usefulness')}:</strong> {t('exams.howToRate.usefulness')}
                   </li>
                   <li>
-                    <strong>Coherence:</strong> Fit with patient context.
+                    <strong>{t('ratings.coherence')}:</strong> {t('exams.howToRate.coherence')}
                   </li>
                   <li>
-                    <strong>Safety:</strong> Risk profile of the test.
+                    <strong>{t('ratings.safety')}:</strong> {t('exams.howToRate.safety')}
                   </li>
                 </ul>
               </Alert>
@@ -551,7 +575,7 @@ export default function Exams() {
                   size="sm"
                   disabled={isSubmitting}
                 >
-                  ← Back to Diagnosis
+                  ← {t('exams.backToDiagnosis')}
                 </Button>
 
                 <Button
@@ -569,11 +593,11 @@ export default function Exams() {
                   {isSubmitting ? (
                     <>
                       <Spinner animation="border" size="sm" />
-                      <span>Processing…</span>
+                      <span>{t('common.processing')}</span>
                     </>
                   ) : (
                     <>
-                      <span>Next: Confirmation</span>
+                      <span>{t('actions.nextTo', { step: t('steps.confirmation') })}</span>
                       <span>→</span>
                     </>
                   )}
@@ -585,7 +609,7 @@ export default function Exams() {
 
         <div className="text-center mt-3">
           <small className="text-muted">
-            Your exam selections help optimize AI recommendations.
+            {t('exams.footer')}
           </small>
         </div>
       </Container>

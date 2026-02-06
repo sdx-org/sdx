@@ -43,10 +43,10 @@ export default function Lifestyle() {
 
   const getSleepQuality = () => {
     const sleep = parseFloat(watchSleep);
-    if (sleep < 5) return { label: 'Poor', color: 'danger' };
-    if (sleep < 7) return { label: 'Fair', color: 'warning' };
-    if (sleep <= 9) return { label: 'Good', color: 'success' };
-    return { label: 'Excessive', color: 'warning' };
+    if (sleep < 5) return { label: t('lifestyle.sleepQuality.poor'), color: 'danger' };
+    if (sleep < 7) return { label: t('lifestyle.sleepQuality.fair'), color: 'warning' };
+    if (sleep <= 9) return { label: t('lifestyle.sleepQuality.good'), color: 'success' };
+    return { label: t('lifestyle.sleepQuality.excessive'), color: 'warning' };
   };
 
   const allFieldsFilled = watchDiet && watchSleep && watchExercise && watchMental;
@@ -56,7 +56,7 @@ export default function Lifestyle() {
 
       // Validate patient ID exists
       if (!state.patientId) {
-        throw new Error('Patient ID not found. Please start over.');
+        throw new Error(t('errors.patientIdMissing'));
       }
 
       // Update local state
@@ -84,7 +84,7 @@ export default function Lifestyle() {
       navigate('/symptoms');
     } catch (err) {
       console.error('Error saving lifestyle data:', err);
-      setApiError(err.message || 'Failed to save lifestyle data. Please try again.');
+      setApiError(err.message || t('errors.saveLifestyleFailed'));
       window.scrollTo(0, 0);
     }
   };
@@ -96,8 +96,12 @@ export default function Lifestyle() {
         {/* Progress Section */}
         <div className="mb-4">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <small className="text-muted fw-semibold">Step 2 of 10</small>
-            <small className="text-muted">20% Complete</small>
+            <small className="text-muted fw-semibold">
+              {t('steps.ofTen', { step: 2 })}
+            </small>
+            <small className="text-muted">
+              {t('steps.percentComplete', { percent: 20 })}
+            </small>
           </div>
           <ProgressBar now={20} style={{ height: '8px' }} className="mb-3" />
         </div>
@@ -110,7 +114,7 @@ export default function Lifestyle() {
             onClose={() => setApiError(null)}
             className="mb-4"
           >
-            <Alert.Heading>Error</Alert.Heading>
+            <Alert.Heading>{t('errors.title')}</Alert.Heading>
             <p className="mb-0">{apiError}</p>
           </Alert>
         )}
@@ -124,7 +128,7 @@ export default function Lifestyle() {
                 🏃 {t('lifestyle.title')}
               </h1>
               <p className="text-muted lead mb-0">
-                Tell us about your daily habits and routines
+                {t('lifestyle.subtitle')}
               </p>
             </div>
 
@@ -135,16 +139,16 @@ export default function Lifestyle() {
                 <Col md={6}>
                   <Form.Group>
                     <Form.Label className="fw-semibold mb-2">
-                      Diet Type <span className="text-danger">*</span>
+                      {t('lifestyle.dietLabel')} <span className="text-danger">*</span>
                     </Form.Label>
                     <Form.Control
-                      placeholder="e.g., Balanced, Keto, Vegetarian, Vegan"
+                      placeholder={t('lifestyle.dietPlaceholder')}
                       className={`py-3 ${errors.diet ? 'is-invalid' : ''}`}
                       {...register('diet', {
-                        required: 'Diet type is required',
+                        required: t('validation.dietRequired'),
                         minLength: {
                           value: 3,
-                          message: 'Please describe your diet pattern',
+                          message: t('validation.dietMin'),
                         },
                       })}
                     />
@@ -164,32 +168,32 @@ export default function Lifestyle() {
                 <Col md={6}>
                   <Form.Group>
                     <Form.Label className="fw-semibold mb-2">
-                      Sleep Hours/Night <span className="text-danger">*</span>
+                      {t('lifestyle.sleepLabel')} <span className="text-danger">*</span>
                     </Form.Label>
                     <div className="input-group">
                       <Form.Control
                         type="number"
                         step="0.5"
-                        placeholder="e.g., 7.5"
+                        placeholder={t('lifestyle.sleepPlaceholder')}
                         className={`py-3 ${errors.sleep_hours ? 'is-invalid' : ''}`}
                         {...register('sleep_hours', {
-                          required: 'Sleep duration is required',
+                          required: t('validation.sleepRequired'),
                           min: {
                             value: 1,
-                            message: 'Sleep must be at least 1 hour',
+                            message: t('validation.sleepMin'),
                           },
                           max: {
                             value: 24,
-                            message: 'Sleep cannot exceed 24 hours',
+                            message: t('validation.sleepMax'),
                           },
                           pattern: {
                             value: /^[0-9]+\.?[0-9]*$/,
-                            message: 'Sleep must be a valid number',
+                            message: t('validation.sleepNumber'),
                           },
                         })}
                       />
                       <span className="input-group-text bg-light fw-semibold">
-                        hrs
+                        {t('lifestyle.sleepUnit')}
                       </span>
                     </div>
                     {errors.sleep_hours && (
@@ -199,7 +203,9 @@ export default function Lifestyle() {
                     )}
                     {watchSleep && !errors.sleep_hours && sleepQuality && (
                       <div className="mt-2 d-flex align-items-center gap-2">
-                        <small className="text-success">✓ {watchSleep} hours</small>
+                        <small className="text-success">
+                          ✓ {t('lifestyle.sleepHoursValue', { hours: watchSleep })}
+                        </small>
                         <Badge bg={sleepQuality.color}>{sleepQuality.label}</Badge>
                       </div>
                     )}
@@ -212,16 +218,16 @@ export default function Lifestyle() {
                 <Col md={6}>
                   <Form.Group>
                     <Form.Label className="fw-semibold mb-2">
-                      Physical Activity <span className="text-danger">*</span>
+                      {t('lifestyle.exerciseLabel')} <span className="text-danger">*</span>
                     </Form.Label>
                     <Form.Control
-                      placeholder="e.g., Running 3x/week, Gym daily, Walks"
+                      placeholder={t('lifestyle.exercisePlaceholder')}
                       className={`py-3 ${errors.physical_activity ? 'is-invalid' : ''}`}
                       {...register('physical_activity', {
-                        required: 'Physical activity is required',
+                        required: t('validation.exerciseRequired'),
                         minLength: {
                           value: 3,
-                          message: 'Please describe your exercise routine',
+                          message: t('validation.exerciseMin'),
                         },
                       })}
                     />
@@ -241,16 +247,16 @@ export default function Lifestyle() {
                 <Col md={6}>
                   <Form.Group>
                     <Form.Label className="fw-semibold mb-2">
-                      Mental Exercises <span className="text-danger">*</span>
+                      {t('lifestyle.mentalLabel')} <span className="text-danger">*</span>
                     </Form.Label>
                     <Form.Control
-                      placeholder="e.g., Meditation, Reading, Yoga, Journaling"
+                      placeholder={t('lifestyle.mentalPlaceholder')}
                       className={`py-3 ${errors.mental_exercises ? 'is-invalid' : ''}`}
                       {...register('mental_exercises', {
-                        required: 'Mental activities are required',
+                        required: t('validation.mentalRequired'),
                         minLength: {
                           value: 3,
-                          message: 'Please describe your mental activities',
+                          message: t('validation.mentalMin'),
                         },
                       })}
                     />
@@ -275,8 +281,7 @@ export default function Lifestyle() {
                     ℹ️
                   </span>
                   <small>
-                    Lifestyle factors like sleep, exercise, and diet significantly impact your
-                    overall health and help us provide better assessments.
+                    {t('lifestyle.info')}
                   </small>
                 </div>
               </Alert>
@@ -289,7 +294,7 @@ export default function Lifestyle() {
                   size="lg"
                   disabled={isSubmitting}
                 >
-                  ← Back
+                  ← {t('common.back')}
                 </Button>
 
                 <Button
@@ -302,11 +307,11 @@ export default function Lifestyle() {
                   {isSubmitting ? (
                     <>
                       <Spinner animation="border" size="sm" />
-                      <span>Saving...</span>
+                      <span>{t('common.saving')}</span>
                     </>
                   ) : (
                     <>
-                      <span>Next: Symptoms</span>
+                      <span>{t('actions.nextTo', { step: t('steps.symptoms') })}</span>
                       <span>→</span>
                     </>
                   )}
@@ -319,7 +324,7 @@ export default function Lifestyle() {
         {/* Footer */}
         <div className="text-center mt-4">
           <small className="text-muted">
-            Your health information is encrypted and securely stored
+            {t('lifestyle.footer')}
           </small>
         </div>
       </Container>

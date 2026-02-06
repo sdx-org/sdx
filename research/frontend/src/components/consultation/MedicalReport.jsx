@@ -63,7 +63,7 @@ export default function MedicalReport() {
 
     // Validate file count
     if (selectedFiles.length + files.length > maxFiles) {
-      setApiError(`Maximum ${maxFiles} files allowed`);
+      setApiError(t('medicalReports.errors.maxFiles', { max: maxFiles }));
       return;
     }
 
@@ -73,7 +73,7 @@ export default function MedicalReport() {
       // Check format
       if (!acceptedFormats.includes(file.type)) {
         setApiError(
-          `Invalid file format: ${file.name}. Accepted: PDF, JPG, PNG`
+          t('medicalReports.errors.invalidFormat', { name: file.name })
         );
         continue;
       }
@@ -81,7 +81,11 @@ export default function MedicalReport() {
       // Check size
       if (file.size > maxFileSize) {
         setApiError(
-          `File too large: ${file.name} (${formatFileSize(file.size)}). Max: 10MB`
+          t('medicalReports.errors.fileTooLarge', {
+            name: file.name,
+            size: formatFileSize(file.size),
+            max: formatFileSize(maxFileSize),
+          })
         );
         continue;
       }
@@ -108,7 +112,7 @@ export default function MedicalReport() {
 
       // Validate patient ID exists
       if (!state.patientId) {
-        throw new Error('Patient ID not found. Please start over.');
+        throw new Error(t('errors.patientIdMissing'));
       }
 
       // Update local state
@@ -129,7 +133,7 @@ export default function MedicalReport() {
       navigate('/wearable-data');
     } catch (err) {
       console.error('Error skipping medical reports:', err);
-      setApiError(err.message || 'Failed to skip medical reports. Please try again.');
+      setApiError(err.message || t('errors.skipMedicalReportsFailed'));
       window.scrollTo(0, 0);
     }
   };
@@ -139,11 +143,11 @@ export default function MedicalReport() {
 
       // Validate patient ID exists
       if (!state.patientId) {
-        throw new Error('Patient ID not found. Please start over.');
+        throw new Error(t('errors.patientIdMissing'));
       }
 
       if (selectedFiles.length === 0) {
-        setApiError('Please select files or click Skip');
+        setApiError(t('medicalReports.errors.noFilesSelected'));
         return;
       }
 
@@ -175,7 +179,7 @@ export default function MedicalReport() {
       navigate('/wearable-data');
     } catch (err) {
       console.error('Error uploading medical reports:', err);
-      setApiError(err.message || 'Failed to upload medical reports. Please try again.');
+      setApiError(err.message || t('errors.uploadMedicalReportsFailed'));
       window.scrollTo(0, 0);
     }
   };
@@ -187,8 +191,12 @@ export default function MedicalReport() {
         {/* Progress Section */}
         <div className="mb-4">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <small className="text-muted fw-semibold">Step 5 of 10</small>
-            <small className="text-muted">50% Complete</small>
+            <small className="text-muted fw-semibold">
+              {t('steps.ofTen', { step: 5 })}
+            </small>
+            <small className="text-muted">
+              {t('steps.percentComplete', { percent: 50 })}
+            </small>
           </div>
           <ProgressBar now={50} style={{ height: '8px' }} className="mb-3" />
         </div>
@@ -201,7 +209,7 @@ export default function MedicalReport() {
             onClose={() => setApiError(null)}
             className="mb-4"
           >
-            <Alert.Heading>Error</Alert.Heading>
+            <Alert.Heading>{t('errors.title')}</Alert.Heading>
             <p className="mb-0">{apiError}</p>
           </Alert>
         )}
@@ -212,10 +220,10 @@ export default function MedicalReport() {
             {/* Header */}
             <div className="mb-5">
               <h1 className="display-6 fw-bold text-primary mb-2">
-                📄 Medical Reports
+                📄 {t('medicalReports.title')}
               </h1>
               <p className="text-muted lead mb-0">
-                Upload previous medical test results, reports, or documentation
+                {t('medicalReports.subtitle')}
               </p>
             </div>
 
@@ -225,7 +233,7 @@ export default function MedicalReport() {
               <div className="mb-5">
                 <Form.Group>
                   <Form.Label className="fw-semibold mb-3">
-                    Upload Medical Documents
+                    {t('medicalReports.uploadLabel')}
                   </Form.Label>
 
                   {/* Drag & Drop Area */}
@@ -259,10 +267,10 @@ export default function MedicalReport() {
                       📤
                     </div>
                     <p className="mb-2">
-                      <strong>Click to upload or drag and drop</strong>
+                      <strong>{t('medicalReports.dropTitle')}</strong>
                     </p>
                     <p className="text-muted small mb-0">
-                      Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB each)
+                      {t('medicalReports.dropSubtitle')}
                     </p>
                   </div>
 
@@ -283,14 +291,17 @@ export default function MedicalReport() {
                 <div className="mb-5">
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <p className="fw-semibold mb-0">
-                      Selected Files ({selectedFiles.length}/{maxFiles})
+                      {t('medicalReports.selectedFiles', {
+                        count: selectedFiles.length,
+                        max: maxFiles,
+                      })}
                     </p>
                     <Button
                       variant="outline-danger"
                       size="sm"
                       onClick={clearAllFiles}
                     >
-                      Clear All
+                      {t('common.clearAll')}
                     </Button>
                   </div>
 
@@ -335,13 +346,15 @@ export default function MedicalReport() {
                     💡
                   </span>
                   <div className="small">
-                    <p className="mb-2 fw-semibold">Helpful information:</p>
+                    <p className="mb-2 fw-semibold">
+                      {t('medicalReports.helpfulTitle')}
+                    </p>
                     <ul className="mb-0 ps-3">
-                      <li>Blood tests, X-rays, MRI, ultrasound reports</li>
-                      <li>Previous consultation summaries</li>
-                      <li>Lab test results with dates</li>
-                      <li>Any specialist recommendations</li>
-                      <li>Hospital discharge summaries</li>
+                      {t('medicalReports.helpfulList', { returnObjects: true }).map(
+                        (item, idx) => (
+                          <li key={idx}>{item}</li>
+                        )
+                      )}
                     </ul>
                   </div>
                 </div>
@@ -353,21 +366,26 @@ export default function MedicalReport() {
                   <Row className="g-3">
                     <Col md={6}>
                       <p className="text-muted small mb-2">
-                        <strong>✅ Accepted Formats</strong>
+                        <strong>{t('medicalReports.guidelinesFormatsTitle')}</strong>
                       </p>
                       <ul className="text-muted small mb-0 ps-3">
-                        <li>PDF Documents</li>
-                        <li>Images (JPG, PNG)</li>
+                        {t('medicalReports.guidelinesFormatsList', { returnObjects: true }).map(
+                          (item, idx) => (
+                            <li key={idx}>{item}</li>
+                          )
+                        )}
                       </ul>
                     </Col>
                     <Col md={6}>
                       <p className="text-muted small mb-2">
-                        <strong>📋 Guidelines</strong>
+                        <strong>{t('medicalReports.guidelinesRulesTitle')}</strong>
                       </p>
                       <ul className="text-muted small mb-0 ps-3">
-                        <li>Maximum 5 files</li>
-                        <li>Max 20MB per file</li>
-                        <li>Clear, readable scans</li>
+                        {t('medicalReports.guidelinesRulesList', { returnObjects: true }).map(
+                          (item, idx) => (
+                            <li key={idx}>{item}</li>
+                          )
+                        )}
                       </ul>
                     </Col>
                   </Row>
@@ -381,8 +399,7 @@ export default function MedicalReport() {
                     🔒
                   </span>
                   <small>
-                    Your medical documents are encrypted and securely stored. Only
-                    authorized medical professionals can access them.
+                    {t('medicalReports.privacyText')}
                   </small>
                 </div>
               </Alert>
@@ -395,7 +412,7 @@ export default function MedicalReport() {
                   size="lg"
                   disabled={isSubmitting}
                 >
-                  ← Back
+                  ← {t('common.back')}
                 </Button>
 
                 <div className="d-flex gap-2">
@@ -406,7 +423,7 @@ export default function MedicalReport() {
                     disabled={isSubmitting}
                     className="d-flex align-items-center gap-2"
                   >
-                    <span>Skip</span>
+                    <span>{t('common.skip')}</span>
                   </Button>
 
                   <Button
@@ -419,11 +436,11 @@ export default function MedicalReport() {
                     {isSubmitting ? (
                       <>
                         <Spinner animation="border" size="sm" />
-                        <span>Uploading...</span>
+                        <span>{t('common.uploading')}</span>
                       </>
                     ) : (
                       <>
-                        <span>Upload & Continue</span>
+                        <span>{t('common.uploadContinue')}</span>
                         <span>→</span>
                       </>
                     )}
@@ -437,7 +454,7 @@ export default function MedicalReport() {
         {/* Footer */}
         <div className="text-center mt-4">
           <small className="text-muted">
-            Medical reports help us provide better diagnostic recommendations
+            {t('medicalReports.footer')}
           </small>
         </div>
       </Container>

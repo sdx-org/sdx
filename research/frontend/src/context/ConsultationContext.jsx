@@ -8,6 +8,19 @@ const ConsultationContext = createContext(initialState);
 const getStorageKey= (patientId)=>
   patientId?`consultationState_${patientId}`:'consultationState_temp';
 
+const mergeWithInitialState = (initial, saved) => {
+  if (!saved || typeof saved !== 'object') {
+    return initial;
+  }
+  return {
+    ...initial,
+    ...saved,
+    formData: {
+      ...initial.formData,
+      ...(saved.formData || {}),
+    },
+  };
+};
 
 //Provider Component
 export function ConsultationProvider({ children }) {
@@ -21,9 +34,12 @@ export function ConsultationProvider({ children }) {
           const parsed=JSON.parse(tempSaved);
           if(parsed.patientId){
             const patientSaved=localStorage.getItem(getStorageKey(parsed.patientId));
-            return patientSaved? JSON.parse(patientSaved):parsed;
+            return mergeWithInitialState(
+              initial,
+              patientSaved ? JSON.parse(patientSaved) : parsed
+            );
         }
-        return parsed;
+        return mergeWithInitialState(initial, parsed);
       }
       return initial;
       } catch (e) {

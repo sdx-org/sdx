@@ -19,7 +19,7 @@ import { useConsultation, consultationActions } from '../../context/Consultation
 export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { dispatch } = useConsultation();
+  const { state, dispatch } = useConsultation();
   const [patients, setPatients] = useState([]);
   const [stats, setStats] = useState({
     total_patients: 0,
@@ -66,7 +66,7 @@ export default function Dashboard() {
       });
     } catch (err) {
       console.error('Error loading dashboard data:', err);
-      setError(err.message || 'Failed to load dashboard data');
+      setError(err.message || t('errors.loadDashboardFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +110,7 @@ export default function Dashboard() {
     try{
       const consultationData=await consultationAPI.getConsultationStatus(patientId);
       if(!consultationData){
-        alert('No consultation data found for this patient.');
+        alert(t('errors.noConsultationData'));
         return;
       }
       const currentStep=consultationData.current_step || 'demographics';
@@ -149,14 +149,16 @@ export default function Dashboard() {
         navigate(`/${currentStep}`);
     }catch(err){
       console.error('Error resuming patient consultation:',err);
-      alert(`Failed to resume consultation: ${err.message}`);
+      alert(t('errors.resumeFailed', { message: err.message }));
     }
   };
 
   const handleDeletePatient = async (patientId, patientName) => {
     if (
       !window.confirm(
-        `Delete patient "${patientName || patientId}"? This action cannot be undone.`
+        t('dashboard.confirmDelete', {
+          name: patientName || patientId,
+        })
       )
     ) {
       return;
@@ -165,6 +167,13 @@ export default function Dashboard() {
     try {
       await consultationAPI.deletePatient(patientId);
 
+      // Remove any persisted consultation state for this patient
+      localStorage.removeItem(`consultationState_${patientId}`);
+      if (state?.patientId === patientId) {
+        dispatch(consultationActions.resetState());
+        localStorage.removeItem('consultationState_temp');
+      }
+
       // Remove from local list
       setPatients((prev) => prev.filter((p) => p.patient_id !== patientId));
 
@@ -172,7 +181,7 @@ export default function Dashboard() {
       await loadDashboardData();
     } catch (err) {
       console.error('Error deleting patient:', err);
-      alert(`Failed to delete patient: ${err.message}`);
+      alert(t('errors.deleteFailed', { message: err.message }));
     }
   };
 
@@ -189,11 +198,11 @@ export default function Dashboard() {
         {/* Header */}
         <div className="mb-4 d-flex justify-content-between align-items-center">
           <div>
-            <h1 className="display-6 fw-bold text-primary mb-2">
+            <h1 className="h3 fw-bold text-primary mb-2">
               {t('dashboard.title')}
             </h1>
             <p className="text-muted lead mb-0">
-              Manage and track patient records efficiently
+              {t('dashboard.subtitle')}
             </p>
           </div>
 
@@ -204,14 +213,14 @@ export default function Dashboard() {
             className="d-flex align-items-center gap-2"
           >
             <span style={{ fontSize: '1.2rem' }}>➕</span>
-            <span>Add Patient</span>
+            <span>{t('dashboard.addPatient')}</span>
           </Button>
         </div>
 
         {/* Error Alert */}
         {error && (
           <Alert variant="danger" dismissible onClose={() => setError(null)}>
-            <Alert.Heading>Error</Alert.Heading>
+            <Alert.Heading>{t('errors.title')}</Alert.Heading>
             <p>{error}</p>
           </Alert>
         )}
@@ -234,7 +243,9 @@ export default function Dashboard() {
                         stats.total_patients
                       )}
                     </h3>
-                    <p className="text-muted mb-0 small">Total Patients</p>
+                    <p className="text-muted mb-0 small">
+                      {t('dashboard.stats.totalPatients')}
+                    </p>
                   </div>
                 </div>
               </Card.Body>
@@ -257,7 +268,9 @@ export default function Dashboard() {
                         stats.active_records
                       )}
                     </h3>
-                    <p className="text-muted mb-0 small">Active Records</p>
+                    <p className="text-muted mb-0 small">
+                      {t('dashboard.stats.activeRecords')}
+                    </p>
                   </div>
                 </div>
               </Card.Body>
@@ -280,7 +293,9 @@ export default function Dashboard() {
                         stats.this_month
                       )}
                     </h3>
-                    <p className="text-muted mb-0 small">This Month</p>
+                    <p className="text-muted mb-0 small">
+                      {t('dashboard.stats.thisMonth')}
+                    </p>
                   </div>
                 </div>
               </Card.Body>
@@ -293,9 +308,11 @@ export default function Dashboard() {
           <Card className="border-0 shadow-sm">
             <Card.Body className="p-5 text-center">
               <Spinner animation="border" role="status">
-                <span className="visually-hidden">Loading...</span>
+                <span className="visually-hidden">{t('common.loading')}</span>
               </Spinner>
-              <p className="text-muted mt-3">Loading patients...</p>
+              <p className="text-muted mt-3">
+                {t('dashboard.loadingPatients')}
+              </p>
             </Card.Body>
           </Card>
         ) : !hasPatients ? (
@@ -305,7 +322,7 @@ export default function Dashboard() {
                 {t('dashboard.noRecords')}
               </h5>
               <p className="text-muted mb-4">
-                Get started by adding your first patient record
+                {t('dashboard.getStarted')}
               </p>
               <Button
                 onClick={handleAddPatient}
@@ -314,7 +331,7 @@ export default function Dashboard() {
                 className="px-4"
               >
                 <span className="me-2">➕</span>
-                Add New Patient
+                {t('dashboard.addNewPatient')}
               </Button>
             </Card.Body>
           </Card>
@@ -322,19 +339,19 @@ export default function Dashboard() {
           <Card className="border-0 shadow-sm">
             <Card.Body className="p-4">
               <h5 className="mb-4 fw-semibold">
-                Recent Patients ({patients.length})
+                {t('dashboard.recentPatients', { count: patients.length })}
               </h5>
 
               <div className="table-responsive">
                 <Table hover className="align-middle">
                   <thead>
                     <tr>
-                      <th>#</th>
-                      <th>Patient ID</th>
-                      <th>Language</th>
-                      <th>Status</th>
-                      <th>Created</th>
-                      <th>Action</th>
+                      <th>{t('dashboard.table.index')}</th>
+                      <th>{t('dashboard.table.patientId')}</th>
+                      <th>{t('dashboard.table.language')}</th>
+                      <th>{t('dashboard.table.status')}</th>
+                      <th>{t('dashboard.table.created')}</th>
+                      <th>{t('dashboard.table.action')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -346,7 +363,7 @@ export default function Dashboard() {
                             {patient.patient_id}
                           </code>
                         </td>
-                        <td>{patient.lang || 'N/A'}</td>
+                        <td>{patient.lang || t('common.na')}</td>
                         <td>
                           <Badge
                             bg={
@@ -356,14 +373,14 @@ export default function Dashboard() {
                             }
                           >
                             {patient.is_complete === true
-                              ? '✓ Complete'
-                              : '⏳ In Progress'}
+                              ? t('status.complete')
+                              : t('status.inProgress')}
                           </Badge>
                         </td>
                         <td className="small">
                           {patient.created_at
                             ? new Date(patient.created_at).toLocaleDateString()
-                            : 'N/A'}
+                            : t('common.na')}
                         </td>
                         <td>
                           <div className="d-flex gap-2">
@@ -375,7 +392,7 @@ export default function Dashboard() {
                                   handleViewPatient(patient.patient_id)
                                 }
                               >
-                                View
+                                {t('dashboard.actions.view')}
                               </Button>
                             ) : (
                               <Button
@@ -385,7 +402,7 @@ export default function Dashboard() {
                                   handleResumePatient(patient.patient_id)
                                 }
                               >
-                                Resume
+                                {t('dashboard.actions.resume')}
                               </Button>
                             )}
                             <Button
@@ -397,8 +414,8 @@ export default function Dashboard() {
                                   patient.patient_id
                                 )
                               }
-                            >
-                              Delete
+                              >
+                              {t('dashboard.actions.delete')}
                             </Button>
                           </div>
                         </td>
@@ -411,9 +428,9 @@ export default function Dashboard() {
               {/* Pagination */}
               {pageCount > 1 && (
                 <ReactPaginate
-                  breakLabel="..."
-                  nextLabel="›"
-                  previousLabel="‹"
+                  breakLabel={t('pagination.break')}
+                  nextLabel={t('pagination.next')}
+                  previousLabel={t('pagination.prev')}
                   onPageChange={handlePageClick}
                   pageRangeDisplayed={3}
                   pageCount={pageCount}

@@ -37,24 +37,14 @@ export default function Symptoms() {
   const getCharacterCount = () => watchSymptoms?.length || 0;
 
   const getSeverityHint = (length) => {
-    if (length < 10) return { status: 'Too short', color: 'danger' };
-    if (length < 50) return { status: 'Brief', color: 'warning' };
-    if (length < 150) return { status: 'Good', color: 'info' };
-    return { status: 'Detailed', color: 'success' };
+    if (length < 10) return { status: t('symptoms.severity.tooShort'), color: 'danger' };
+    if (length < 50) return { status: t('symptoms.severity.brief'), color: 'warning' };
+    if (length < 150) return { status: t('symptoms.severity.good'), color: 'info' };
+    return { status: t('symptoms.severity.detailed'), color: 'success' };
   };
 
-  const commonSymptoms = [
-    '🤕 Headache / Migraine',
-    '🤒 Fever / Chills',
-    '🫁 Cough / Breathing issues',
-    '🤢 Nausea / Vomiting',
-    '🫘 Chest pain / Discomfort',
-    '😴 Fatigue / Weakness',
-    '🦴 Joint / Muscle pain',
-    '🧠 Dizziness / Vertigo',
-    '👁️ Vision problems',
-    '💪 Weakness',
-  ];
+  const commonSymptoms = t('symptoms.commonList', { returnObjects: true });
+  const tips = t('symptoms.tips', { returnObjects: true });
 
   const isFormComplete = watchSymptoms && watchSymptoms.length >= 10;
   const charCount = getCharacterCount();
@@ -65,7 +55,7 @@ export default function Symptoms() {
 
       // Validate patient ID exists
       if (!state.patientId) {
-        throw new Error('Patient ID not found. Please start over.');
+        throw new Error(t('errors.patientIdMissing'));
       }
 
       // Update local state
@@ -87,7 +77,7 @@ export default function Symptoms() {
       navigate('/mental');
     } catch (err) {
       console.error('Error saving symptoms data:', err);
-      setApiError(err.message || 'Failed to save symptoms. Please try again.');
+      setApiError(err.message || t('errors.saveSymptomsFailed'));
       window.scrollTo(0, 0);
     }
   };
@@ -98,8 +88,12 @@ export default function Symptoms() {
         {/* Progress Section */}
         <div className="mb-4">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <small className="text-muted fw-semibold">Step 3 of 10</small>
-            <small className="text-muted">30% Complete</small>
+            <small className="text-muted fw-semibold">
+              {t('steps.ofTen', { step: 3 })}
+            </small>
+            <small className="text-muted">
+              {t('steps.percentComplete', { percent: 30 })}
+            </small>
           </div>
           <ProgressBar now={30} style={{ height: '8px' }} className="mb-3" />
         </div>
@@ -112,7 +106,7 @@ export default function Symptoms() {
             onClose={() => setApiError(null)}
             className="mb-4"
           >
-            <Alert.Heading>Error</Alert.Heading>
+            <Alert.Heading>{t('errors.title')}</Alert.Heading>
             <p className="mb-0">{apiError}</p>
           </Alert>
         )}
@@ -123,10 +117,10 @@ export default function Symptoms() {
             {/* Header */}
             <div className="mb-5">
               <h1 className="display-6 fw-bold text-primary mb-2">
-                🤒 Symptoms & Concerns
+                🤒 {t('symptoms.title')}
               </h1>
               <p className="text-muted lead mb-0">
-                Describe any current symptoms or health concerns you're experiencing
+                {t('symptoms.subtitle')}
               </p>
             </div>
 
@@ -135,7 +129,7 @@ export default function Symptoms() {
               {/* Common Symptoms Reference */}
               <div className="mb-5">
                 <p className="text-muted fw-semibold mb-3">
-                  Common symptoms (for reference):
+                  {t('symptoms.commonTitle')}
                 </p>
                 <div className="d-flex flex-wrap gap-2 mb-4">
                   {commonSymptoms.map((symptom, idx) => (
@@ -153,25 +147,19 @@ export default function Symptoms() {
               {/* Symptoms Textarea */}
               <Form.Group className="mb-4">
                 <Form.Label className="fw-semibold mb-2">
-                  Describe Your Symptoms <span className="text-danger">*</span>
+                  {t('symptoms.describeLabel')} <span className="text-danger">*</span>
                 </Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={6}
-                  placeholder="Be specific about:
-• What symptoms you're experiencing
-• When they started
-• How often they occur
-• Severity (mild/moderate/severe)
-• What triggers or relieves them
-• Any related activities or conditions"
+                  placeholder={t('symptoms.placeholder')}
                   className={`${errors.symptoms ? 'is-invalid' : ''}`}
                   style={{ resize: 'vertical' }}
                   {...register('symptoms', {
-                    required: 'Please describe your symptoms',
+                    required: t('validation.symptomsRequired'),
                     minLength: {
                       value: 10,
-                      message: 'Please provide more details (minimum 10 characters)',
+                      message: t('validation.minDetails'),
                     },
                   })}
                 />
@@ -184,7 +172,7 @@ export default function Symptoms() {
                 {/* Character Count & Status */}
                 <div className="mt-3 d-flex justify-content-between align-items-center">
                   <small className="text-muted">
-                    {charCount} characters entered
+                    {t('common.charactersEntered', { count: charCount })}
                   </small>
                   {watchSymptoms && (
                     <span
@@ -204,13 +192,10 @@ export default function Symptoms() {
               <Card className="bg-light border-0 mb-4">
                 <Card.Body className="p-3">
                   <p className="text-muted small mb-2">
-                    <strong>📝 Example of detailed symptom description:</strong>
+                    <strong>📝 {t('symptoms.exampleTitle')}</strong>
                   </p>
                   <p className="text-muted small mb-0" style={{ fontSize: '0.9rem' }}>
-                    "Recurring headaches for 2 weeks, mostly in afternoon, moderate
-                    severity. Triggered by stress and long screen time. Pain is located
-                    in temples and forehead. Relieved by rest and paracetamol. No
-                    associated fever or nausea."
+                    {t('symptoms.exampleText')}
                   </p>
                 </Card.Body>
               </Card>
@@ -222,12 +207,12 @@ export default function Symptoms() {
                     💡
                   </span>
                   <div className="small">
-                    <p className="mb-2 fw-semibold">Tips for describing symptoms:</p>
+                    <p className="mb-2 fw-semibold">
+                      {t('symptoms.tipsTitle')}
+                    </p>
                     <ul className="mb-0 ps-3">
-                      <li>Be as specific as possible about location and timing</li>
-                      <li>Include severity and impact on daily activities</li>
-                      <li>Mention any known triggers or relief measures</li>
-                      <li>Note any other related symptoms</li>
+                      {Array.isArray(tips) &&
+                        tips.map((tip, idx) => <li key={idx}>{tip}</li>)}
                     </ul>
                   </div>
                 </div>
@@ -240,10 +225,8 @@ export default function Symptoms() {
                     ⚠️
                   </span>
                   <small>
-                    <strong>Emergency:</strong> If you experience severe chest pain,
-                    difficulty breathing, loss of consciousness, or other life-threatening
-                    symptoms, please contact emergency services or visit the nearest hospital
-                    immediately.
+                    <strong>{t('symptoms.emergencyTitle')}:</strong>{' '}
+                    {t('symptoms.emergencyText')}
                   </small>
                 </div>
               </Alert>
@@ -256,7 +239,7 @@ export default function Symptoms() {
                   size="lg"
                   disabled={isSubmitting}
                 >
-                  ← Back
+                  ← {t('common.back')}
                 </Button>
 
                 <Button
@@ -269,11 +252,11 @@ export default function Symptoms() {
                   {isSubmitting ? (
                     <>
                       <Spinner animation="border" size="sm" />
-                      <span>Saving...</span>
+                      <span>{t('common.saving')}</span>
                     </>
                   ) : (
                     <>
-                      <span>Next: Mental Health</span>
+                      <span>{t('actions.nextTo', { step: t('steps.mentalHealth') })}</span>
                       <span>→</span>
                     </>
                   )}
@@ -286,7 +269,7 @@ export default function Symptoms() {
         {/* Footer */}
         <div className="text-center mt-4">
           <small className="text-muted">
-            Your symptom information is completely confidential and encrypted
+            {t('symptoms.footer')}
           </small>
         </div>
       </Container>

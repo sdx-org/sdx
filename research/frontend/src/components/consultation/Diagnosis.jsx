@@ -14,12 +14,14 @@ import {
   InputGroup,
 } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConsultation, consultationActions } from '../../context/ConsultationContext';
 import consultationAPI from '../../services/api';
 
 
 export default function Diagnosis() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { state, dispatch } = useConsultation();
 
   const {
@@ -36,6 +38,13 @@ export default function Diagnosis() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [evaluations, setEvaluations] = useState({});
   const [manualText, setManualText] = useState('');
+  const ratingFields = ['accuracy', 'relevance', 'usefulness', 'coherence'];
+  const ratingLabels = {
+    accuracy: t('ratings.accuracy'),
+    relevance: t('ratings.relevance'),
+    usefulness: t('ratings.usefulness'),
+    coherence: t('ratings.coherence'),
+  };
 
   useEffect(() => {
     const hasExistingData=
@@ -78,7 +87,7 @@ export default function Diagnosis() {
       setIsLoadingSuggestions(true);
       setApiError(null);
       if (!state.patientId) {
-        throw new Error('Patient ID not found. Please start over.');
+        throw new Error(t('errors.patientIdMissing'));
       }
       const response = await consultationAPI.getDiagnosisSuggestions(state.patientId);
       const options = response.options || [];
@@ -107,7 +116,7 @@ export default function Diagnosis() {
       );
     } catch (err) {
       console.error('Error fetching diagnosis suggestions:', err);
-      setApiError(err.message || 'Failed to load diagnosis suggestions. Please try again.');
+      setApiError(err.message || t('errors.loadDiagnosisFailed'));
     } finally {
       setIsLoadingSuggestions(false);
     }
@@ -212,11 +221,11 @@ export default function Diagnosis() {
       setApiError(null);
 
       if (!state.patientId) {
-        throw new Error('Patient ID not found. Please start over.');
+        throw new Error(t('errors.patientIdMissing'));
       }
 
       if (selectedIds.length === 0) {
-        setApiError('Please select at least one diagnosis.');
+        setApiError(t('diagnosis.errors.selectAtLeastOne'));
         return;
       }
 
@@ -225,7 +234,9 @@ export default function Diagnosis() {
         const names = diagnosisItems
           .filter((item) => incomplete.includes(item.id))
           .map((item) => item.name);
-        setApiError(`Please complete ratings for: ${names.join(', ')}`);
+        setApiError(
+          t('diagnosis.errors.completeRatings', { names: names.join(', ') })
+        );
         return;
       }
 
@@ -254,7 +265,7 @@ export default function Diagnosis() {
       navigate('/exams');
     } catch (err) {
       console.error('Error saving diagnosis selections:', err);
-      setApiError(err.message || 'Failed to save selections. Please try again.');
+      setApiError(err.message || t('errors.saveDiagnosisFailed'));
       window.scrollTo(0, 0);
     }
   };
@@ -267,8 +278,12 @@ export default function Diagnosis() {
         {/* Progress */}
         <div className="mb-4">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <small className="text-muted fw-semibold">Step 7 of 10</small>
-            <small className="text-muted">70% complete</small>
+            <small className="text-muted fw-semibold">
+              {t('steps.ofTen', { step: 7 })}
+            </small>
+            <small className="text-muted">
+              {t('steps.percentComplete', { percent: 70 })}
+            </small>
           </div>
           <ProgressBar now={70} style={{ height: '8px' }} />
         </div>
@@ -281,7 +296,9 @@ export default function Diagnosis() {
             onClose={() => setApiError(null)}
             className="mb-3"
           >
-            <Alert.Heading className="h6 mb-2">Error</Alert.Heading>
+            <Alert.Heading className="h6 mb-2">
+              {t('errors.title')}
+            </Alert.Heading>
             <p className="mb-0 small">{apiError}</p>
           </Alert>
         )}
@@ -292,7 +309,7 @@ export default function Diagnosis() {
             <Card.Body className="p-5 text-center">
               <Spinner animation="border" variant="primary" className="mb-3" />
               <p className="text-muted mb-0">
-                Analyzing patient data and generating differential diagnoses…
+                {t('diagnosis.loading')}
               </p>
             </Card.Body>
           </Card>
@@ -302,11 +319,10 @@ export default function Diagnosis() {
               {/* Header */}
               <div className="mb-4">
                 <h1 className="h3 fw-bold text-primary mb-1">
-                  AI Differential Diagnosis
+                  {t('diagnosis.title')}
                 </h1>
                 <p className="text-muted mb-0 small">
-                  Select diagnoses, expand each one to add ratings and comments, and
-                  optionally add your own diagnoses.
+                  {t('diagnosis.subtitle')}
                 </p>
               </div>
 
@@ -315,7 +331,7 @@ export default function Diagnosis() {
                 <Card className="bg-light border-0 mb-4">
                   <Card.Body className="p-3">
                     <p className="small mb-1 fw-semibold text-muted">
-                      AI analysis summary
+                      {t('diagnosis.aiSummaryTitle')}
                     </p>
                     <p className="small mb-0 text-muted">{aiSummary}</p>
                   </Card.Body>
@@ -324,10 +340,12 @@ export default function Diagnosis() {
 
               {/* Add manual diagnosis */}
               <div className="mb-4">
-                <p className="small fw-semibold mb-2">Add manual diagnosis</p>
+                <p className="small fw-semibold mb-2">
+                  {t('diagnosis.addManualTitle')}
+                </p>
                 <InputGroup>
                   <Form.Control
-                    placeholder="Type a custom diagnosis and click Add"
+                    placeholder={t('diagnosis.addManualPlaceholder')}
                     value={manualText}
                     onChange={(e) => setManualText(e.target.value)}
                     size="sm"
@@ -337,7 +355,7 @@ export default function Diagnosis() {
                     size="sm"
                     onClick={handleAddManualDiagnosis}
                   >
-                    + Add
+                    + {t('common.add')}
                   </Button>
                 </InputGroup>
               </div>
@@ -346,14 +364,13 @@ export default function Diagnosis() {
               {diagnosisItems.length === 0 ? (
                 <Alert variant="info" className="border-0">
                   <p className="small mb-0">
-                    No diagnosis suggestions available. Please ensure previous steps
-                    are completed.
+                    {t('diagnosis.empty')}
                   </p>
                 </Alert>
               ) : (
                 <div className="mb-4">
                   <p className="small fw-semibold mb-2">
-                    Review each suggestion. Click the row to expand and rate.
+                    {t('diagnosis.reviewHint')}
                   </p>
 
                   {diagnosisItems.map((item) => {
@@ -399,7 +416,9 @@ export default function Diagnosis() {
                                       }
                                       pill
                                     >
-                                      {item.source === 'ai' ? 'AI' : 'Manual'}
+                                      {item.source === 'ai'
+                                        ? t('diagnosis.sourceAi')
+                                        : t('diagnosis.sourceManual')}
                                     </Badge>
                                   </div>
                                   {item.description && (
@@ -412,7 +431,7 @@ export default function Diagnosis() {
                                 <div className="text-end">
                                   {average > 0 && (
                                     <div className="small text-muted">
-                                      Avg: <strong>{average}/10</strong>
+                                      {t('common.avg')}: <strong>{average}/10</strong>
                                     </div>
                                   )}
                                   {isSelected && (
@@ -420,7 +439,7 @@ export default function Diagnosis() {
                                       bg={complete ? 'success' : 'warning'}
                                       className="mt-1"
                                     >
-                                      {complete ? 'Complete' : 'Pending'}
+                                      {complete ? t('status.complete') : t('status.pending')}
                                     </Badge>
                                   )}
                                 </div>
@@ -432,16 +451,16 @@ export default function Diagnosis() {
                           <Collapse in={item.expanded}>
                             <div className="mt-3 border-top pt-3">
                               <p className="small fw-semibold mb-2">
-                                Rate this diagnosis (1–10)
+                                {t('diagnosis.rateTitle')}
                               </p>
 
                               {/* Ratings grid */}
                               <div className="row g-2 mb-3">
-                                {['accuracy', 'relevance', 'usefulness', 'coherence'].map(
+                                {ratingFields.map(
                                   (field) => (
                                     <div className="col-12 col-md-6" key={field}>
                                       <Form.Label className="small mb-1 text-muted text-capitalize">
-                                        {field}
+                                        {ratingLabels[field]}
                                       </Form.Label>
                                       <Form.Select
                                         size="sm"
@@ -450,7 +469,9 @@ export default function Diagnosis() {
                                           setRating(item.id, field, e.target.value)
                                         }
                                       >
-                                        <option value="">Select</option>
+                                        <option value="">
+                                          {t('common.select')}
+                                        </option>
                                         {Array.from({ length: 10 }).map((_, i) => (
                                           <option key={i + 1} value={i + 1}>
                                             {i + 1}
@@ -465,13 +486,13 @@ export default function Diagnosis() {
                               {/* Comments */}
                               <Form.Group className="mb-1">
                                 <Form.Label className="small mb-1 text-muted">
-                                  Comments (optional)
+                                  {t('common.commentsOptional')}
                                 </Form.Label>
                                 <Form.Control
                                   as="textarea"
                                   rows={2}
                                   size="sm"
-                                  placeholder="Rationale..."
+                                  placeholder={t('common.rationalePlaceholder')}
                                   value={evalForItem.comments || ''}
                                   onChange={(e) =>
                                     setComment(item.id, e.target.value)
@@ -492,7 +513,9 @@ export default function Diagnosis() {
                 <Card className="bg-light border-0 mb-4">
                   <Card.Body className="p-3">
                     <p className="small fw-semibold mb-2">
-                      Selected diagnoses ({selectedIds.length})
+                      {t('diagnosis.selectedSummary', {
+                        count: selectedIds.length,
+                      })}
                     </p>
                     <ListGroup variant="flush">
                       {selectedIds.map((id) => {
@@ -508,11 +531,11 @@ export default function Diagnosis() {
                             <div>
                               <p className="mb-1 small fw-semibold">{item.name}</p>
                               <small className="text-muted">
-                                Score: {score}/10
+                                {t('common.scoreValue', { score })}
                               </small>
                             </div>
                             <Badge bg={complete ? 'success' : 'warning'}>
-                              {complete ? 'Complete' : 'Pending'}
+                              {complete ? t('status.complete') : t('status.pending')}
                             </Badge>
                           </ListGroup.Item>
                         );
@@ -527,19 +550,19 @@ export default function Diagnosis() {
                 variant="info"
                 className="border-0 bg-info bg-opacity-10 mb-4 small"
               >
-                <p className="fw-semibold mb-1">How to rate:</p>
+                <p className="fw-semibold mb-1">{t('diagnosis.howToRateTitle')}</p>
                 <ul className="mb-0 ps-3">
                   <li>
-                    <strong>Accuracy:</strong> How well it matches the symptoms.
+                    <strong>{t('ratings.accuracy')}:</strong> {t('diagnosis.howToRate.accuracy')}
                   </li>
                   <li>
-                    <strong>Relevance:</strong> How relevant it is to the case.
+                    <strong>{t('ratings.relevance')}:</strong> {t('diagnosis.howToRate.relevance')}
                   </li>
                   <li>
-                    <strong>Usefulness:</strong> How helpful it is for management.
+                    <strong>{t('ratings.usefulness')}:</strong> {t('diagnosis.howToRate.usefulness')}
                   </li>
                   <li>
-                    <strong>Coherence:</strong> How logically it fits available data.
+                    <strong>{t('ratings.coherence')}:</strong> {t('diagnosis.howToRate.coherence')}
                   </li>
                 </ul>
               </Alert>
@@ -552,7 +575,7 @@ export default function Diagnosis() {
                   size="sm"
                   disabled={isSubmitting}
                 >
-                  ← Back
+                  ← {t('common.back')}
                 </Button>
 
                 <Button
@@ -570,11 +593,11 @@ export default function Diagnosis() {
                   {isSubmitting ? (
                     <>
                       <Spinner animation="border" size="sm" />
-                      <span>Processing…</span>
+                      <span>{t('common.processing')}</span>
                     </>
                   ) : (
                     <>
-                      <span>Next: Exams</span>
+                      <span>{t('actions.nextTo', { step: t('steps.exams') })}</span>
                       <span>→</span>
                     </>
                   )}
@@ -586,7 +609,7 @@ export default function Diagnosis() {
 
         <div className="text-center mt-3">
           <small className="text-muted">
-            Your feedback helps improve future AI diagnostic suggestions.
+            {t('diagnosis.footer')}
           </small>
         </div>
       </Container>

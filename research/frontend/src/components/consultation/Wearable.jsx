@@ -72,7 +72,7 @@ export default function Wearable() {
     // Check format
     if (!acceptedFormats.includes(file.type)) {
       setApiError(
-        `Invalid file format: ${file.name}. Accepted: CSV, JSON`
+        t('wearable.errors.invalidFormat', { name: file.name })
       );
       return;
     }
@@ -80,7 +80,11 @@ export default function Wearable() {
     // Check size
     if (file.size > maxFileSize) {
       setApiError(
-        `File too large: ${file.name} (${formatFileSize(file.size)}). Max: 50MB`
+        t('wearable.errors.fileTooLarge', {
+          name: file.name,
+          size: formatFileSize(file.size),
+          max: formatFileSize(maxFileSize),
+        })
       );
       return;
     }
@@ -98,7 +102,7 @@ export default function Wearable() {
 
       // Validate patient ID exists
       if (!state.patientId) {
-        throw new Error('Patient ID not found. Please start over.');
+        throw new Error(t('errors.patientIdMissing'));
       }
 
       // Update local state
@@ -119,7 +123,7 @@ export default function Wearable() {
       navigate('/diagnosis');
     } catch (err) {
       console.error('Error skipping wearable data:', err);
-      setApiError(err.message || 'Failed to skip wearable data. Please try again.');
+      setApiError(err.message || t('errors.skipWearableFailed'));
       window.scrollTo(0, 0);
     }
   };
@@ -130,11 +134,11 @@ export default function Wearable() {
 
       // Validate patient ID exists
       if (!state.patientId) {
-        throw new Error('Patient ID not found. Please start over.');
+        throw new Error(t('errors.patientIdMissing'));
       }
 
       if (!selectedFile) {
-        setApiError('Please select a file or click Skip');
+        setApiError(t('wearable.errors.noFileSelected'));
         return;
       }
 
@@ -164,7 +168,7 @@ export default function Wearable() {
       navigate('/diagnosis');
     } catch (err) {
       console.error('Error uploading wearable data:', err);
-      setApiError(err.message || 'Failed to upload wearable data. Please try again.');
+      setApiError(err.message || t('errors.uploadWearableFailed'));
       window.scrollTo(0, 0);
     }
   };
@@ -176,8 +180,12 @@ export default function Wearable() {
         {/* Progress Section */}
         <div className="mb-4">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <small className="text-muted fw-semibold">Step 6 of 10</small>
-            <small className="text-muted">60% Complete</small>
+            <small className="text-muted fw-semibold">
+              {t('steps.ofTen', { step: 6 })}
+            </small>
+            <small className="text-muted">
+              {t('steps.percentComplete', { percent: 60 })}
+            </small>
           </div>
           <ProgressBar now={60} style={{ height: '8px' }} className="mb-3" />
         </div>
@@ -190,7 +198,7 @@ export default function Wearable() {
             onClose={() => setApiError(null)}
             className="mb-4"
           >
-            <Alert.Heading>Error</Alert.Heading>
+            <Alert.Heading>{t('errors.title')}</Alert.Heading>
             <p className="mb-0">{apiError}</p>
           </Alert>
         )}
@@ -201,10 +209,10 @@ export default function Wearable() {
             {/* Header */}
             <div className="mb-5">
               <h1 className="display-6 fw-bold text-primary mb-2">
-                ⌚ Wearable Device Data
+                ⌚ {t('wearable.title')}
               </h1>
               <p className="text-muted lead mb-0">
-                Upload data from fitness trackers, smartwatches, or health monitoring apps
+                {t('wearable.subtitle')}
               </p>
             </div>
 
@@ -213,7 +221,7 @@ export default function Wearable() {
               {/* Supported Devices Info */}
               <div className="mb-5">
                 <p className="text-muted fw-semibold mb-3">
-                  Supported devices & sources:
+                  {t('wearable.supportedDevices')}
                 </p>
                 <Row className="g-2">
                   {[
@@ -240,7 +248,7 @@ export default function Wearable() {
               <div className="mb-5">
                 <Form.Group>
                   <Form.Label className="fw-semibold mb-3">
-                    Upload Wearable Data Export
+                    {t('wearable.uploadLabel')}
                   </Form.Label>
 
                   {/* Drag & Drop Area */}
@@ -274,10 +282,10 @@ export default function Wearable() {
                       📤
                     </div>
                     <p className="mb-2">
-                      <strong>Click to upload or drag and drop</strong>
+                      <strong>{t('wearable.dropTitle')}</strong>
                     </p>
                     <p className="text-muted small mb-0">
-                      Supported formats: CSV, JSON, PDF, XLSX, ZIP (Max 50MB)
+                      {t('wearable.dropSubtitle')}
                     </p>
                   </div>
 
@@ -295,7 +303,7 @@ export default function Wearable() {
               {/* Selected File Display */}
               {hasFile && (
                 <div className="mb-5">
-                  <p className="fw-semibold mb-3">Selected File</p>
+                  <p className="fw-semibold mb-3">{t('wearable.selectedFile')}</p>
                   <Card className="border-0 bg-light">
                     <Card.Body className="d-flex justify-content-between align-items-center p-3">
                       <div className="d-flex align-items-center gap-3">
@@ -309,13 +317,13 @@ export default function Wearable() {
                           </small>
                         </div>
                       </div>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={removeFile}
-                      >
-                        ✕
-                      </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={removeFile}
+                        >
+                          ✕
+                        </Button>
                     </Card.Body>
                   </Card>
                 </div>
@@ -328,23 +336,15 @@ export default function Wearable() {
                     💡
                   </span>
                   <div className="small">
-                    <p className="mb-2 fw-semibold">How to export data:</p>
+                    <p className="mb-2 fw-semibold">
+                      {t('wearable.exportTitle')}
+                    </p>
                     <ul className="mb-0 ps-3">
-                      <li>
-                        <strong>Apple Health:</strong> Settings → Health Data → Export
-                      </li>
-                      <li>
-                        <strong>Fitbit:</strong> Account → Download Your Data
-                      </li>
-                      <li>
-                        <strong>Google Fit:</strong> Settings → Download Your Data
-                      </li>
-                      <li>
-                        <strong>Garmin:</strong> Device → Export to CSV
-                      </li>
-                      <li>
-                        <strong>Other apps:</strong> Look for Export or Share options
-                      </li>
+                      {t('wearable.exportList', { returnObjects: true }).map(
+                        (item, idx) => (
+                          <li key={idx}>{item}</li>
+                        )
+                      )}
                     </ul>
                   </div>
                 </div>
@@ -354,16 +354,14 @@ export default function Wearable() {
               <Card className="bg-light border-0 mb-4">
                 <Card.Body className="p-3">
                   <p className="text-muted small mb-2">
-                    <strong>Helpful data to include:</strong>
+                    <strong>{t('wearable.helpfulDataTitle')}</strong>
                   </p>
                   <ul className="text-muted small mb-0 ps-3">
-                    <li>Daily steps and activity levels</li>
-                    <li>Heart rate data (resting and active)</li>
-                    <li>Sleep patterns and duration</li>
-                    <li>Calorie burn information</li>
-                    <li>Distance and workout data</li>
-                    <li>Blood oxygen and stress levels (if available)</li>
-                    <li>Any health metrics from past 1-3 months</li>
+                    {t('wearable.helpfulDataList', { returnObjects: true }).map(
+                      (item, idx) => (
+                        <li key={idx}>{item}</li>
+                      )
+                    )}
                   </ul>
                 </Card.Body>
               </Card>
@@ -374,22 +372,26 @@ export default function Wearable() {
                   <Row className="g-3">
                     <Col md={6}>
                       <p className="text-muted small mb-2">
-                        <strong>✅ Accepted Formats</strong>
+                        <strong>{t('wearable.formatsTitle')}</strong>
                       </p>
                       <ul className="text-muted small mb-0 ps-3">
-                        <li>CSV (Comma Separated)</li>
-                        <li>JSON (Data Export)</li>
+                        {t('wearable.formatsList', { returnObjects: true }).map(
+                          (item, idx) => (
+                            <li key={idx}>{item}</li>
+                          )
+                        )}
                       </ul>
                     </Col>
                     <Col md={6}>
                       <p className="text-muted small mb-2">
-                        <strong>📋 Guidelines</strong>
+                        <strong>{t('wearable.guidelinesTitle')}</strong>
                       </p>
                       <ul className="text-muted small mb-0 ps-3">
-                        <li>One file per upload</li>
-                        <li>Max 50MB file size</li>
-                        <li>Recent data preferred</li>
-                        <li>Multiple metrics OK</li>
+                        {t('wearable.guidelinesList', { returnObjects: true }).map(
+                          (item, idx) => (
+                            <li key={idx}>{item}</li>
+                          )
+                        )}
                       </ul>
                     </Col>
                   </Row>
@@ -403,8 +405,7 @@ export default function Wearable() {
                     🔒
                   </span>
                   <small>
-                    Your wearable data is encrypted and securely stored. We use it only
-                    to provide personalized health insights and recommendations.
+                    {t('wearable.privacyText')}
                   </small>
                 </div>
               </Alert>
@@ -417,7 +418,7 @@ export default function Wearable() {
                   size="lg"
                   disabled={isSubmitting}
                 >
-                  ← Back
+                  ← {t('common.back')}
                 </Button>
 
                 <div className="d-flex gap-2">
@@ -428,7 +429,7 @@ export default function Wearable() {
                     disabled={isSubmitting}
                     className="d-flex align-items-center gap-2"
                   >
-                    <span>Skip</span>
+                    <span>{t('common.skip')}</span>
                   </Button>
 
                   <Button
@@ -441,11 +442,11 @@ export default function Wearable() {
                     {isSubmitting ? (
                       <>
                         <Spinner animation="border" size="sm" />
-                        <span>Uploading...</span>
+                        <span>{t('common.uploading')}</span>
                       </>
                     ) : (
                       <>
-                        <span>Upload & Continue</span>
+                        <span>{t('common.uploadContinue')}</span>
                         <span>→</span>
                       </>
                     )}
@@ -459,7 +460,7 @@ export default function Wearable() {
         {/* Footer */}
         <div className="text-center mt-4">
           <small className="text-muted">
-            Wearable data helps us understand your activity patterns and health trends
+            {t('wearable.footer')}
           </small>
         </div>
       </Container>

@@ -36,33 +36,15 @@ export default function Mental() {
   const getCharacterCount = () => watchMentalHealth?.length || 0;
 
   const getDetailLevel = (length) => {
-    if (length < 10) return { status: 'Too short', color: 'danger' };
-    if (length < 50) return { status: 'Brief', color: 'warning' };
-    if (length < 150) return { status: 'Good', color: 'info' };
-    return { status: 'Comprehensive', color: 'success' };
+    if (length < 10) return { status: t('mental.detailLevel.tooShort'), color: 'danger' };
+    if (length < 50) return { status: t('mental.detailLevel.brief'), color: 'warning' };
+    if (length < 150) return { status: t('mental.detailLevel.good'), color: 'info' };
+    return { status: t('mental.detailLevel.comprehensive'), color: 'success' };
   };
 
-  const stressAreas = [
-    '💼 Work / Career',
-    '👨‍👩‍👧‍👦 Family / Relationships',
-    '💰 Financial',
-    '🏥 Health concerns',
-    '🏠 Home / Living situation',
-    '👥 Social / Isolation',
-    '🎓 Education / Learning',
-    '🎯 Life goals / Purpose',
-  ];
-  const copingStrategies = [
-    '🧘 Meditation / Mindfulness',
-    '💪 Exercise / Physical activity',
-    '👥 Social support / Friends',
-    '🗣️ Therapy / Counseling',
-    '📖 Reading / Creative pursuits',
-    '🎵 Music / Entertainment',
-    '😴 Sleep / Rest',
-    '🧠 Problem-solving',
-    '🙏 Spiritual / Religious practices',
-  ];
+  const stressAreas = t('mental.stressAreas', { returnObjects: true });
+  const copingStrategies = t('mental.copingStrategies', { returnObjects: true });
+  const tips = t('mental.tips', { returnObjects: true });
   const isFormComplete = watchMentalHealth && watchMentalHealth.length >= 10;
   const charCount = getCharacterCount();
   const detailLevel = getDetailLevel(charCount);
@@ -72,7 +54,7 @@ export default function Mental() {
 
       // Validate patient ID exists
       if (!state.patientId) {
-        throw new Error('Patient ID not found. Please start over.');
+        throw new Error(t('errors.patientIdMissing'));
       }
 
       // Update local state
@@ -94,7 +76,7 @@ export default function Mental() {
       navigate('/medical-reports');
     } catch (err) {
       console.error('Error saving mental health data:', err);
-      setApiError(err.message || 'Failed to save mental health information. Please try again.');
+      setApiError(err.message || t('errors.saveMentalFailed'));
       window.scrollTo(0, 0);
     }
   };
@@ -105,8 +87,12 @@ export default function Mental() {
         {/* Progress Section */}
         <div className="mb-4">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <small className="text-muted fw-semibold">Step 4 of 10</small>
-            <small className="text-muted">40% Complete</small>
+            <small className="text-muted fw-semibold">
+              {t('steps.ofTen', { step: 4 })}
+            </small>
+            <small className="text-muted">
+              {t('steps.percentComplete', { percent: 40 })}
+            </small>
           </div>
           <ProgressBar now={40} style={{ height: '8px' }} className="mb-3" />
         </div>
@@ -119,7 +105,7 @@ export default function Mental() {
             onClose={() => setApiError(null)}
             className="mb-4"
           >
-            <Alert.Heading>Error</Alert.Heading>
+            <Alert.Heading>{t('errors.title')}</Alert.Heading>
             <p className="mb-0">{apiError}</p>
           </Alert>
         )}
@@ -130,10 +116,10 @@ export default function Mental() {
             {/* Header */}
             <div className="mb-5">
               <h1 className="display-6 fw-bold text-primary mb-2">
-                🧠 Mental Health & Wellness
+                🧠 {t('mental.title')}
               </h1>
               <p className="text-muted lead mb-0">
-                Share information about your mental health, stress levels, and emotional well-being
+                {t('mental.subtitle')}
               </p>
             </div>
 
@@ -142,7 +128,7 @@ export default function Mental() {
               {/* Common Stress Areas */}
               <div className="mb-5">
                 <p className="text-muted fw-semibold mb-3">
-                  Common stress areas (for reference):
+                  {t('mental.stressTitle')}
                 </p>
                 <div className="d-flex flex-wrap gap-2 mb-4">
                   {stressAreas.map((area, idx) => (
@@ -160,28 +146,19 @@ export default function Mental() {
               {/* Mental Health Textarea */}
               <Form.Group className="mb-4">
                 <Form.Label className="fw-semibold mb-2">
-                  Mental Health & Stress <span className="text-danger">*</span>
+                  {t('mental.label')} <span className="text-danger">*</span>
                 </Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={6}
-                  placeholder="Share information about:
-• Current stress levels (low/moderate/high)
-• Anxiety or worry patterns
-• Mood changes or concerns
-• Sleep quality and patterns
-• Emotional challenges
-• Work-life balance
-• Coping strategies you use
-• Any history of mental health conditions
-• Current support systems"
+                  placeholder={t('mental.placeholder')}
                   className={`${errors.mental_health ? 'is-invalid' : ''}`}
                   style={{ resize: 'vertical' }}
                   {...register('mental_health', {
-                    required: 'Please share your mental health information',
+                    required: t('validation.mentalHealthRequired'),
                     minLength: {
                       value: 10,
-                      message: 'Please provide more details (minimum 10 characters)',
+                      message: t('validation.minDetails'),
                     },
                   })}
                 />
@@ -194,7 +171,7 @@ export default function Mental() {
                 {/* Character Count & Status */}
                 <div className="mt-3 d-flex justify-content-between align-items-center">
                   <small className="text-muted">
-                    {charCount} characters entered
+                    {t('common.charactersEntered', { count: charCount })}
                   </small>
                   {watchMentalHealth && (
                     <span
@@ -213,7 +190,7 @@ export default function Mental() {
               {/* Coping Strategies Reference */}
               <div className="mb-4">
                 <p className="text-muted fw-semibold mb-3">
-                  Healthy coping strategies (for reference):
+                  {t('mental.copingTitle')}
                 </p>
                 <div className="d-flex flex-wrap gap-2">
                   {copingStrategies.map((strategy, idx) => (
@@ -232,14 +209,10 @@ export default function Mental() {
               <Card className="bg-light border-0 mb-4">
                 <Card.Body className="p-3">
                   <p className="text-muted small mb-2">
-                    <strong>📝 Example of comprehensive mental health information:</strong>
+                    <strong>📝 {t('mental.exampleTitle')}</strong>
                   </p>
                   <p className="text-muted small mb-0" style={{ fontSize: '0.9rem' }}>
-                    "Experiencing moderate work-related stress with occasional anxiety.
-                    Sleep quality is affected, typically 6-7 hours per night. I cope by
-                    exercising 3x/week and meditation on weekdays. Have supportive family
-                    and friends. Mood generally stable but sometimes feel overwhelmed. No
-                    previous mental health diagnosis. Looking to improve work-life balance."
+                    {t('mental.exampleText')}
                   </p>
                 </Card.Body>
               </Card>
@@ -251,13 +224,10 @@ export default function Mental() {
                     💡
                   </span>
                   <div className="small">
-                    <p className="mb-2 fw-semibold">Tips for sharing mental health information:</p>
+                    <p className="mb-2 fw-semibold">{t('mental.tipsTitle')}</p>
                     <ul className="mb-0 ps-3">
-                      <li>Be honest about your stress levels and emotional state</li>
-                      <li>Include both challenges and positive coping mechanisms</li>
-                      <li>Mention any significant life events or changes</li>
-                      <li>Share what helps you feel better and what worsens stress</li>
-                      <li>Include any history of anxiety, depression, or other conditions</li>
+                      {Array.isArray(tips) &&
+                        tips.map((tip, idx) => <li key={idx}>{tip}</li>)}
                     </ul>
                   </div>
                 </div>
@@ -270,9 +240,8 @@ export default function Mental() {
                     🔒
                   </span>
                   <small>
-                    <strong>Your Privacy:</strong> All mental health information is completely
-                    confidential and protected. This information is used only to provide
-                    appropriate medical care and support.
+                    <strong>{t('mental.privacyTitle')}:</strong>{' '}
+                    {t('mental.privacyText')}
                   </small>
                 </div>
               </Alert>
@@ -285,7 +254,7 @@ export default function Mental() {
                   size="lg"
                   disabled={isSubmitting}
                 >
-                  ← Back
+                  ← {t('common.back')}
                 </Button>
 
                 <Button
@@ -298,11 +267,11 @@ export default function Mental() {
                   {isSubmitting ? (
                     <>
                       <Spinner animation="border" size="sm" />
-                      <span>Saving...</span>
+                      <span>{t('common.saving')}</span>
                     </>
                   ) : (
                     <>
-                      <span>Next: Medical Reports</span>
+                      <span>{t('actions.nextTo', { step: t('steps.medicalReports') })}</span>
                       <span>→</span>
                     </>
                   )}
@@ -315,7 +284,7 @@ export default function Mental() {
         {/* Footer */}
         <div className="text-center mt-4">
           <small className="text-muted">
-            Mental health information is crucial for comprehensive care and is always confidential
+            {t('mental.footer')}
           </small>
         </div>
       </Container>

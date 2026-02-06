@@ -12,11 +12,13 @@ import {
   Nav,
   Tab,
 } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import consultationAPI from '../../services/api';
 
 export default function PatientView() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [patient, setPatient] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,13 +31,13 @@ export default function PatientView() {
         const data = await consultationAPI.getConsultationStatus(id);
 
         if (!data) {
-          throw new Error('Patient record not found');
+          throw new Error(t('patientView.errors.notFound'));
         }
 
         setPatient(data);
       } catch (err) {
         console.error('Error loading patient:', err);
-        setError(err.message || 'Failed to load patient record');
+        setError(err.message || t('patientView.errors.loadFailed'));
       } finally {
         setIsLoading(false);
       }
@@ -45,9 +47,9 @@ export default function PatientView() {
   }, [id]);
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return t('common.na');
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
+      return new Date(dateString).toLocaleDateString(i18n.language || 'en', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -58,7 +60,9 @@ export default function PatientView() {
   };
 
   const renderDemographics = (formData) => {
-    if (!formData?.demographics) return <p className="text-muted">No data</p>;
+    if (!formData?.demographics) {
+      return <p className="text-muted">{t('common.noData')}</p>;
+    }
 
     const { age, gender, weight, height } = formData.demographics;
     return (
@@ -66,22 +70,26 @@ export default function PatientView() {
         <Row className="g-3">
           <Col md={6}>
             <p>
-              <strong>Age:</strong> {age ? `${age} years` : 'Not provided'}
+              <strong>{t('patientView.demographics.age')}:</strong>{' '}
+              {age ? t('patientView.demographics.ageValue', { age }) : t('common.notProvided')}
             </p>
           </Col>
           <Col md={6}>
             <p>
-              <strong>Gender:</strong> {gender || 'Not provided'}
+              <strong>{t('patientView.demographics.gender')}:</strong>{' '}
+              {gender || t('common.notProvided')}
             </p>
           </Col>
           <Col md={6}>
             <p>
-              <strong>Weight:</strong> {weight ? `${weight} kg` : 'Not provided'}
+              <strong>{t('patientView.demographics.weight')}:</strong>{' '}
+              {weight ? t('patientView.demographics.weightValue', { weight }) : t('common.notProvided')}
             </p>
           </Col>
           <Col md={6}>
             <p>
-              <strong>Height:</strong> {height ? `${height} cm` : 'Not provided'}
+              <strong>{t('patientView.demographics.height')}:</strong>{' '}
+              {height ? t('patientView.demographics.heightValue', { height }) : t('common.notProvided')}
             </p>
           </Col>
         </Row>
@@ -90,7 +98,9 @@ export default function PatientView() {
   };
 
   const renderLifestyle = (formData) => {
-    if (!formData?.lifestyle) return <p className="text-muted">No data</p>;
+    if (!formData?.lifestyle) {
+      return <p className="text-muted">{t('common.noData')}</p>;
+    }
 
     const { diet, sleep_hours, physical_activity, mental_exercises } =
       formData.lifestyle;
@@ -99,25 +109,28 @@ export default function PatientView() {
         <Row className="g-3">
           <Col md={6}>
             <p>
-              <strong>Diet:</strong> {diet || 'Not provided'}
+              <strong>{t('patientView.lifestyle.diet')}:</strong>{' '}
+              {diet || t('common.notProvided')}
             </p>
           </Col>
           <Col md={6}>
             <p>
-              <strong>Sleep Hours:</strong>{' '}
-              {sleep_hours ? `${sleep_hours} hours/day` : 'Not provided'}
+              <strong>{t('patientView.lifestyle.sleepHours')}:</strong>{' '}
+              {sleep_hours
+                ? t('patientView.lifestyle.sleepHoursValue', { hours: sleep_hours })
+                : t('common.notProvided')}
             </p>
           </Col>
           <Col md={6}>
             <p>
-              <strong>Physical Activity:</strong>{' '}
-              {physical_activity || 'Not provided'}
+              <strong>{t('patientView.lifestyle.physicalActivity')}:</strong>{' '}
+              {physical_activity || t('common.notProvided')}
             </p>
           </Col>
           <Col md={6}>
             <p>
-              <strong>Mental Exercises:</strong>{' '}
-              {mental_exercises || 'Not provided'}
+              <strong>{t('patientView.lifestyle.mentalExercises')}:</strong>{' '}
+              {mental_exercises || t('common.notProvided')}
             </p>
           </Col>
         </Row>
@@ -126,57 +139,68 @@ export default function PatientView() {
   };
 
   const renderSymptoms = (formData) => {
-    if (!formData?.symptoms) return <p className="text-muted">No data</p>;
+    if (!formData?.symptoms) {
+      return <p className="text-muted">{t('common.noData')}</p>;
+    }
 
     return (
       <div>
         <p>
-          <strong>Symptoms:</strong>
+          <strong>{t('patientView.symptoms.title')}:</strong>
         </p>
-        <p className="bg-light p-3 rounded">{formData.symptoms.symptoms || 'Not provided'}</p>
+        <p className="bg-light p-3 rounded">
+          {formData.symptoms.symptoms || t('common.notProvided')}
+        </p>
       </div>
     );
   };
 
   const renderMentalHealth = (formData) => {
-    if (!formData?.mental) return <p className="text-muted">No data</p>;
+    if (!formData?.mental) {
+      return <p className="text-muted">{t('common.noData')}</p>;
+    }
 
     return (
       <div>
         <p>
-          <strong>Mental Health Notes:</strong>
+          <strong>{t('patientView.mental.title')}:</strong>
         </p>
-        <p className="bg-light p-3 rounded">{formData.mental.mental_health || 'Not provided'}</p>
+        <p className="bg-light p-3 rounded">
+          {formData.mental.mental_health || t('common.notProvided')}
+        </p>
       </div>
     );
   };
 
   const renderMedicalReports = (formData) => {
-    if (!formData?.medicalReports) return <p className="text-muted">No data</p>;
+    if (!formData?.medicalReports) {
+      return <p className="text-muted">{t('common.noData')}</p>;
+    }
 
     const { files, skipped } = formData.medicalReports;
 
     if (skipped) {
       return (
         <Alert variant="info">
-          <strong>Skipped:</strong> User skipped uploading medical reports
+          <strong>{t('patientView.skipped')}:</strong>{' '}
+          {t('patientView.medicalReports.skipped')}
         </Alert>
       );
     }
 
     if (!files || files.length === 0) {
-      return <p className="text-muted">No files uploaded</p>;
+      return <p className="text-muted">{t('patientView.medicalReports.noFiles')}</p>;
     }
 
     return (
       <div>
         <p>
-          <strong>Medical Reports:</strong>
+          <strong>{t('patientView.medicalReports.title')}:</strong>
         </p>
         <ul className="list-group">
           {files.map((file, idx) => (
             <li key={idx} className="list-group-item">
-              📄 {file.name || `File ${idx + 1}`}
+              📄 {file.name || t('patientView.fileFallback', { index: idx + 1 })}
             </li>
           ))}
         </ul>
@@ -185,34 +209,41 @@ export default function PatientView() {
   };
 
   const renderWearableData = (formData) => {
-    if (!formData?.wearableData) return <p className="text-muted">No data</p>;
+    if (!formData?.wearableData) {
+      return <p className="text-muted">{t('common.noData')}</p>;
+    }
 
     const { file, skipped } = formData.wearableData;
 
     if (skipped) {
       return (
         <Alert variant="info">
-          <strong>Skipped:</strong> User skipped uploading wearable data
+          <strong>{t('patientView.skipped')}:</strong>{' '}
+          {t('patientView.wearable.skipped')}
         </Alert>
       );
     }
 
     if (!file) {
-      return <p className="text-muted">No file uploaded</p>;
+      return <p className="text-muted">{t('patientView.wearable.noFile')}</p>;
     }
 
     return (
       <div>
         <p>
-          <strong>Wearable Data File:</strong>
+          <strong>{t('patientView.wearable.title')}:</strong>
         </p>
-        <p className="bg-light p-3 rounded">📊 {file.name || 'Wearable data'}</p>
+        <p className="bg-light p-3 rounded">
+          📊 {file.name || t('patientView.wearable.fallback')}
+        </p>
       </div>
     );
   };
 
   const renderDiagnosis = (formData) => {
-    if (!formData?.diagnosis) return <p className="text-muted">No data</p>;
+    if (!formData?.diagnosis) {
+      return <p className="text-muted">{t('common.noData')}</p>;
+    }
 
     const { suggestions, selected } = formData.diagnosis;
 
@@ -221,7 +252,7 @@ export default function PatientView() {
         {suggestions && suggestions.length > 0 && (
           <>
             <p>
-              <strong>Diagnosis Suggestions:</strong>
+              <strong>{t('patientView.diagnosis.suggestions')}:</strong>
             </p>
             <ul className="list-group mb-3">
               {suggestions.map((diagnosis, idx) => (
@@ -236,7 +267,7 @@ export default function PatientView() {
         {selected && selected.length > 0 && (
           <>
             <p>
-              <strong>Selected Diagnoses:</strong>
+              <strong>{t('patientView.diagnosis.selected')}:</strong>
             </p>
             <div className="d-flex flex-wrap gap-2">
               {selected.map((diagnosis, idx) => (
@@ -249,14 +280,16 @@ export default function PatientView() {
         )}
 
         {!suggestions?.length && !selected?.length && (
-          <p className="text-muted">No diagnosis data</p>
+          <p className="text-muted">{t('patientView.diagnosis.none')}</p>
         )}
       </div>
     );
   };
 
   const renderExams = (formData) => {
-    if (!formData?.exams) return <p className="text-muted">No data</p>;
+    if (!formData?.exams) {
+      return <p className="text-muted">{t('common.noData')}</p>;
+    }
 
     const { suggestions, selected } = formData.exams;
 
@@ -265,7 +298,7 @@ export default function PatientView() {
         {suggestions && suggestions.length > 0 && (
           <>
             <p>
-              <strong>Exam Suggestions:</strong>
+              <strong>{t('patientView.exams.suggestions')}:</strong>
             </p>
             <ul className="list-group mb-3">
               {suggestions.map((exam, idx) => (
@@ -280,7 +313,7 @@ export default function PatientView() {
         {selected && selected.length > 0 && (
           <>
             <p>
-              <strong>Selected Exams:</strong>
+              <strong>{t('patientView.exams.selected')}:</strong>
             </p>
             <div className="d-flex flex-wrap gap-2">
               {selected.map((exam, idx) => (
@@ -293,7 +326,7 @@ export default function PatientView() {
         )}
 
         {!suggestions?.length && !selected?.length && (
-          <p className="text-muted">No exam data</p>
+          <p className="text-muted">{t('patientView.exams.none')}</p>
         )}
       </div>
     );
@@ -304,19 +337,19 @@ export default function PatientView() {
       <Container className="py-5">
         <div className="text-center">
           <Spinner animation="border" role="status" className="mb-3">
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
-          <p className="text-muted">Loading patient record...</p>
-        </div>
-      </Container>
-    );
+          <span className="visually-hidden">{t('common.loading')}</span>
+        </Spinner>
+        <p className="text-muted">{t('patientView.loading')}</p>
+      </div>
+    </Container>
+  );
   }
 
   if (error) {
     return (
       <Container className="py-5">
         <Alert variant="danger">
-          <Alert.Heading>Error Loading Patient</Alert.Heading>
+          <Alert.Heading>{t('patientView.errorTitle')}</Alert.Heading>
           <p>{error}</p>
         </Alert>
         <Button
@@ -324,10 +357,10 @@ export default function PatientView() {
           onClick={() => navigate(-1)}
           className="me-2"
         >
-          ← Go Back
+          ← {t('common.goBack')}
         </Button>
         <Button variant="primary" onClick={() => navigate('/')}>
-          Back to Dashboard
+          {t('patientView.backToDashboard')}
         </Button>
       </Container>
     );
@@ -337,11 +370,11 @@ export default function PatientView() {
     return (
       <Container className="py-5">
         <Alert variant="warning">
-          <Alert.Heading>Patient Not Found</Alert.Heading>
-          <p>The requested patient record could not be found.</p>
+          <Alert.Heading>{t('patientView.notFoundTitle')}</Alert.Heading>
+          <p>{t('patientView.notFoundMessage')}</p>
         </Alert>
         <Button variant="primary" onClick={() => navigate('/')}>
-          Back to Dashboard
+          {t('patientView.backToDashboard')}
         </Button>
       </Container>
     );
@@ -353,10 +386,10 @@ export default function PatientView() {
       <div className="mb-4 d-flex justify-content-between align-items-center">
         <div>
           <h1 className="display-6 fw-bold text-primary mb-2">
-            Patient Record
+            {t('patientView.title')}
           </h1>
           <p className="text-muted">
-            View complete consultation details for patient{' '}
+            {t('patientView.subtitle')}{' '}
             <code>{patient.patient_id}</code>
           </p>
         </div>
@@ -365,7 +398,7 @@ export default function PatientView() {
           onClick={() => navigate(-1)}
           size="lg"
         >
-          ← Back
+          ← {t('common.back')}
         </Button>
       </div>
 
@@ -374,25 +407,33 @@ export default function PatientView() {
         <Card.Body className="p-4">
           <Row className="g-4">
             <Col md={6} lg={3}>
-              <p className="text-muted small mb-1">Patient ID</p>
+              <p className="text-muted small mb-1">
+                {t('patientView.summary.patientId')}
+              </p>
               <code className="d-block fs-6">{patient.patient_id}</code>
             </Col>
             <Col md={6} lg={3}>
-              <p className="text-muted small mb-1">Language</p>
+              <p className="text-muted small mb-1">
+                {t('patientView.summary.language')}
+              </p>
               <p className="mb-0 fs-6">
-                <strong>{patient.lang?.toUpperCase() || 'N/A'}</strong>
+                <strong>{patient.lang?.toUpperCase() || t('common.na')}</strong>
               </p>
             </Col>
             <Col md={6} lg={3}>
-              <p className="text-muted small mb-1">Created</p>
+              <p className="text-muted small mb-1">
+                {t('patientView.summary.created')}
+              </p>
               <p className="mb-0 fs-6">
                 <strong>{formatDate(patient.created_at)}</strong>
               </p>
             </Col>
             <Col md={6} lg={3}>
-              <p className="text-muted small mb-1">Status</p>
+              <p className="text-muted small mb-1">
+                {t('patientView.summary.status')}
+              </p>
               <Badge bg={patient.is_complete ? 'success' : 'warning'} className="fs-6">
-                {patient.is_complete ? '✓ Complete' : '⏳ In Progress'}
+                {patient.is_complete ? t('status.complete') : t('status.inProgress')}
               </Badge>
             </Col>
           </Row>
@@ -404,47 +445,47 @@ export default function PatientView() {
         <Card.Body className="p-0">
           <Tab.Container defaultActiveKey="demographics">
             <Nav variant="pills" className="border-bottom p-3">
-              <Nav.Item>
-                <Nav.Link eventKey="demographics" className="rounded-0">
-                  📋 Demographics
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="lifestyle" className="rounded-0">
-                  🏃 Lifestyle
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="symptoms" className="rounded-0">
-                  🤒 Symptoms
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="mental" className="rounded-0">
-                  🧠 Mental Health
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="medical" className="rounded-0">
-                  📄 Medical Reports
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="wearable" className="rounded-0">
-                  ⌚ Wearable Data
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="diagnosis" className="rounded-0">
-                  🔍 Diagnosis
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="exams" className="rounded-0">
-                  🩺 Exams
-                </Nav.Link>
-              </Nav.Item>
-            </Nav>
+                <Nav.Item>
+                  <Nav.Link eventKey="demographics" className="rounded-0">
+                  📋 {t('patientView.tabs.demographics')}
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="lifestyle" className="rounded-0">
+                  🏃 {t('patientView.tabs.lifestyle')}
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="symptoms" className="rounded-0">
+                  🤒 {t('patientView.tabs.symptoms')}
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="mental" className="rounded-0">
+                  🧠 {t('patientView.tabs.mental')}
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="medical" className="rounded-0">
+                  📄 {t('patientView.tabs.medical')}
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="wearable" className="rounded-0">
+                  ⌚ {t('patientView.tabs.wearable')}
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="diagnosis" className="rounded-0">
+                  🔍 {t('patientView.tabs.diagnosis')}
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="exams" className="rounded-0">
+                  🩺 {t('patientView.tabs.exams')}
+                  </Nav.Link>
+                </Nav.Item>
+              </Nav>
 
             <Tab.Content className="p-4">
               <Tab.Pane eventKey="demographics">
@@ -477,9 +518,9 @@ export default function PatientView() {
       </Card>
 
       {/* Raw JSON Data (for debugging) */}
-      <Card className="border-0 shadow-sm mt-4">
+        <Card className="border-0 shadow-sm mt-4">
         <Card.Header className="bg-light border-bottom">
-          <h6 className="mb-0">Raw Data (JSON)</h6>
+          <h6 className="mb-0">{t('patientView.rawData')}</h6>
         </Card.Header>
         <Card.Body>
           <pre

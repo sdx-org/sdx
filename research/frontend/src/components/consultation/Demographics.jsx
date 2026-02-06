@@ -89,7 +89,7 @@ export default function Demographics() {
       navigate('/lifestyle');
     } catch (err) {
       console.error('Error saving demographics:', err);
-      setApiError(err.message || t("errors.saveFailed"));
+      setApiError(err.message || t('errors.saveDemographicsFailed'));
       window.scrollTo(0, 0);
     }
   };
@@ -105,8 +105,12 @@ export default function Demographics() {
         {/* Progress Section */}
         <div className="mb-4">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <small className="text-muted fw-semibold">{t("steps.step1")}</small>
-            <small className="text-muted">{t("steps.percent10")}</small>
+            <small className="text-muted fw-semibold">
+              {t('steps.ofTen', { step: 1 })}
+            </small>
+            <small className="text-muted">
+              {t('steps.percentComplete', { percent: 10 })}
+            </small>
           </div>
           <ProgressBar now={10} style={{ height: '8px' }} />
         </div>
@@ -162,7 +166,7 @@ export default function Demographics() {
 
                     {watchAge && !errors.age && (
                       <small className="text-success d-block mt-2">
-                        ✓ {watchAge}
+                        ✓ {t('demographics.ageValue', { age: watchAge })}
                       </small>
                     )}
                   </Form.Group>
@@ -216,7 +220,9 @@ export default function Demographics() {
                           required: t("validation.weightRequired"),
                         })}
                       />
-                      <span className="input-group-text bg-light fw-semibold">kg</span>
+                      <span className="input-group-text bg-light fw-semibold">
+                        {t('units.kg')}
+                      </span>
                     </div>
                   </Form.Group>
                 </Col>
@@ -237,7 +243,9 @@ export default function Demographics() {
                           required: t("validation.heightRequired"),
                         })}
                       />
-                      <span className="input-group-text bg-light fw-semibold">cm</span>
+                      <span className="input-group-text bg-light fw-semibold">
+                        {t('units.cm')}
+                      </span>
                     </div>
                   </Form.Group>
                 </Col>
@@ -278,7 +286,7 @@ export default function Demographics() {
                     </>
                   ) : (
                     <>
-                      {t("common.next")} →
+                      {t('actions.nextTo', { step: t('steps.lifestyle') })} →
                     </>
                   )}
                 </Button>
@@ -290,7 +298,7 @@ export default function Demographics() {
 
         <div className="text-center mt-4">
           <small className="text-muted">
-            {t("footer.faq")} <a href="#faq">FAQ</a>
+            {t('footer.faq')} <a href="#faq">{t('footer.faqLink')}</a>
           </small>
         </div>
       </Container>

@@ -59,39 +59,39 @@ export default function Confirmation() {
 
   const generateConsultationSummary = () => {
     const data = state.formData;
-    let summary = `CONSULTATION SUMMARY\n`;
-    summary += `Patient ID: ${state.patientId}\n`;
-    summary += `Language: ${state.language}\n`;
-    summary += `Status: COMPLETE\n\n`;
+    let summary = `${t('confirmation.summary.header')}\n`;
+    summary += `${t('confirmation.summary.patientId')}: ${state.patientId}\n`;
+    summary += `${t('confirmation.summary.language')}: ${state.language}\n`;
+    summary += `${t('confirmation.summary.status')}: ${t('confirmation.summary.statusComplete')}\n\n`;
 
-    summary += `=== DEMOGRAPHICS ===\n`;
-    summary += `Age: ${data.demographics.age} years\n`;
-    summary += `Gender: ${data.demographics.gender}\n`;
-    summary += `Weight: ${data.demographics.weight} kg\n`;
-    summary += `Height: ${data.demographics.height} cm\n\n`;
+    summary += `=== ${t('confirmation.summary.sections.demographics')} ===\n`;
+    summary += `${t('confirmation.summary.age')}: ${data.demographics.age} ${t('confirmation.summary.years')}\n`;
+    summary += `${t('confirmation.summary.gender')}: ${data.demographics.gender}\n`;
+    summary += `${t('confirmation.summary.weight')}: ${data.demographics.weight} ${t('confirmation.summary.kg')}\n`;
+    summary += `${t('confirmation.summary.height')}: ${data.demographics.height} ${t('confirmation.summary.cm')}\n\n`;
 
-    summary += `=== LIFESTYLE ===\n`;
-    summary += `Diet: ${data.lifestyle.diet}\n`;
-    summary += `Sleep Hours: ${data.lifestyle.sleep_hours}\n`;
-    summary += `Physical Activity: ${data.lifestyle.physical_activity}\n`;
-    summary += `Mental Exercises: ${data.lifestyle.mental_exercises}\n\n`;
+    summary += `=== ${t('confirmation.summary.sections.lifestyle')} ===\n`;
+    summary += `${t('confirmation.summary.diet')}: ${data.lifestyle.diet}\n`;
+    summary += `${t('confirmation.summary.sleepHours')}: ${data.lifestyle.sleep_hours}\n`;
+    summary += `${t('confirmation.summary.physicalActivity')}: ${data.lifestyle.physical_activity}\n`;
+    summary += `${t('confirmation.summary.mentalExercises')}: ${data.lifestyle.mental_exercises}\n\n`;
 
-    summary += `=== SYMPTOMS ===\n`;
+    summary += `=== ${t('confirmation.summary.sections.symptoms')} ===\n`;
     summary += `${data.symptoms.symptoms}\n\n`;
 
-    summary += `=== MENTAL HEALTH ===\n`;
+    summary += `=== ${t('confirmation.summary.sections.mentalHealth')} ===\n`;
     summary += `${data.mental.mental_health}\n\n`;
 
-    summary += `=== MEDICAL REPORTS ===\n`;
-    summary += `Files Uploaded: ${data.medicalReports.files.length}\n`;
-    summary += `Skipped: ${data.medicalReports.skipped}\n\n`;
+    summary += `=== ${t('confirmation.summary.sections.medicalReports')} ===\n`;
+    summary += `${t('confirmation.summary.filesUploaded')}: ${data.medicalReports.files.length}\n`;
+    summary += `${t('confirmation.summary.skipped')}: ${data.medicalReports.skipped}\n\n`;
 
-    summary += `=== WEARABLE DATA ===\n`;
-    summary += `File Uploaded: ${data.wearableData.file ? 'Yes' : 'No'}\n`;
-    summary += `Skipped: ${data.wearableData.skipped}\n\n`;
+    summary += `=== ${t('confirmation.summary.sections.wearable')} ===\n`;
+    summary += `${t('confirmation.summary.fileUploaded')}: ${data.wearableData.file ? t('common.yes') : t('common.no')}\n`;
+    summary += `${t('confirmation.summary.skipped')}: ${data.wearableData.skipped}\n\n`;
 
-    summary += `=== SELECTED DIAGNOSES ===\n`;
-    summary += `Total: ${data.diagnosis.selected.length}\n`;
+    summary += `=== ${t('confirmation.summary.sections.diagnoses')} ===\n`;
+    summary += `${t('confirmation.summary.total')}: ${data.diagnosis.selected.length}\n`;
     data.diagnosis.selected.forEach((name) => {
       const evaluations = data.diagnosis.evaluations[name];
       const score = evaluations
@@ -103,12 +103,12 @@ export default function Confirmation() {
               4
           )
         : 0;
-      summary += `- ${name} (Score: ${score}/10)\n`;
+      summary += `- ${name} (${t('confirmation.summary.score')}: ${score}/10)\n`;
     });
     summary += '\n';
 
-    summary += `=== SELECTED EXAMS ===\n`;
-    summary += `Total: ${data.exams.selected.length}\n`;
+    summary += `=== ${t('confirmation.summary.sections.exams')} ===\n`;
+    summary += `${t('confirmation.summary.total')}: ${data.exams.selected.length}\n`;
     data.exams.selected.forEach((name) => {
       const evaluations = data.exams.evaluations[name];
       const score = evaluations
@@ -121,14 +121,14 @@ export default function Confirmation() {
               5
           )
         : 0;
-      summary += `- ${name} (Score: ${score}/10)\n`;
+      summary += `- ${name} (${t('confirmation.summary.score')}: ${score}/10)\n`;
     });
     summary += '\n';
 
-    summary += `=== PRIVACY & DEIDENTIFICATION ===\n`;
-    summary += `Your data has been deidentified and will be securely archived.\n`;
-    summary += `All personal identifiers have been removed.\n`;
-    summary += `This data will be used solely for research purposes.\n`;
+    summary += `=== ${t('confirmation.summary.sections.privacy')} ===\n`;
+    summary += `${t('confirmation.privacy.deidentified')}\n`;
+    summary += `${t('confirmation.privacy.identifiersRemoved')}\n`;
+    summary += `${t('confirmation.privacy.researchUse')}\n`;
 
     return summary;
   };
@@ -139,8 +139,12 @@ export default function Confirmation() {
         {/* Progress Section */}
         <div className="mb-4">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <small className="text-muted fw-semibold">Step 9 of 10</small>
-            <small className="text-muted">100% Complete</small>
+            <small className="text-muted fw-semibold">
+              {t('steps.ofTen', { step: 9 })}
+            </small>
+            <small className="text-muted">
+              {t('steps.percentComplete', { percent: 100 })}
+            </small>
           </div>
           <ProgressBar
             now={100}
@@ -160,16 +164,18 @@ export default function Confirmation() {
 
             {/* Header */}
             <h1 className="display-4 fw-bold text-success mb-2">
-              Consultation Complete!
+              {t('confirmation.title')}
             </h1>
             <p className="text-muted lead mb-4">
-              Thank you for completing your health consultation
+              {t('confirmation.subtitle')}
             </p>
 
             {/* Patient ID */}
-            <Card className="bg-light border-0 mb-4 mx-auto" style={{ maxWidth: '400px' }}>
+              <Card className="bg-light border-0 mb-4 mx-auto" style={{ maxWidth: '400px' }}>
               <Card.Body className="p-3">
-                <small className="text-muted d-block mb-2">Patient ID</small>
+                <small className="text-muted d-block mb-2">
+                  {t('confirmation.patientId')}
+                </small>
                 <code className="fs-6">{state.patientId}</code>
               </Card.Body>
             </Card>
@@ -182,57 +188,61 @@ export default function Confirmation() {
             {/* Completion Summary */}
             <Card className="border-0 shadow-sm mb-4">
               <Card.Body className="p-4">
-                <h5 className="fw-bold mb-4">📋 Consultation Summary</h5>
+                <h5 className="fw-bold mb-4">
+                  📋 {t('confirmation.summaryTitle')}
+                </h5>
 
                 {/* Steps Completed */}
                 <div className="mb-4">
-                  <h6 className="fw-semibold mb-3">Steps Completed:</h6>
+                  <h6 className="fw-semibold mb-3">
+                    {t('confirmation.stepsCompleted')}
+                  </h6>
                   <ListGroup variant="flush">
                     <ListGroup.Item className="d-flex justify-content-between align-items-center border-0 py-2">
                       <span>
-                        <span className="me-2">👤</span> Demographics
+                        <span className="me-2">👤</span> {t('steps.demographics')}
                       </span>
                       <span className="text-success fw-bold">✓</span>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between align-items-center border-0 py-2">
                       <span>
-                        <span className="me-2">🏃</span> Lifestyle
+                        <span className="me-2">🏃</span> {t('steps.lifestyle')}
                       </span>
                       <span className="text-success fw-bold">✓</span>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between align-items-center border-0 py-2">
                       <span>
-                        <span className="me-2">🤒</span> Symptoms
+                        <span className="me-2">🤒</span> {t('steps.symptoms')}
                       </span>
                       <span className="text-success fw-bold">✓</span>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between align-items-center border-0 py-2">
                       <span>
-                        <span className="me-2">🧠</span> Mental Health
+                        <span className="me-2">🧠</span> {t('steps.mentalHealth')}
                       </span>
                       <span className="text-success fw-bold">✓</span>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between align-items-center border-0 py-2">
                       <span>
-                        <span className="me-2">📄</span> Medical Reports
+                        <span className="me-2">📄</span> {t('steps.medicalReports')}
                       </span>
                       <span className="text-success fw-bold">✓</span>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between align-items-center border-0 py-2">
                       <span>
-                        <span className="me-2">⌚</span> Wearable Data
+                        <span className="me-2">⌚</span> {t('steps.wearableData')}
                       </span>
                       <span className="text-success fw-bold">✓</span>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between align-items-center border-0 py-2">
                       <span>
-                        <span className="me-2">🔬</span> AI Diagnosis
+                        <span className="me-2">🔬</span> {t('steps.diagnosis')}
                       </span>
                       <span className="text-success fw-bold">✓</span>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex justify-content-between align-items-center border-0 py-2">
                       <span>
-                        <span className="me-2">🧪</span> Recommended Exams
+                        <span className="me-2">🧪</span> {t('steps.exams')}
                       </span>
                       <span className="text-success fw-bold">✓</span>
                     </ListGroup.Item>
@@ -241,12 +251,14 @@ export default function Confirmation() {
 
                 {/* Selected Items Summary */}
                 <div className="border-top pt-4">
-                  <h6 className="fw-semibold mb-3">Selections Summary:</h6>
+                  <h6 className="fw-semibold mb-3">
+                    {t('confirmation.selectionsTitle')}
+                  </h6>
                   <Row className="g-3">
                     <Col sm={6}>
                       <div className="p-3 bg-light rounded">
                         <small className="text-muted d-block mb-1">
-                          Selected Diagnoses
+                          {t('confirmation.selectedDiagnoses')}
                         </small>
                         <h5 className="mb-0 text-primary fw-bold">
                           {state.formData.diagnosis.selected.length}
@@ -256,7 +268,7 @@ export default function Confirmation() {
                     <Col sm={6}>
                       <div className="p-3 bg-light rounded">
                         <small className="text-muted d-block mb-1">
-                          Recommended Exams
+                          {t('confirmation.selectedExams')}
                         </small>
                         <h5 className="mb-0 text-primary fw-bold">
                           {state.formData.exams.selected.length}
@@ -271,7 +283,9 @@ export default function Confirmation() {
             {/* Privacy & Deidentification */}
             <Card className="border-0 shadow-sm mb-4">
               <Card.Body className="p-4">
-                <h5 className="fw-bold mb-4">🔒 Privacy & Data Protection</h5>
+                <h5 className="fw-bold mb-4">
+                  🔒 {t('confirmation.privacy.title')}
+                </h5>
 
                 <Alert variant="success" className="border-0 mb-3">
                   <div className="d-flex align-items-start">
@@ -279,11 +293,11 @@ export default function Confirmation() {
                       ✅
                     </span>
                     <div>
-                      <p className="fw-semibold mb-2">Data Deidentified</p>
+                      <p className="fw-semibold mb-2">
+                        {t('confirmation.privacy.deidentifiedTitle')}
+                      </p>
                       <small>
-                        Your consultation data has been automatically deidentified.
-                        All personal identifiers have been removed and will not be
-                        stored with your medical information.
+                        {t('confirmation.privacy.deidentifiedText')}
                       </small>
                     </div>
                   </div>
@@ -295,12 +309,11 @@ export default function Confirmation() {
                       📋
                     </span>
                     <div>
-                      <p className="fw-semibold mb-2">Research Use Only</p>
+                      <p className="fw-semibold mb-2">
+                        {t('confirmation.privacy.researchTitle')}
+                      </p>
                       <small>
-                        Your deidentified data will be securely archived and used
-                        solely for improving AI diagnostic and exam recommendation
-                        systems. No clinical decisions will be made based on this
-                        data.
+                        {t('confirmation.privacy.researchText')}
                       </small>
                     </div>
                   </div>
@@ -312,11 +325,11 @@ export default function Confirmation() {
                       🛡️
                     </span>
                     <div>
-                      <p className="fw-semibold mb-2">Secure Storage</p>
+                      <p className="fw-semibold mb-2">
+                        {t('confirmation.privacy.storageTitle')}
+                      </p>
                       <small>
-                        Your data is encrypted and stored in secure, HIPAA-compliant
-                        facilities. Access is restricted to authorized research
-                        personnel only.
+                        {t('confirmation.privacy.storageText')}
                       </small>
                     </div>
                   </div>
@@ -327,7 +340,9 @@ export default function Confirmation() {
             {/* What Happens Next */}
             <Card className="border-0 shadow-sm mb-4">
               <Card.Body className="p-4">
-                <h5 className="fw-bold mb-4">📌 What Happens Next?</h5>
+                <h5 className="fw-bold mb-4">
+                  📌 {t('confirmation.next.title')}
+                </h5>
 
                 <div className="mb-3">
                   <div className="d-flex align-items-start mb-3">
@@ -338,10 +353,11 @@ export default function Confirmation() {
                       1
                     </div>
                     <div>
-                      <p className="fw-semibold mb-1">Review by Healthcare Professional</p>
+                      <p className="fw-semibold mb-1">
+                        {t('confirmation.next.step1Title')}
+                      </p>
                       <small className="text-muted">
-                        Your AI-generated diagnoses and recommended exams will be
-                        reviewed by a qualified healthcare professional.
+                        {t('confirmation.next.step1Text')}
                       </small>
                     </div>
                   </div>
@@ -354,10 +370,11 @@ export default function Confirmation() {
                       2
                     </div>
                     <div>
-                      <p className="fw-semibold mb-1">Clinical Feedback</p>
+                      <p className="fw-semibold mb-1">
+                        {t('confirmation.next.step2Title')}
+                      </p>
                       <small className="text-muted">
-                        You will receive feedback from the healthcare professional
-                        regarding the AI recommendations and suggested next steps.
+                        {t('confirmation.next.step2Text')}
                       </small>
                     </div>
                   </div>
@@ -370,10 +387,11 @@ export default function Confirmation() {
                       3
                     </div>
                     <div>
-                      <p className="fw-semibold mb-1">Improved AI Models</p>
+                      <p className="fw-semibold mb-1">
+                        {t('confirmation.next.step3Title')}
+                      </p>
                       <small className="text-muted">
-                        Your ratings and evaluations help train better AI diagnostic
-                        systems that will benefit future patients.
+                        {t('confirmation.next.step3Text')}
                       </small>
                     </div>
                   </div>
@@ -389,7 +407,7 @@ export default function Confirmation() {
                 onClick={handleViewDashboard}
                 className="d-flex align-items-center justify-content-center gap-2"
               >
-                <span>📊 View Dashboard</span>
+                <span>📊 {t('confirmation.actions.viewDashboard')}</span>
               </Button>
 
               <Button
@@ -398,7 +416,7 @@ export default function Confirmation() {
                 onClick={handleDownloadSummary}
                 className="d-flex align-items-center justify-content-center gap-2"
               >
-                <span>⬇️ Download Summary</span>
+                <span>⬇️ {t('confirmation.actions.downloadSummary')}</span>
               </Button>
 
               <Button
@@ -407,7 +425,7 @@ export default function Confirmation() {
                 onClick={handleCreateNewConsultation}
                 className="d-flex align-items-center justify-content-center gap-2"
               >
-                <span>➕ New Consultation</span>
+                <span>➕ {t('confirmation.actions.newConsultation')}</span>
               </Button>
             </div>
           </Col>
@@ -418,10 +436,11 @@ export default function Confirmation() {
           <Col lg={8} className="mx-auto">
             <Card className="border-0 bg-light">
               <Card.Body className="p-4 text-center">
-                <h6 className="fw-bold mb-2">Thank You for Contributing to Research</h6>
+                <h6 className="fw-bold mb-2">
+                  {t('confirmation.thanksTitle')}
+                </h6>
                 <small className="text-muted">
-                  Your participation in this AI-driven consultation system helps us
-                  improve healthcare diagnostics and benefit future patients worldwide.
+                  {t('confirmation.thanksText')}
                 </small>
               </Card.Body>
             </Card>
@@ -431,10 +450,12 @@ export default function Confirmation() {
         {/* Footer */}
         <div className="text-center mt-5">
           <small className="text-muted">
-            Consultation ID: <code>{state.patientId}</code>
+            {t('confirmation.consultationId')}: <code>{state.patientId}</code>
           </small>
           <br />
-          <small className="text-muted">Status: ✅ COMPLETE</small>
+          <small className="text-muted">
+            {t('confirmation.statusLabel')}: ✅ {t('confirmation.statusComplete')}
+          </small>
         </div>
       </Container>
     </div>

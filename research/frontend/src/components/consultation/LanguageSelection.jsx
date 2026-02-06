@@ -1,37 +1,37 @@
-import React,{ useState } from 'react';
-import {useNavigate} from 'react-router-dom';
-import {Container, Row, Col, Button, Alert, Spinner} from 'react-bootstrap';
-import {useConsultation, consultationActions} from '../../context/ConsultationContext';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Button, Alert, Spinner } from 'react-bootstrap';
+import { useConsultation, consultationActions } from '../../context/ConsultationContext';
 import consultationAPI from '../../services/api';
 import { useTranslation } from 'react-i18next';
 
 
-export default function LanguageSelection(){
-  const navigate= useNavigate();
-  const {dispatch}= useConsultation();
+export default function LanguageSelection() {
+  const navigate = useNavigate();
+  const { dispatch } = useConsultation();
 
   const { t, i18n } = useTranslation();
 
-  const [selectedLanguage, setSelectedLanguage]=useState(null);
-  const [isLoading,setIsLoading]= useState(false);
-  const [error, setError]=useState(null);
-  const languages=[
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'es', name: 'Spanish', flag: '🇪🇸' },
-    { code: 'pt', name: 'Portuguese', flag: '🇧🇷' }
-  ]
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const languages = [
+    { code: 'en', name: t('language.english'), flag: '🇬🇧' },
+    { code: 'es', name: t('language.spanish'), flag: '🇪🇸' },
+    { code: 'pt', name: t('language.portuguese'), flag: '🇧🇷' }
+  ];
 
-  const handleLanguageSelect= async (languageCode)=>{
+  const handleLanguageSelect = async (languageCode) => {
     setSelectedLanguage(languageCode);
     setIsLoading(true);
     setError(null);
 
     i18n.changeLanguage(languageCode);
 
-    try{
-      const response= await consultationAPI.createPatient(languageCode);
-      if(!response.patient_id){
-        throw new Error('Failed to create patient: No patient ID returned');
+    try {
+      const response = await consultationAPI.createPatient(languageCode);
+      if (!response.patient_id) {
+        throw new Error(t('errors.patientCreateNoId'));
       }
       dispatch(
         consultationActions.initConsultation(
@@ -42,12 +42,12 @@ export default function LanguageSelection(){
       )
       localStorage.setItem('currentPatientId', response.patient_id);
       localStorage.setItem('currentLanguage', languageCode);
-      navigate('/demographics')
-    }catch(err){
+      navigate('/demographics');
+    } catch (err) {
       console.error('Error creating patient:', err);
-      setError(err.message || 'Failed to create patient. Please try again.');
+      setError(err.message || t('errors.patientCreateFailed'));
       setSelectedLanguage(null);
-    }finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -58,16 +58,18 @@ export default function LanguageSelection(){
         <Col lg={8} md={10} xs={12}>
           {/* Header */}
           <div className="text-center mb-5">
-            <h1 className="display-5 fw-bold mb-2">Welcome</h1>
+            <h1 className="display-5 fw-bold mb-2">
+              {t('languageSelection.title')}
+            </h1>
             <p className="lead text-muted">
-              Select your preferred language to begin your consultation
+              {t('languageSelection.subtitle')}
             </p>
           </div>
 
           {/* Error Alert */}
           {error && (
             <Alert variant="danger" dismissible onClose={() => setError(null)}>
-              <Alert.Heading>Error</Alert.Heading>
+              <Alert.Heading>{t('errors.title')}</Alert.Heading>
               <p>{error}</p>
             </Alert>
           )}
@@ -92,7 +94,9 @@ export default function LanguageSelection(){
                       className="ms-2"
                       role="status"
                     >
-                      <span className="visually-hidden">Loading...</span>
+                      <span className="visually-hidden">
+                        {t('common.loading')}
+                      </span>
                     </Spinner>
                   )}
                 </Button>
@@ -102,10 +106,9 @@ export default function LanguageSelection(){
 
           {/* Info Section */}
           <div className="alert alert-info">
-            <h5>ℹ️ What happens next?</h5>
+            <h5>ℹ️ {t('languageSelection.infoTitle')}</h5>
             <p className="mb-0">
-              After selecting your language, you'll be guided through a series of health-related
-              questions. Your responses will help us provide better insights.
+              {t('languageSelection.infoBody')}
             </p>
           </div>
         </Col>
