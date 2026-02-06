@@ -33,7 +33,7 @@ export default function AppNavbar() {
           as={inRouter ? Link : "a"}
           to="/"
           href="/"
-          className="fw-bold text-primary"
+          className="h5 fw-bold text-primary fs-2"
         >
           HiperHealth
         </Navbar.Brand>
@@ -48,7 +48,7 @@ export default function AppNavbar() {
               as={inRouter ? NavLink : "a"}
               to="/"
               href="/"
-              className="fw-semibold text-dark px-3"
+              className="fw-semibold text-dark px-3 small"
             >
               {t("navbar.dashboard", "Patient Dashboard")}
             </Nav.Link>

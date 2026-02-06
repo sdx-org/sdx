@@ -15,7 +15,6 @@ import { useTranslation } from 'react-i18next';
 import ReactPaginate from 'react-paginate';
 import consultationAPI from '../../services/api';
 import { useConsultation, consultationActions } from '../../context/ConsultationContext';
-import Navbar from '../Navbar';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -157,7 +156,7 @@ export default function Dashboard() {
   const handleDeletePatient = async (patientId, patientName) => {
     if (
       !window.confirm(
-        `Delete patient "${patientName || patientId}"? This action cannot be undone.`
+        `Delete patient "${patientId || patientName}"? This action cannot be undone.`
       )
     ) {
       return;
@@ -201,7 +200,7 @@ export default function Dashboard() {
           {/* Header */}
           <div className="mb-4 d-flex justify-content-between align-items-center">
             <div>
-              <h1 className="display-6 fw-bold text-primary mb-2">
+              <h1 className="h3 fw-bold text-primary mb-2">
                 {t('dashboard.title')}
               </h1>
               <p className="text-muted lead mb-0">
