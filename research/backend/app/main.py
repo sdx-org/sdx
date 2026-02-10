@@ -37,6 +37,13 @@ load_dotenv(env_path)
 from app.database import SessionLocal
 from app.models.repositories import ResearchRepository
 from app.models.ui import Consultation, Patient
+from app.rate_limiter import (
+    diagnosis_cache,
+    diagnosis_rate_limiter,
+    exam_cache,
+    exam_rate_limiter,
+    ip_rate_limiter,
+)
 from app.reports import (
     load_fhir_reports,
     process_uploaded_reports,
@@ -69,17 +76,10 @@ from app.schemas import (
     WearableDataSkipResponse,
     WearableDataUploadResponse,
 )
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, Request
+from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from hiperhealth.agents.diagnostics import core as diag
-from app.rate_limiter import (
-    diagnosis_rate_limiter,
-    exam_rate_limiter,
-    ip_rate_limiter,
-    diagnosis_cache,
-    exam_cache,
-)
 from hiperhealth.agents.extraction.medical_reports import (
     MedicalReportFileExtractor,
 )
@@ -798,14 +798,18 @@ def get_diagnosis_suggestions(
     request: Request,
     repo: ResearchRepository = Depends(get_repository),
 ):
-    """Get AI-generated differential diagnosis suggestions with rate limiting and caching."""
+    """
+    Get AI-generated differential diagnosis suggestions.
+
+    Includes rate limiting and response caching.
+    """
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
 
     # Get client IP for rate limiting
     client_ip = request.client.host if request.client else 'unknown'
-    
+
     # Check IP-based rate limit (100 per hour)
     ip_allowed, ip_limits = ip_rate_limiter.is_allowed(f'ip:{client_ip}')
     if not ip_allowed:
@@ -819,13 +823,16 @@ def get_diagnosis_suggestions(
                 'Retry-After': str(ip_limits['reset'] - int(time.time())),
             },
         )
-    
+
     # Check patient-based rate limit (5 per hour)
-    patient_allowed, patient_limits = diagnosis_rate_limiter.is_allowed(f'patient:{patient_id}')
+    patient_key = f'patient:{patient_id}'
+    patient_allowed, patient_limits = diagnosis_rate_limiter.is_allowed(
+        patient_key
+    )
     if not patient_allowed:
         raise HTTPException(
             status_code=429,
-            detail='Rate limit exceeded: 5 diagnosis requests per hour per patient',
+            detail='Rate limit exceeded: 5 diagnosis requests per hour',
             headers={
                 'X-RateLimit-Limit': str(patient_limits['limit']),
                 'X-RateLimit-Remaining': str(patient_limits['remaining']),
@@ -833,7 +840,7 @@ def get_diagnosis_suggestions(
                 'Retry-After': str(patient_limits['reset'] - int(time.time())),
             },
         )
-    
+
     # Check cache first
     cache_key = f'diagnosis:{patient_id}'
     cached_response = diagnosis_cache.get(cache_key)
@@ -863,16 +870,16 @@ def get_diagnosis_suggestions(
             DiagnosisOption(name=name, description='')
             for name in ai.options.keys()
         ]
-    
+
     response_data = {
         'patient_id': patient_id,
         'summary': ai.summary,
         'options': diagnosis_options,
     }
-    
+
     # Cache the response
     diagnosis_cache.set(cache_key, response_data)
-    
+
     return DiagnosisGetResponse(**response_data)
 
 
@@ -911,14 +918,18 @@ def get_exam_suggestions(
     request: Request,
     repo: ResearchRepository = Depends(get_repository),
 ):
-    """Get AI-generated exam suggestions with rate limiting and caching."""
+    """
+    Get AI-generated exam suggestions.
+
+    Includes rate limiting and response caching.
+    """
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
 
     # Get client IP for rate limiting
     client_ip = request.client.host if request.client else 'unknown'
-    
+
     # Check IP-based rate limit (100 per hour)
     ip_allowed, ip_limits = ip_rate_limiter.is_allowed(f'ip:{client_ip}')
     if not ip_allowed:
@@ -932,9 +943,10 @@ def get_exam_suggestions(
                 'Retry-After': str(ip_limits['reset'] - int(time.time())),
             },
         )
-    
+
     # Check patient-based rate limit (5 per hour)
-    patient_allowed, patient_limits = exam_rate_limiter.is_allowed(f'patient:{patient_id}')
+    patient_key = f'patient:{patient_id}'
+    patient_allowed, patient_limits = exam_rate_limiter.is_allowed(patient_key)
     if not patient_allowed:
         raise HTTPException(
             status_code=429,
@@ -946,7 +958,7 @@ def get_exam_suggestions(
                 'Retry-After': str(patient_limits['reset'] - int(time.time())),
             },
         )
-    
+
     # Check cache first
     cache_key = f'exam:{patient_id}'
     cached_response = exam_cache.get(cache_key)
@@ -973,16 +985,16 @@ def get_exam_suggestions(
         exam_options = [
             ExamOption(name=name, description='') for name in ai.options.keys()
         ]
-    
+
     response_data = {
         'patient_id': patient_id,
         'summary': ai.summary,
         'options': exam_options,
     }
-    
+
     # Cache the response
     exam_cache.set(cache_key, response_data)
-    
+
     return ExamGetResponse(**response_data)
 
 
