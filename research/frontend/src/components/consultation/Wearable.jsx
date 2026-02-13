@@ -138,10 +138,6 @@ export default function Wearable() {
         return;
       }
 
-      // Create FormData for multipart upload
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-
       // Update local state
       dispatch(
         consultationActions.updateWearableData({
