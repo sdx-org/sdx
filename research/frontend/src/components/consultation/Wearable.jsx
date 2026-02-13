@@ -154,6 +154,7 @@ export default function Wearable() {
         })
       );
 
+
       // Call backend API to upload
       await consultationAPI.uploadWearableData(state.patientId, selectedFile);
 
