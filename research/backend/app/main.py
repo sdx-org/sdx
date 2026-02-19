@@ -434,20 +434,29 @@ def get_all_patients(repo: ResearchRepository = Depends(get_repository)):
     """Get list of all patients for dashboard."""
     patients = repo.list_patients()
     patients_data = []
+
     for p in patients:
         next_step = _get_next_step(p)
+
+        latest_consultation = (
+            p.consultations[-1] if p.consultations else None
+        )
+
         patients_data.append(
             PatientSummary(
                 patient_id=p.uuid,
-                created_at=p.consultations[-1].timestamp.isoformat()
-                if p.consultations and p.consultations[-1].timestamp
+                created_at=latest_consultation.timestamp.isoformat()
+                if latest_consultation and latest_consultation.timestamp
+                else None,
+                language=latest_consultation.lang
+                if latest_consultation and latest_consultation.lang
                 else None,
                 current_step=next_step,
                 is_complete=next_step == 'confirmation',
             )
         )
-    return patients_data
 
+    return patients_data
 
 # Delete a patient
 @app.delete('/api/patients/{patient_id}', response_model=DeleteResponse)

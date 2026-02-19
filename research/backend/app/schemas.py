@@ -320,12 +320,16 @@ class PatientSummary(BaseModel):
     created_at: Optional[str] = Field(
         None, description='Timestamp when the patient was created.'
     )
+    language: Optional[str] = Field(
+        None, description='Selected language code (e.g. en, es, pt).'
+    )
     current_step: str = Field(
         ..., description='The current step in the consultation workflow.'
     )
     is_complete: bool = Field(
         ..., description='Indicates if the consultation workflow is complete.'
     )
+
 
 
 class DeleteResponse(BaseModel):
