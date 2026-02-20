@@ -346,7 +346,7 @@ export default function Dashboard() {
                             {patient.patient_id}
                           </code>
                         </td>
-                        <td>{patient.language ?? patient.lang ?? 'N/A'}</td>
+                        <td>{(patient.language ?? patient.lang) || 'N/A'}</td>
                         <td>
                           <Badge
                             bg={

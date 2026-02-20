@@ -368,6 +368,13 @@ def patient_to_ui_data(patient: Patient) -> Dict[str, Any]:
         'exams': exams,
     }
 
+def _select_latest_consultation(consultations):
+    """Select the latest consultation by timestamp."""
+    return max(
+        (c for c in consultations if getattr(c, "timestamp", None)),
+        key=lambda c: c.timestamp,
+        default=None,
+    )
 
 def _get_next_step(patient: Patient) -> str:
     """Determine the next step by checking for missing data."""
@@ -438,9 +445,7 @@ def get_all_patients(repo: ResearchRepository = Depends(get_repository)):
     for p in patients:
         next_step = _get_next_step(p)
 
-        latest_consultation = (
-            p.consultations[-1] if p.consultations else None
-        )
+        latest_consultation = _select_latest_consultation(p.consultations)
 
         patients_data.append(
             PatientSummary(
@@ -448,8 +453,8 @@ def get_all_patients(repo: ResearchRepository = Depends(get_repository)):
                 created_at=latest_consultation.timestamp.isoformat()
                 if latest_consultation and latest_consultation.timestamp
                 else None,
-                language=latest_consultation.lang
-                if latest_consultation and latest_consultation.lang
+                language=getattr(latest_consultation, "lang", None)
+                if latest_consultation
                 else None,
                 current_step=next_step,
                 is_complete=next_step == 'confirmation',

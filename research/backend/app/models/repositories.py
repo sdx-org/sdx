@@ -102,9 +102,8 @@ class ResearchRepository:
             datetime.fromisoformat(timestamp_str) if timestamp_str else None
         )
 
-        lang = meta_data.get("lang") if isinstance(meta_data, dict) else None
-        if  lang:
-            consultation.lang = lang
+        if isinstance(meta_data, dict) and "lang" in meta_data:
+            consultation.lang = meta_data["lang"]
 
         consultation.ai_diag_raw = full_patient_record.get('ai_diag')
         consultation.ai_exam_raw = full_patient_record.get('ai_exam')
