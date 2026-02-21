@@ -16,6 +16,16 @@ from schema.ui import ConsultationCreate, PatientCreate
 from sqlalchemy.orm import Session
 
 
+def _normalize_lang(value: object) -> str | None:
+    """Normalize and validate ISO 639-1 language code."""
+    if not isinstance(value, str):
+        return None
+    code = value.strip().lower()
+    if len(code) != 2 or not code.isalpha():
+        return None
+    return code
+
+
 class ResearchRepository:
     """
     Handle all database operations for the research application.
@@ -102,8 +112,10 @@ class ResearchRepository:
             datetime.fromisoformat(timestamp_str) if timestamp_str else None
         )
 
-        if isinstance(meta_data, dict) and "lang" in meta_data:
-            consultation.lang = meta_data["lang"]
+        if isinstance(meta_data, dict):
+            lang = _normalize_lang(meta_data.get('lang'))
+            if lang and consultation.lang != lang:
+                consultation.lang = lang
 
         consultation.ai_diag_raw = full_patient_record.get('ai_diag')
         consultation.ai_exam_raw = full_patient_record.get('ai_exam')

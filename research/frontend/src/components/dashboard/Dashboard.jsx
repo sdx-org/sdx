@@ -16,6 +16,11 @@ import ReactPaginate from 'react-paginate';
 import consultationAPI from '../../services/api';
 import { useConsultation, consultationActions } from '../../context/ConsultationContext';
 
+function displayOrNA(value) {
+  const s = typeof value === 'string' ? value.trim() : '';
+  return s ? s : 'N/A';
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -346,7 +351,7 @@ export default function Dashboard() {
                             {patient.patient_id}
                           </code>
                         </td>
-                        <td>{(patient.language ?? patient.lang) || 'N/A'}</td>
+                        <td>{displayOrNA(patient.language ?? patient.lang)}</td>
                         <td>
                           <Badge
                             bg={

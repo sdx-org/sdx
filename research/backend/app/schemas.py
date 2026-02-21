@@ -1,6 +1,6 @@
 """API Request/ Response schemas."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -320,8 +320,8 @@ class PatientSummary(BaseModel):
     created_at: Optional[str] = Field(
         None, description='Timestamp when the patient was created.'
     )
-    language: Optional[str] = Field(
-        None, description='Selected language code (e.g. en, es, pt).'
+    language: Optional[Literal['en', 'es', 'pt']] = Field(
+        None, description='Selected language code (ISO 639-1: en, es, pt).'
     )
     current_step: str = Field(
         ..., description='The current step in the consultation workflow.'
@@ -329,7 +329,6 @@ class PatientSummary(BaseModel):
     is_complete: bool = Field(
         ..., description='Indicates if the consultation workflow is complete.'
     )
-
 
 
 class DeleteResponse(BaseModel):

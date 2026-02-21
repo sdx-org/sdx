@@ -22,10 +22,10 @@ import io
 import logging
 import uuid
 
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 from dotenv import load_dotenv
 
@@ -368,13 +368,40 @@ def patient_to_ui_data(patient: Patient) -> Dict[str, Any]:
         'exams': exams,
     }
 
-def _select_latest_consultation(consultations):
-    """Select the latest consultation by timestamp."""
-    return max(
-        (c for c in consultations if getattr(c, "timestamp", None)),
-        key=lambda c: c.timestamp,
-        default=None,
-    )
+
+def _select_latest_consultation(
+    consultations: Optional[Iterable[Any]],
+) -> Optional[Any]:
+    """
+    Select the latest consultation based on timestamp.
+
+    Safely handles:
+    - None consultations
+    - Missing timestamps
+    - Mixed naive and timezone-aware datetime values
+
+    Args:
+        consultations: Iterable of consultation objects or None.
+
+    Returns
+    -------
+    The latest consultation object or None if unavailable.
+    """
+    if not consultations:
+        return None
+
+    def _to_epoch(dt: datetime) -> float:
+        """Normalize datetime to epoch seconds."""
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.timestamp()
+
+    items = [c for c in consultations if getattr(c, 'timestamp', None)]
+    if not items:
+        return None
+
+    return max(items, key=lambda c: _to_epoch(c.timestamp))
+
 
 def _get_next_step(patient: Patient) -> str:
     """Determine the next step by checking for missing data."""
@@ -453,7 +480,7 @@ def get_all_patients(repo: ResearchRepository = Depends(get_repository)):
                 created_at=latest_consultation.timestamp.isoformat()
                 if latest_consultation and latest_consultation.timestamp
                 else None,
-                language=getattr(latest_consultation, "lang", None)
+                language=getattr(latest_consultation, 'lang', None)
                 if latest_consultation
                 else None,
                 current_step=next_step,
@@ -462,6 +489,7 @@ def get_all_patients(repo: ResearchRepository = Depends(get_repository)):
         )
 
     return patients_data
+
 
 # Delete a patient
 @app.delete('/api/patients/{patient_id}', response_model=DeleteResponse)
