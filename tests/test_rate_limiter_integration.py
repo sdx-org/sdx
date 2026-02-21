@@ -1,22 +1,22 @@
 """Simplified integration tests for rate limiting logic.
 
 Testing Approach:
-    This integration test suite validates rate limiting behavior at the API endpoint level,
-    ensuring the feature works end-to-end in realistic scenarios. Tests are organized into four
-    groups: (1) RateLimitingLogic tests verify patient and IP limits enforce correctly with
-    proper HTTP headers and semantic validity. (2) RateLimitingWithCaching tests confirm cached
-    responses don't consume quota, preventing cache from being bypassed for rate limiting.
-    (3) RateLimitingScenarios tests simulate real-world conditions with concurrent patients,
-    mixed limiting rules, and accurate reset timestamps. (4) ErrorConditions tests handle edge
-    cases like zero remaining quota, unusual keys, and extreme request volumes. By directly
-    testing RateLimiter and ResponseCache classes with realistic data, we validate both the
-    rate limiting logic and cache interaction work correctly without affecting production systems.
+    This integration test suite validates rate limiting behavior at the API
+    endpoint level, ensuring the feature works end-to-end in realistic
+    scenarios. Tests are organized into four groups: (1) RateLimitingLogic
+    tests verify patient and IP limits enforce correctly with proper HTTP
+    headers and semantic validity. (2) RateLimitingWithCaching tests confirm
+    cached responses don't consume quota, preventing cache from being
+    bypassed for rate limiting. (3) RateLimitingScenarios tests simulate
+    real-world conditions with concurrent patients, mixed limiting rules, and
+    accurate reset timestamps. (4) ErrorConditions tests handle edge cases
+    like zero remaining quota, unusual keys, and extreme request volumes. By
+    directly testing RateLimiter and ResponseCache classes with realistic
+    data, we validate both the rate limiting logic and cache interaction work
+    correctly without affecting production systems.
 """
 
 import time
-from unittest.mock import Mock, patch
-
-import pytest
 
 from app.rate_limiter import (
     RateLimiter,
@@ -24,8 +24,6 @@ from app.rate_limiter import (
     _rate_limit_store,
     diagnosis_cache,
     diagnosis_rate_limiter,
-    exam_cache,
-    exam_rate_limiter,
     ip_rate_limiter,
 )
 
@@ -68,7 +66,7 @@ class TestRateLimitingLogic:
 
     def test_rate_limit_headers_format(self):
         """Test that rate limit info has correct format for HTTP headers."""
-        is_allowed, info = diagnosis_rate_limiter.is_allowed('patient:abc')
+        _, info = diagnosis_rate_limiter.is_allowed('patient:abc')
 
         # Headers should include: X-RateLimit-Limit, Remaining, Reset
         assert 'limit' in info
@@ -260,7 +258,8 @@ class TestErrorConditions:
         # Cache can store None
         cache.set('null_key', None)
         result = cache.get('null_key')
-        assert result is None  # Returned None, but it's from cache expiry check
+        # Returned None, but it's from cache expiry check
+        assert result is None
 
     def test_extremely_high_request_volume(self):
         """Test handling of very high number of requests."""

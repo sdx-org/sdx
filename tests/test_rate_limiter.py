@@ -1,21 +1,20 @@
 """Tests for rate limiting and caching functionality.
 
 Testing Approach:
-    This test suite validates the rate limiting and response caching feature through three
-    complementary layers: (1) Unit tests verify core RateLimiter and ResponseCache classes
-    work correctly in isolation, testing window resets, quota enforcement, and cache TTL expiry.
-    (2) Configuration tests ensure global instances are properly initialized with correct limits
-    (5/hour per patient, 100/hour per IP) and independent counters. (3) By resetting state
-    between tests via setup_method, we ensure test isolation and deterministic behavior. The
-    approach covers both happy paths (requests within limits, cache hits) and edge cases
-    (expired windows, multiple keys, concurrent access) to guarantee robust protection against
-    API abuse while maintaining accurate rate limit metadata for clients.
+    This test suite validates the rate limiting and response caching feature
+    through three complementary layers: (1) Unit tests verify core RateLimiter
+    and ResponseCache classes work correctly in isolation, testing window
+    resets, quota enforcement, and cache TTL expiry. (2) Configuration tests
+    ensure global instances are properly initialized with correct limits
+    (5/hour per patient, 100/hour per IP) and independent counters. (3) By
+    resetting state between tests via setup_method, we ensure test isolation
+    and deterministic behavior. The approach covers both happy paths (requests
+    within limits, cache hits) and edge cases (expired windows, multiple keys,
+    concurrent access) to guarantee robust protection against API abuse while
+    maintaining accurate rate limit metadata for clients.
 """
 
 import time
-from unittest.mock import patch
-
-import pytest
 
 from app.rate_limiter import RateLimiter, ResponseCache
 
@@ -101,7 +100,7 @@ class TestRateLimiter:
     def test_rate_limit_info_structure(self):
         """Test that rate limit info has correct structure."""
         limiter = RateLimiter(max_calls=5, time_window=3600)
-        is_allowed, info = limiter.is_allowed('test:key')
+        _, info = limiter.is_allowed('test:key')
 
         assert 'limit' in info
         assert 'remaining' in info
@@ -279,17 +278,21 @@ class TestGlobalInstances:
 
     def test_separate_rate_limiters_independent(self):
         """Test that different rate limiters have separate configs."""
-        from app.rate_limiter import diagnosis_rate_limiter, exam_rate_limiter
+        from app.rate_limiter import (
+            diagnosis_rate_limiter,
+            exam_rate_limiter,
+        )
 
-        # Note: Limiters share the same store, so they use KEY naming to distinguish
-        # For this test, we verify they have different configurations
-        
+        # Note: Limiters share the same store, so they use KEY naming to
+        # distinguish. For this test, we verify they have different
+        # configurations
+
         # Exhaust diagnosis limiter with specific key
         for _ in range(5):
             diagnosis_rate_limiter.is_allowed('diagnosis:patient:123')
 
-        is_allowed, _ = diagnosis_rate_limiter.is_allowed('diagnosis:patient:123')
-        assert is_allowed is False
+        _, info = diagnosis_rate_limiter.is_allowed('diagnosis:patient:123')
+        assert info['remaining'] == 0
 
         # Use exam endpoint with different key - should have independent count
         is_allowed, _ = exam_rate_limiter.is_allowed('exam:patient:123')
