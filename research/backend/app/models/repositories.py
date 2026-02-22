@@ -1,5 +1,7 @@
 """Repositories for reading and saving the web app data."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Any, Dict, List
 from uuid import UUID
@@ -103,10 +105,10 @@ class ResearchRepository:
             patient_data.get('meta', {}).get('lang')
         )
         consultation_schema = ConsultationCreate(
+            **patient_data['patient'],
             patient_id=new_patient.id,
             timestamp=timestamp_obj,
             lang=normalized_lang,
-            **patient_data['patient'],
         )
         new_consultation = Consultation(
             **consultation_schema.model_dump(exclude_unset=True)
@@ -155,10 +157,11 @@ class ResearchRepository:
                     if ts is not None:
                         consultation.timestamp = ts
 
-            # Update language consistently (even if None) for predictability
-            lang = _normalize_lang(meta_data.get('lang'))
-            if consultation.lang != lang:
-                consultation.lang = lang
+            # Update language only if explicitly provided in meta_data
+            if 'lang' in meta_data:
+                lang = _normalize_lang(meta_data.get('lang'))
+                if consultation.lang != lang:
+                    consultation.lang = lang
 
         consultation.ai_diag_raw = full_patient_record.get('ai_diag')
         consultation.ai_exam_raw = full_patient_record.get('ai_exam')

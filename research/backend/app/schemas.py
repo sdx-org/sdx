@@ -352,7 +352,7 @@ class PatientSummary(BaseModel):
         """
         if v is None:
             return None
-        code = str(v).split('-')[0].split('_')[0].lower()
+        code = str(v).strip().split('-')[0].split('_')[0].lower()
         allowed = set(get_args(LanguageCode))
         if code in allowed:
             return code  # type: ignore
