@@ -2,7 +2,10 @@
 
 from typing import Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
+
+# Type alias for supported language codes
+LanguageCode = Literal['en', 'es', 'pt']
 
 
 # Generic response schemas
@@ -320,7 +323,7 @@ class PatientSummary(BaseModel):
     created_at: Optional[str] = Field(
         None, description='Timestamp when the patient was created.'
     )
-    language: Optional[Literal['en', 'es', 'pt']] = Field(
+    language: Optional[LanguageCode] = Field(
         None, description='Selected language code (ISO 639-1: en, es, pt).'
     )
     current_step: str = Field(
@@ -329,6 +332,31 @@ class PatientSummary(BaseModel):
     is_complete: bool = Field(
         ..., description='Indicates if the consultation workflow is complete.'
     )
+
+    @validator('language', pre=True)
+    def _normalize_language(cls, v: Optional[str]) -> Optional[LanguageCode]:
+        """Normalize and validate language code.
+
+        Accepts BCP-47-like inputs (e.g. 'en-US', 'pt_BR') and normalizes
+        to base ISO 639-1 codes (e.g. 'en', 'pt'). Returns None for
+        unsupported or invalid codes, matching repositories._normalize_lang.
+
+        Args:
+        ----
+            v: Language code input (string or None).
+
+        Returns
+        -------
+            Normalized language code ('en', 'es', 'pt') or None if
+            unsupported/invalid.
+        """
+        if v is None:
+            return None
+        code = str(v).split('-')[0].split('_')[0].lower()
+        if code in {'en', 'es', 'pt'}:
+            return code  # type: ignore
+        # Unsupported or invalid codes -> return None (don't raise)
+        return None
 
 
 class DeleteResponse(BaseModel):

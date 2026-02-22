@@ -369,6 +369,31 @@ def patient_to_ui_data(patient: Patient) -> Dict[str, Any]:
     }
 
 
+def _filter_items_with_datetime_timestamp(
+    consultations: Iterable[Any],
+) -> list[Any]:
+    """Return only items whose timestamp is a datetime object."""
+    return [
+        c
+        for c in consultations
+        if isinstance(getattr(c, 'timestamp', None), datetime)
+    ]
+
+
+def _to_epoch(dt: datetime) -> float:
+    """Normalize datetime to epoch seconds.
+
+    Assumes naive datetimes are UTC. Converts aware datetimes to UTC.
+    """
+    if dt.tzinfo is None:
+        # Naive datetime; treat as UTC
+        dt = dt.replace(tzinfo=timezone.utc)
+    else:
+        # Aware datetime; convert to UTC
+        dt = dt.astimezone(timezone.utc)
+    return dt.timestamp()
+
+
 def _select_latest_consultation(
     consultations: Optional[Iterable[Any]],
 ) -> Optional[Any]:
@@ -390,13 +415,7 @@ def _select_latest_consultation(
     if not consultations:
         return None
 
-    def _to_epoch(dt: datetime) -> float:
-        """Normalize datetime to epoch seconds."""
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        return dt.timestamp()
-
-    items = [c for c in consultations if getattr(c, 'timestamp', None)]
+    items = _filter_items_with_datetime_timestamp(consultations)
     if not items:
         return None
 
@@ -474,15 +493,22 @@ def get_all_patients(repo: ResearchRepository = Depends(get_repository)):
 
         latest_consultation = _select_latest_consultation(p.consultations)
 
+        # NOTE: created_at uses the latest consultation timestamp, not the
+        # patient's actual creation time. This represents the most recent
+        # update. Confirm downstream consumers expect this semantic.
         patients_data.append(
             PatientSummary(
                 patient_id=p.uuid,
-                created_at=latest_consultation.timestamp.isoformat()
-                if latest_consultation and latest_consultation.timestamp
-                else None,
-                language=getattr(latest_consultation, 'lang', None)
-                if latest_consultation
-                else None,
+                created_at=(
+                    latest_consultation.timestamp.isoformat()
+                    if latest_consultation and latest_consultation.timestamp
+                    else None
+                ),
+                language=(
+                    getattr(latest_consultation, 'lang', None)
+                    if latest_consultation
+                    else None
+                ),
                 current_step=next_step,
                 is_complete=next_step == 'confirmation',
             )

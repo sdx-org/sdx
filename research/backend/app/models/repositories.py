@@ -22,9 +22,11 @@ def _normalize_lang(value: object) -> str | None:
     if not isinstance(value, str):
         return None
     code = value.strip().lower()
-    # Accept codes like 'pt-BR' and take the primary subtag
-    if '-' in code:
-        code = code.split('-', 1)[0]
+    # Accept codes like 'pt-BR' or 'pt_BR' and take the primary subtag
+    for sep in ('-', '_'):
+        if sep in code:
+            code = code.split(sep, 1)[0]
+            break
 
     if code in SUPPORTED:
         return code
@@ -112,19 +114,18 @@ class ResearchRepository:
             self.db.add(consultation)
 
         consultation_data = full_patient_record.get('patient', {})
-        meta_data = full_patient_record.get('meta', {})
+        meta_data: Dict[str, Any] | None = full_patient_record.get('meta')
 
         for key, value in consultation_data.items():
             if hasattr(consultation, key):
                 setattr(consultation, key, value)
 
         # Parse the timestamp string into a datetime object
-        timestamp_str = meta_data.get('timestamp')
-        consultation.timestamp = (
-            datetime.fromisoformat(timestamp_str) if timestamp_str else None
-        )
+        if meta_data and isinstance(meta_data, dict):
+            if 'timestamp' in meta_data and meta_data.get('timestamp'):
+                timestamp_str = meta_data['timestamp']
+                consultation.timestamp = datetime.fromisoformat(timestamp_str)
 
-        if isinstance(meta_data, dict):
             lang = _normalize_lang(meta_data.get('lang'))
             if lang and consultation.lang != lang:
                 consultation.lang = lang

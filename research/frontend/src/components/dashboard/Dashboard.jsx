@@ -16,9 +16,15 @@ import ReactPaginate from 'react-paginate';
 import consultationAPI from '../../services/api';
 import { useConsultation, consultationActions } from '../../context/ConsultationContext';
 
-function displayOrNA(value) {
-  const s = typeof value === 'string' ? value.trim() : '';
-  return s ? s : 'N/A';
+/** Coalesce first non-empty trimmed string or 'N/A' */
+function firstNonEmptyOrNA(...values) {
+  for (const v of values) {
+    if (typeof v === 'string') {
+      const s = v.trim();
+      if (s) return s;
+    }
+  }
+  return 'N/A';
 }
 
 export default function Dashboard() {
@@ -351,7 +357,7 @@ export default function Dashboard() {
                             {patient.patient_id}
                           </code>
                         </td>
-                        <td>{displayOrNA(patient.language ?? patient.lang)}</td>
+                        <td>{firstNonEmptyOrNA(patient.language, patient.lang)}</td>
                         <td>
                           <Badge
                             bg={
