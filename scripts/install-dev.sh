@@ -6,6 +6,9 @@ SCRIPT_PATH="${BASH_SOURCE:-$0}"
 SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
+# Ensure setuptools < 82 is available for pkg_resources compatibility
+pip install --upgrade "setuptools<82"
+
 # Make uv install into the current interpreter (conda/venv)
 export UV_PYTHON="$(python -c 'import sys; print(sys.executable)')"
 
@@ -33,10 +36,4 @@ case "$OS" in
     ;;
 esac
 
-# Install package with dev dependencies
 pip install ".[dev]"
-
-# CRITICAL: Ensure setuptools is available for pkg_resources
-# Required by mkdocs-macros-plugin. Must be installed AFTER pip install
-# to ensure it's properly registered in the environment.
-pip install --force-reinstall "setuptools>=70.1.0"
