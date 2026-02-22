@@ -15,10 +15,31 @@ from app.models.ui import (
 from schema.ui import ConsultationCreate, PatientCreate
 from sqlalchemy.orm import Session
 
+# Supported language codes
+SUPPORTED_LANGS: set[str] = {'en', 'es', 'pt'}
+
+
+def _parse_iso_datetime(value: object) -> datetime | None:
+    """Parse ISO 8601 timestamp safely.
+
+    Parameters
+    ----------
+        value: Object to parse (typically a string).
+
+    Returns
+    -------
+        Parsed datetime or None if value is None, not a string, or invalid.
+    """
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except (ValueError, TypeError):
+        return None
+
 
 def _normalize_lang(value: object) -> str | None:
     """Normalize and validate ISO 639-1 language code."""
-    SUPPORTED = {'en', 'es', 'pt'}
     if not isinstance(value, str):
         return None
     code = value.strip().lower()
@@ -28,7 +49,7 @@ def _normalize_lang(value: object) -> str | None:
             code = code.split(sep, 1)[0]
             break
 
-    if code in SUPPORTED:
+    if code in SUPPORTED_LANGS:
         return code
 
     # unsupported or invalid codes -> explicit fallback to None
@@ -72,11 +93,9 @@ class ResearchRepository:
         self.db.commit()
         self.db.refresh(new_patient)
 
-        # Parse the timestamp string into a datetime object
+        # Parse the timestamp string safely as ISO 8601.
         timestamp_str = patient_data['meta'].get('timestamp')
-        timestamp_obj = (
-            datetime.fromisoformat(timestamp_str) if timestamp_str else None
-        )
+        timestamp_obj = _parse_iso_datetime(timestamp_str)
 
         # Normalize language before persisting.
         # Only supported codes (en, es, pt) will be saved.
@@ -120,14 +139,25 @@ class ResearchRepository:
             if hasattr(consultation, key):
                 setattr(consultation, key, value)
 
-        # Parse the timestamp string into a datetime object
+        # Parse and update timestamp: trim whitespace, clear on empty/None.
         if meta_data and isinstance(meta_data, dict):
-            if 'timestamp' in meta_data and meta_data.get('timestamp'):
-                timestamp_str = meta_data['timestamp']
-                consultation.timestamp = datetime.fromisoformat(timestamp_str)
+            if 'timestamp' in meta_data:
+                raw_ts = meta_data.get('timestamp')
+                # Trim whitespace; empty or None clears the timestamp
+                if isinstance(raw_ts, str):
+                    raw_ts = raw_ts.strip()
+                if not raw_ts:
+                    # Empty/whitespace-only/None clears timestamp
+                    consultation.timestamp = None
+                else:
+                    # Parse the trimmed value
+                    ts = _parse_iso_datetime(raw_ts)
+                    if ts is not None:
+                        consultation.timestamp = ts
 
+            # Update language consistently (even if None) for predictability
             lang = _normalize_lang(meta_data.get('lang'))
-            if lang and consultation.lang != lang:
+            if consultation.lang != lang:
                 consultation.lang = lang
 
         consultation.ai_diag_raw = full_patient_record.get('ai_diag')

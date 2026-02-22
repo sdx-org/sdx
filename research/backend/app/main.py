@@ -394,6 +394,22 @@ def _to_epoch(dt: datetime) -> float:
     return dt.timestamp()
 
 
+def _to_utc_iso(dt: datetime) -> str:
+    """Return UTC ISO8601 string for a datetime.
+
+    Normalizes naive datetimes to UTC and converts aware datetimes to UTC.
+    Assumes naive datetimes are already in UTC; if not, results will be
+    incorrect. Consider adding logging to surface naive timestamps.
+    """
+    if dt.tzinfo is None:
+        # Naive datetime; treat as UTC
+        dt = dt.replace(tzinfo=timezone.utc)
+    else:
+        # Aware datetime; convert to UTC
+        dt = dt.astimezone(timezone.utc)
+    return dt.isoformat()
+
+
 def _select_latest_consultation(
     consultations: Optional[Iterable[Any]],
 ) -> Optional[Any]:
@@ -496,11 +512,13 @@ def get_all_patients(repo: ResearchRepository = Depends(get_repository)):
         # NOTE: created_at uses the latest consultation timestamp, not the
         # patient's actual creation time. This represents the most recent
         # update. Confirm downstream consumers expect this semantic.
+        # Selection by max(timestamp) instead of last item may re-order if
+        # insertion order was previously relied upon.
         patients_data.append(
             PatientSummary(
                 patient_id=p.uuid,
                 created_at=(
-                    latest_consultation.timestamp.isoformat()
+                    _to_utc_iso(latest_consultation.timestamp)
                     if latest_consultation and latest_consultation.timestamp
                     else None
                 ),

@@ -1,8 +1,8 @@
 """API Request/ Response schemas."""
 
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, get_args
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 # Type alias for supported language codes
 LanguageCode = Literal['en', 'es', 'pt']
@@ -333,7 +333,7 @@ class PatientSummary(BaseModel):
         ..., description='Indicates if the consultation workflow is complete.'
     )
 
-    @validator('language', pre=True)
+    @field_validator('language', mode='before')
     def _normalize_language(cls, v: Optional[str]) -> Optional[LanguageCode]:
         """Normalize and validate language code.
 
@@ -353,7 +353,8 @@ class PatientSummary(BaseModel):
         if v is None:
             return None
         code = str(v).split('-')[0].split('_')[0].lower()
-        if code in {'en', 'es', 'pt'}:
+        allowed = set(get_args(LanguageCode))
+        if code in allowed:
             return code  # type: ignore
         # Unsupported or invalid codes -> return None (don't raise)
         return None
