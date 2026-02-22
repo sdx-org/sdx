@@ -18,12 +18,19 @@ from sqlalchemy.orm import Session
 
 def _normalize_lang(value: object) -> str | None:
     """Normalize and validate ISO 639-1 language code."""
+    SUPPORTED = {'en', 'es', 'pt'}
     if not isinstance(value, str):
         return None
     code = value.strip().lower()
-    if len(code) != 2 or not code.isalpha():
-        return None
-    return code
+    # Accept codes like 'pt-BR' and take the primary subtag
+    if '-' in code:
+        code = code.split('-', 1)[0]
+
+    if code in SUPPORTED:
+        return code
+
+    # unsupported or invalid codes -> explicit fallback to None
+    return None
 
 
 class ResearchRepository:
@@ -69,10 +76,15 @@ class ResearchRepository:
             datetime.fromisoformat(timestamp_str) if timestamp_str else None
         )
 
+        # Normalize language before persisting.
+        # Only supported codes (en, es, pt) will be saved.
+        normalized_lang = _normalize_lang(
+            patient_data.get('meta', {}).get('lang')
+        )
         consultation_schema = ConsultationCreate(
             patient_id=new_patient.id,
             timestamp=timestamp_obj,
-            lang=patient_data['meta'].get('lang'),
+            lang=normalized_lang,
             **patient_data['patient'],
         )
         new_consultation = Consultation(
