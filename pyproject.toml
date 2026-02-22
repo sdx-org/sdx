@@ -9,6 +9,7 @@ authors = [
 license = { text = "BSD 3 Clause" }
 requires-python = ">=3.10,<4"
 dependencies = [
+    "setuptools >=70.1.0",  # required for pkg_resources
     "anamnesisai >=0.4.0",
     "fhir.resources >=8.1.0",
     "pypdf >=5.4.0",

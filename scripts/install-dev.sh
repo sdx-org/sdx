@@ -33,4 +33,9 @@ case "$OS" in
     ;;
 esac
 
+# Install package with dev dependencies
 pip install ".[dev]"
+
+# Ensure setuptools is available for pkg_resources (required by mkdocs-macros-plugin)
+# This must be installed AFTER pip install to avoid being shadowed
+pip install --upgrade "setuptools>=70.1.0"
