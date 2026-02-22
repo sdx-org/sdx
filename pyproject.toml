@@ -76,6 +76,7 @@ dev = [
   "makim ==1.27.0",
   "fastapi >=0.115",
   "python-multipart >=0.0.20",
+  "setuptools >=70.1.0",  # required for pkg_resources used by mkdocs-macros-plugin
 ]
 
 [tool.bandit]
