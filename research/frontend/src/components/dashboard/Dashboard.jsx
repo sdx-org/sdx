@@ -21,6 +21,7 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const { dispatch } = useConsultation();
   const [patients, setPatients] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState({
     total_patients: 0,
     active_records: 0,
@@ -30,9 +31,12 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [itemOffset, setItemOffset] = useState(0);
   const itemsPerPage = 5;
+  const filteredPatients = patients.filter((patient) =>
+    (patient.patient_id ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const endOffset = itemOffset + itemsPerPage;
-  const currentItems = patients.slice(itemOffset, endOffset);
-  const pageCount = Math.ceil(patients.length / itemsPerPage);
+  const currentItems = filteredPatients.slice(itemOffset, endOffset);
+  const pageCount = Math.ceil(filteredPatients.length / itemsPerPage);
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
@@ -107,48 +111,48 @@ export default function Dashboard() {
   };
 
   const handleResumePatient = async (patientId) => {
-    try{
-      const consultationData=await consultationAPI.getConsultationStatus(patientId);
-      if(!consultationData){
+    try {
+      const consultationData = await consultationAPI.getConsultationStatus(patientId);
+      if (!consultationData) {
         alert('No consultation data found for this patient.');
         return;
       }
-      const currentStep=consultationData.current_step || 'demographics';
-      const language=consultationData.lang || 'en';
+      const currentStep = consultationData.current_step || 'demographics';
+      const language = consultationData.lang || 'en';
       dispatch(consultationActions.initConsultation(
         patientId,
         language,
         currentStep
       ));
 
-      const shouldPrefillFromLocalStorage=[
+      const shouldPrefillFromLocalStorage = [
         'demographics',
         'lifestyle',
         'symptoms',
         'mental',
       ].includes(currentStep);
 
-      if(shouldPrefillFromLocalStorage){
-        const savedState=localStorage.getItem(`consultationState_${patientId}`);
-        if(savedState){
-          const parsedState=JSON.parse(savedState);
-          if(parsedState.formData.demographics){
+      if (shouldPrefillFromLocalStorage) {
+        const savedState = localStorage.getItem(`consultationState_${patientId}`);
+        if (savedState) {
+          const parsedState = JSON.parse(savedState);
+          if (parsedState.formData.demographics) {
             dispatch(consultationActions.updateDemographics(parsedState.formData.demographics));
           }
-          if(parsedState.formData.lifestyle){
+          if (parsedState.formData.lifestyle) {
             dispatch(consultationActions.updateLifestyle(parsedState.formData.lifestyle));
           }
-          if(parsedState.formData.symptoms){
+          if (parsedState.formData.symptoms) {
             dispatch(consultationActions.updateSymptoms(parsedState.formData.symptoms));
           }
-          if(parsedState.formData.mental){
+          if (parsedState.formData.mental) {
             dispatch(consultationActions.updateMentalHealth(parsedState.formData.mental));
           }
         }
       }
-        navigate(`/${currentStep}`);
-    }catch(err){
-      console.error('Error resuming patient consultation:',err);
+      navigate(`/${currentStep}`);
+    } catch (err) {
+      console.error('Error resuming patient consultation:', err);
       alert(`Failed to resume consultation: ${err.message}`);
     }
   };
@@ -177,7 +181,8 @@ export default function Dashboard() {
   };
 
   const handlePageClick = (event) => {
-    const newOffset = (event.selected * itemsPerPage) % patients.length;
+    const newOffset =
+      (event.selected * itemsPerPage) % filteredPatients.length;
     setItemOffset(newOffset);
   };
 
@@ -321,10 +326,23 @@ export default function Dashboard() {
         ) : (
           <Card className="border-0 shadow-sm">
             <Card.Body className="p-4">
-              <h5 className="mb-4 fw-semibold">
-                Recent Patients ({patients.length})
-              </h5>
-
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h5 className="fw-semibold mb-0">
+                  Recent Patients ({filteredPatients.length})
+                </h5>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search by Patient ID..."
+                  style={{ maxWidth: '300px' }}
+                  aria-label="search patients by ID..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setItemOffset(0);
+                  }}
+                />
+              </div>
               <div className="table-responsive">
                 <Table hover className="align-middle">
                   <thead>
