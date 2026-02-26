@@ -4,12 +4,6 @@ import pytest
 
 from hiperhealth.privacy.deidentifier import Deidentifier
 
-# Skipping all Deidentifier tests temporarily
-pytestmark = pytest.mark.skip(
-    reason='Temporarily skipping all Deidentifier tests'
-)
-
-
 PII_TEST_CASES = [
     ('T1_SIMPLE_EMAIL_NAME', 'Contact Jane Doe at jane.d@example.com.', True),
     ('T2_US_PHONE', 'My phone number is 415-555-0132.', True),
@@ -99,9 +93,14 @@ PII_TEST_CASES = [
 ]
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def deidentifier() -> Deidentifier:
-    """Provide a fresh instance of the Deidentifier class for each test."""
+    """Provide a single shared Deidentifier instance for the entire test session.
+
+    Using session scope avoids reloading the spaCy NLP model on every
+    parametrized test call, which previously caused the process to be killed
+    due to memory exhaustion.
+    """
     return Deidentifier()
 
 
