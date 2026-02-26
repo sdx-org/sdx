@@ -95,11 +95,11 @@ PII_TEST_CASES = [
 
 @pytest.fixture(scope='session')
 def deidentifier() -> Deidentifier:
-    """Provide a single shared Deidentifier instance for the entire test session.
+    """Provide a single Deidentifier instance for the test session.
 
     Using session scope avoids reloading the spaCy NLP model on every
-    parametrized test call, which previously caused the process to be killed
-    due to memory exhaustion.
+    parametrized test call, which previously caused the process to be
+    killed due to memory exhaustion.
     """
     return Deidentifier()
 
