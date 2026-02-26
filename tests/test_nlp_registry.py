@@ -4,7 +4,7 @@ import threading
 def test_register_and_lazy_init(tmp_path, monkeypatch):
     from hiperhealth.nlp import registry
 
-    calls = {"init": 0}
+    calls = {'init': 0}
 
     def factory():
         class _P:
@@ -12,7 +12,7 @@ def test_register_and_lazy_init(tmp_path, monkeypatch):
                 self.initialized = False
 
             def initialize(self):
-                calls["init"] += 1
+                calls['init'] += 1
                 self.initialized = True
 
             def process(self, text: str):
@@ -26,23 +26,23 @@ def test_register_and_lazy_init(tmp_path, monkeypatch):
 
         return _P()
 
-    registry.register_pipeline("test_lazy", factory)
+    registry.register_pipeline('test_lazy', factory)
 
-    p = registry.get_pipeline("test_lazy")
+    p = registry.get_pipeline('test_lazy')
     # not initialized before use
     assert not p.initialized
 
-    out = p.process("hello")
-    assert out == "HELLO"
+    out = p.process('hello')
+    assert out == 'HELLO'
     assert p.initialized
     # factory initialize called exactly once
-    assert calls["init"] == 1
+    assert calls['init'] == 1
 
 
 def test_threaded_init(monkeypatch):
     from hiperhealth.nlp import registry
 
-    initialized = {"count": 0}
+    initialized = {'count': 0}
 
     def factory():
         class P:
@@ -54,7 +54,7 @@ def test_threaded_init(monkeypatch):
                 import time
 
                 time.sleep(0.01)
-                initialized["count"] += 1
+                initialized['count'] += 1
                 self.initialized = True
 
             def process(self, text: str):
@@ -68,13 +68,13 @@ def test_threaded_init(monkeypatch):
 
         return P()
 
-    registry.register_pipeline("thread_lazy", factory)
-    proxy = registry.get_pipeline("thread_lazy")
+    registry.register_pipeline('thread_lazy', factory)
+    proxy = registry.get_pipeline('thread_lazy')
 
     results = []
 
     def worker():
-        results.append(proxy.process("x"))
+        results.append(proxy.process('x'))
 
     threads = [threading.Thread(target=worker) for _ in range(4)]
     for t in threads:
@@ -83,4 +83,4 @@ def test_threaded_init(monkeypatch):
         t.join()
 
     # initialization should happen exactly once
-    assert initialized["count"] == 1
+    assert initialized['count'] == 1

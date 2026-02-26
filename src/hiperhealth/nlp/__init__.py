@@ -1,10 +1,15 @@
 from .base import BasePipeline
-from .registry import register_pipeline, get_pipeline, list_pipelines, LazyPipelineProxy
+from .registry import (
+    LazyPipelineProxy,
+    get_pipeline,
+    list_pipelines,
+    register_pipeline,
+)
 
 __all__ = [
-    "BasePipeline",
-    "register_pipeline",
-    "get_pipeline",
-    "list_pipelines",
-    "LazyPipelineProxy",
+    'BasePipeline',
+    'register_pipeline',
+    'get_pipeline',
+    'list_pipelines',
+    'LazyPipelineProxy',
 ]

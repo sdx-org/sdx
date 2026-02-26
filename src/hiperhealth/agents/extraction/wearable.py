@@ -133,7 +133,7 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             raw = self.mime.from_file(str(file))
             # Normalize MIME type by stripping any charset or parameters
             if isinstance(raw, str):
-                raw = raw.split(";", 1)[0].strip()
+                raw = raw.split(';', 1)[0].strip()
             self._mimetype_cache[cache_key] = cast(MimeType, raw)
             return self._mimetype_cache[cache_key]
         elif isinstance(file, IO):  # Generic IO[bytes]
@@ -149,7 +149,7 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
 
             raw = self.mime.from_buffer(buf)
             if isinstance(raw, str):
-                raw = raw.split(";", 1)[0].strip()
+                raw = raw.split(';', 1)[0].strip()
             self._mimetype_cache[cache_key] = cast(MimeType, raw)
             return self._mimetype_cache[cache_key]
         else:
@@ -185,7 +185,9 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
                 pass
 
         # Fallback to MIME type detection
-        mime = self._get_mime_type(file if not isinstance(file, str) else Path(file))
+        mime = self._get_mime_type(
+            file if not isinstance(file, str) else Path(file)
+        )
         return mime == self.allowed_extensions_mimetypes_map['json']
 
     def _is_csv(self, file: FileInput) -> bool:
@@ -223,7 +225,9 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
                 pass
 
         # Fallback to MIME type detection
-        mime = self._get_mime_type(file if not isinstance(file, str) else Path(file))
+        mime = self._get_mime_type(
+            file if not isinstance(file, str) else Path(file)
+        )
         return mime in (self.allowed_extensions_mimetypes_map['csv'],)
 
     def _process_row(self, row: dict[str, Any]) -> dict[str, object]:

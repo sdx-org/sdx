@@ -1,11 +1,9 @@
-Pluggable NLP Pipeline Registry
-================================
+# Pluggable NLP Pipeline Registry
 
-This package provides a small, dependency-free skeleton for registering
-and lazily loading NLP pipelines.
+This package provides a small, dependency-free skeleton for registering and
+lazily loading NLP pipelines.
 
-Quick start
------------
+## Quick start
 
 Register a pipeline (example):
 
@@ -21,8 +19,9 @@ p = get_pipeline("example")
 print(p.process("hello world"))
 ```
 
-Notes
------
-- `LazyPipelineProxy` defers heavy initialization until the first `process()` call.
+## Notes
+
+- `LazyPipelineProxy` defers heavy initialization until the first `process()`
+  call.
 - Adapters for heavy frameworks (spaCy, presidio, transformers) should be
   implemented in follow-up PRs and can be kept behind optional dependencies.

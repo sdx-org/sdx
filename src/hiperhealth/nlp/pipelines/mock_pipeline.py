@@ -11,7 +11,7 @@ class MockPipeline(BasePipeline):
     """
 
     def __init__(self) -> None:
-        super().__init__("mock")
+        super().__init__('mock')
         self._inits = 0
 
     def initialize(self) -> None:
@@ -33,6 +33,6 @@ class MockPipeline(BasePipeline):
 from ..registry import register_pipeline
 
 
-@register_pipeline("mock")
+@register_pipeline('mock')
 def _mock_factory() -> MockPipeline:
     return MockPipeline()
