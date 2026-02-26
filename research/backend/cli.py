@@ -1,5 +1,3 @@
-"""CLI for physician-guided consultations."""
-
 from __future__ import annotations
 
 import json
@@ -10,9 +8,14 @@ from typing import Any
 
 import questionary
 import typer
+import logging
+from rich.logging import RichHandler
 
 from hiperhealth.agents.diagnostics import core as diag
-from rich import print
+
+# Configure structured logging for CLI output
+logging.basicConfig(level=logging.INFO, handlers=[RichHandler()])
+logger = logging.getLogger(__name__)
 
 RECORDS_DIR = Path.home() / 'config' / '.hiperhealth' / 'records'
 RECORDS_DIR.mkdir(parents=True, exist_ok=True)
@@ -40,36 +43,36 @@ def consult() -> None:
     patient: dict[str, Any] = {}
 
     # ── inputs ──────────────────────────────────────────────────────────
-    print('[bold cyan]\nPatient demographics[/bold cyan]')
+    logger.info('Patient demographics')
     patient['age'] = typer.prompt('Age (years)', type=int)
     patient['gender'] = typer.prompt('Gender (M/F/Other)')
     patient['weight_kg'] = typer.prompt('Weight (kg)', type=float)
     patient['height_cm'] = typer.prompt('Height (cm)', type=float)
 
-    print('[bold cyan]\nLifestyle details[/bold cyan]')
+    logger.info('Lifestyle details')
     patient['diet'] = typer.prompt('Diet (e.g., balanced, keto)')
     patient['sleep_hours'] = typer.prompt('Sleep per night (h)', type=float)
     patient['physical_activity'] = typer.prompt('Physical exercise')
     patient['mental_exercises'] = typer.prompt('Mental activities')
 
-    print('[bold cyan]\nCurrent symptoms[/bold cyan]')
+    logger.info('Current symptoms')
     patient['symptoms'] = typer.prompt('Main symptoms (comma-separated)')
 
-    print('[bold cyan]\nMental health[/bold cyan]')
+    logger.info('Mental health')
     patient['mental_health'] = typer.prompt('Mental health concerns')
 
-    print('[bold cyan]\nPrevious exams/tests[/bold cyan]')
+    logger.info('Previous exams/tests')
     patient['previous_tests'] = typer.prompt("Summary or 'none'")
 
     # ── LLM calls via agents ────────────────────────────────────────────
     diag_json = diag.differential(patient)
-    print(f'\n[bold magenta]AI summary:[/bold magenta] {diag_json["summary"]}')
+    logger.info('AI summary: %s', diag_json['summary'])
     chosen_diag = multiselect(
         'Select diagnoses to investigate', diag_json['options']
     )
 
     exam_json = diag.exams(chosen_diag)
-    print(f'\n[bold magenta]AI summary:[/bold magenta] {exam_json["summary"]}')
+    logger.info('AI summary: %s', exam_json['summary'])
     chosen_exams = multiselect('Select exams to request', exam_json['options'])
 
     record = {
@@ -83,7 +86,7 @@ def consult() -> None:
         },
     }
     path = save_record(record)
-    print(f'\n[green]Record saved to {path}[/green]')
+    logger.info('Record saved to %s', path)
 
 
 if __name__ == '__main__':  # pragma: no cover

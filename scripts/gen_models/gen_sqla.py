@@ -24,6 +24,7 @@ Notes
 from __future__ import annotations
 
 import sys
+import argparse
 
 from datetime import date, datetime
 from pathlib import Path
@@ -189,21 +190,38 @@ class Base(DeclarativeBase):
     return header + '\n\n'.join(body) + '\n'
 
 
-def main() -> None:
+def main() -> int:
     """Execute the main function."""
+    parser = argparse.ArgumentParser(
+        prog='gen_sqla',
+        description='Generate SQLAlchemy ORM models from Pydantic schemas',
+    )
+    parser.add_argument('--dry-run', action='store_true', help='Do not write files; print a preview')
+    parser.add_argument('--output', type=str, default=str(OUTPUT_PATH), help='Output path for generated models')
+    args = parser.parse_args()
+
     models = iter_pydantic_models()
     orm_code = build_orm_file(models)
 
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(orm_code, encoding='utf-8')
+    output_path = Path(args.output)
+    if args.dry_run:
+        print(f'[✓] Dry-run: would write ORM models to {output_path}')
+        # Provide a short preview to assist reviewers
+        preview = orm_code[:1024]
+        print(preview)
+        return 0
 
-    print(f'[✓] ORM models written to {OUTPUT_PATH}')
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(orm_code, encoding='utf-8')
+
+    print(f'[✓] ORM models written to {output_path}')
 
     try:
-        run_ruff(OUTPUT_PATH, fix=True)
+        run_ruff(output_path, fix=True)
     except RuntimeError as err:
         # Fallback: continue without failing the generator
         print(f'[!] Ruff step skipped: {err}')
+    return 0
 
 
 if __name__ == '__main__':

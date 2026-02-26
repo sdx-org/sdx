@@ -288,6 +288,27 @@ Before you submit a pull request, check that it meets these guidelines:
 
 ---
 
+## GSOC & Mentorship
+
+We welcome GSOC project proposals and student contributions. To make
+projects easy to pick up and review, please follow these steps:
+
+- **Open an Issue first** describing the project idea, goals, and 3–5
+  milestones. Tag it with `gsoc` and `help wanted`.
+- **Provide a tiny starter PR** that implements the first, small step
+  (for example: add a `--dry-run` to a generator, replace `print()` with
+  structured logging, or add a simple `docker-compose.yml` for the
+  research backend). This helps students onboard quickly.
+- **List mentor contacts and time commitment** on the issue so students
+  know who to reach out to.
+- **Define acceptance criteria** for each milestone (tests, docs, perf
+  targets, etc.).
+
+Maintainers will triage GSOC issues, add difficulty labels, and help
+students get started by reviewing small starter PRs.
+
+---
+
 ## 4. Submitting Changes
 
 1.  Create a new branch for your feature or bugfix.
