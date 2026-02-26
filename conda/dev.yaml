@@ -5,6 +5,7 @@ channels:
 
 dependencies:
   - python >=3.10,<=3.13
+  - setuptools
   - pip
   - nodejs  # used by semantic-release
   - tesseract

@@ -1,13 +1,16 @@
 import threading
-from typing import Callable, Dict, List, Any
+from typing import Callable, Dict, List, Any, Optional, Union
 
 from .base import BasePipeline
 
 
-_REGISTRY: Dict[str, Callable[[], BasePipeline]] = {}
+Factory = Callable[[], BasePipeline]
+Decorator = Callable[[Factory], Factory]
+
+_REGISTRY: Dict[str, Factory] = {}
 
 
-def register_pipeline(name: str, factory: Callable[[], BasePipeline] | None = None):
+def register_pipeline(name: str, factory: Optional[Factory] = None) -> Union[Decorator, Factory]:
     """Register a pipeline factory under a name.
 
     Can be used as a decorator:
@@ -24,7 +27,7 @@ def register_pipeline(name: str, factory: Callable[[], BasePipeline] | None = No
     """
 
     if factory is None:
-        def decorator(f: Callable[[], BasePipeline]):
+        def decorator(f: Factory) -> Factory:
             _REGISTRY[name] = f
             return f
 
@@ -45,12 +48,12 @@ class LazyPipelineProxy(BasePipeline):
     pipeline is created and initialized exactly once.
     """
 
-    def __init__(self, factory: Callable[[], BasePipeline]):
+    def __init__(self, factory: Factory) -> None:
         # name reflects factory name if possible
         super().__init__(name=getattr(factory, "__name__", "lazy_pipeline"))
         self._factory = factory
         self._lock = threading.Lock()
-        self._pipeline: BasePipeline | None = None
+        self._pipeline: Optional[BasePipeline] = None
 
     def _ensure_init(self) -> None:
         if self._pipeline is None:
@@ -66,6 +69,8 @@ class LazyPipelineProxy(BasePipeline):
 
     def process(self, text: str) -> Any:
         self._ensure_init()
+        # _ensure_init guarantees _pipeline is initialized
+        assert self._pipeline is not None
         return self._pipeline.process(text)
 
     def shutdown(self) -> None:
@@ -74,10 +79,11 @@ class LazyPipelineProxy(BasePipeline):
 
     def health_check(self) -> bool:
         self._ensure_init()
+        assert self._pipeline is not None
         return self._pipeline.health_check()
 
 
-def get_pipeline(name: str) -> LazyPipelineProxy:
+def get_pipeline(name: str) -> BasePipeline:
     factory = _REGISTRY.get(name)
     if factory is None:
         raise KeyError(f"No pipeline registered under '{name}'")

@@ -8,15 +8,15 @@ class MockPipeline(BasePipeline):
     the pipeline interface and lazy-loading behavior.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("mock")
-        self._inits = 0
+        self._inits: int = 0
 
     def initialize(self) -> None:
         self._inits += 1
         self.initialized = True
 
-    def process(self, text: str):
+    def process(self, text: str) -> list[str]:
         # trivial processing: split on whitespace and return tokens
         return [t for t in text.split() if t]
 
@@ -32,5 +32,5 @@ from ..registry import register_pipeline
 
 
 @register_pipeline("mock")
-def _mock_factory():
+def _mock_factory() -> MockPipeline:
     return MockPipeline()
