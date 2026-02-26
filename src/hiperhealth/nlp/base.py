@@ -1,3 +1,10 @@
+"""Core pipeline base class and lightweight helpers.
+
+This module defines `BasePipeline`, the abstract interface all adapters
+should implement. Concrete implementations are expected to load heavy
+resources in `initialize()` and release them in `shutdown()`.
+"""
+
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -22,9 +29,8 @@ class BasePipeline(ABC):
         """Process input text and return structured output."""
 
     def shutdown(self) -> None:
-        """Optional: release resources."""
-        return None
+        """Release resources held by the pipeline, if any."""
 
     def health_check(self) -> bool:
-        """Optional health check; return True when pipeline is usable."""
+        """Return True when pipeline is usable."""
         return True

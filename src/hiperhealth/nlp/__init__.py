@@ -1,3 +1,8 @@
+"""Public API for the `hiperhealth.nlp` package.
+
+Exports the primary pipeline base and registry helpers used by callers.
+"""
+
 from .base import BasePipeline
 from .registry import (
     LazyPipelineProxy,
@@ -6,10 +11,11 @@ from .registry import (
     register_pipeline,
 )
 
+# Keep `__all__` sorted for consistency with import-order checks
 __all__ = [
     'BasePipeline',
-    'register_pipeline',
+    'LazyPipelineProxy',
     'get_pipeline',
     'list_pipelines',
-    'LazyPipelineProxy',
+    'register_pipeline',
 ]

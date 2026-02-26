@@ -1,7 +1,10 @@
+"""Unit tests for the NLP pipeline registry and lazy proxy."""
+
 import threading
 
 
 def test_register_and_lazy_init(tmp_path, monkeypatch):
+    """Ensure registration and lazy initialization behave correctly."""
     from hiperhealth.nlp import registry
 
     calls = {'init': 0}
@@ -40,6 +43,7 @@ def test_register_and_lazy_init(tmp_path, monkeypatch):
 
 
 def test_threaded_init(monkeypatch):
+    """Ensure lazy initialization is thread-safe and runs once."""
     from hiperhealth.nlp import registry
 
     initialized = {'count': 0}
