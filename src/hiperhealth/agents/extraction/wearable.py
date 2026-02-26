@@ -129,16 +129,28 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             return self._mimetype_cache[cache_key]
 
         if isinstance(file, Path):
-            self._mimetype_cache[cache_key] = cast(
-                MimeType, self.mime.from_file(file)
-            )
+            # Ensure we pass a native string path to the libmagic call
+            raw = self.mime.from_file(str(file))
+            # Normalize MIME type by stripping any charset or parameters
+            if isinstance(raw, str):
+                raw = raw.split(";", 1)[0].strip()
+            self._mimetype_cache[cache_key] = cast(MimeType, raw)
             return self._mimetype_cache[cache_key]
         elif isinstance(file, IO):  # Generic IO[bytes]
             head = file.read(2048)
             file.seek(0)
-            self._mimetype_cache[cache_key] = cast(
-                MimeType, self.mime.from_buffer(head)
-            )
+            # libmagic expects a bytes-like object for from_buffer; make sure
+            # we pass raw bytes (not a memoryview or other object) to avoid
+            # ctypes type errors on some platforms/wheels.
+            if isinstance(head, memoryview):
+                buf = head.tobytes()
+            else:
+                buf = bytes(head)
+
+            raw = self.mime.from_buffer(buf)
+            if isinstance(raw, str):
+                raw = raw.split(";", 1)[0].strip()
+            self._mimetype_cache[cache_key] = cast(MimeType, raw)
             return self._mimetype_cache[cache_key]
         else:
             raise TypeError(
@@ -163,10 +175,18 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             except json.JSONDecodeError:
                 file.seek(0)
                 return False
-        return (
-            self._get_mime_type(file)
-            == self.allowed_extensions_mimetypes_map['json']
-        )
+        # If given a path or string path, prefer extension check first
+        if isinstance(file, (str, Path)):
+            try:
+                ext = Path(file).suffix.replace('.', '').lower()
+                if ext == 'json':
+                    return True
+            except Exception:
+                pass
+
+        # Fallback to MIME type detection
+        mime = self._get_mime_type(file if not isinstance(file, str) else Path(file))
+        return mime == self.allowed_extensions_mimetypes_map['json']
 
     def _is_csv(self, file: FileInput) -> bool:
         if isinstance(file, (tempfile.SpooledTemporaryFile, io.BytesIO)):
@@ -193,10 +213,18 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             except csv.Error:
                 file.seek(0)
                 return False
-        return (
-            self._get_mime_type(file)
-            in self.allowed_extensions_mimetypes_map['csv']
-        )
+        # If given a path or string path, prefer extension check first
+        if isinstance(file, (str, Path)):
+            try:
+                ext = Path(file).suffix.replace('.', '').lower()
+                if ext == 'csv':
+                    return True
+            except Exception:
+                pass
+
+        # Fallback to MIME type detection
+        mime = self._get_mime_type(file if not isinstance(file, str) else Path(file))
+        return mime in (self.allowed_extensions_mimetypes_map['csv'],)
 
     def _process_row(self, row: dict[str, Any]) -> dict[str, object]:
         for key, value in row.items():
@@ -212,13 +240,23 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
     def _process_json_file(self, file: FileInput) -> list[dict[str, object]]:
         if isinstance(file, (str, Path)):
             with open(file, 'r', encoding='utf-8') as f:
-                return cast(list[dict[str, object]], json.load(f))
+                try:
+                    return cast(list[dict[str, object]], json.load(f))
+                except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+                    raise FileProcessingError(
+                        'JSON file is malformed or could not be decoded.'
+                    ) from exc
         else:
             file.seek(0)
-            return cast(
-                list[dict[str, object]],
-                json.load(io.TextIOWrapper(file, encoding='utf-8')),
-            )
+            try:
+                return cast(
+                    list[dict[str, object]],
+                    json.load(io.TextIOWrapper(file, encoding='utf-8')),
+                )
+            except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+                raise FileProcessingError(
+                    'JSON file is malformed or could not be decoded.'
+                ) from exc
 
     def _process_csv_file(self, file: FileInput) -> list[dict[str, object]]:
         if isinstance(file, (str, Path)):
