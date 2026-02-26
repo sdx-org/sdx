@@ -1,10 +1,19 @@
 import threading
-from typing import Callable, Dict, List, Any
+from typing import Callable, Dict, List, Any, TypeVar, overload, cast
 
 from .base import BasePipeline
 
 
 _REGISTRY: Dict[str, Callable[[], BasePipeline]] = {}
+
+
+F = TypeVar("F", bound=Callable[[], BasePipeline])
+
+
+@overload
+def register_pipeline(name: str, factory: None = None) -> Callable[[F], F]: ...
+@overload
+def register_pipeline(name: str, factory: F) -> F: ...
 
 
 def register_pipeline(name: str, factory: Callable[[], BasePipeline] | None = None):
@@ -24,7 +33,7 @@ def register_pipeline(name: str, factory: Callable[[], BasePipeline] | None = No
     """
 
     if factory is None:
-        def decorator(f: Callable[[], BasePipeline]):
+        def decorator(f: F) -> F:
             _REGISTRY[name] = f
             return f
 
@@ -66,7 +75,8 @@ class LazyPipelineProxy(BasePipeline):
 
     def process(self, text: str) -> Any:
         self._ensure_init()
-        return self._pipeline.process(text)
+        pipeline = cast(BasePipeline, self._pipeline)
+        return pipeline.process(text)
 
     def shutdown(self) -> None:
         if self._pipeline is not None:
@@ -74,7 +84,8 @@ class LazyPipelineProxy(BasePipeline):
 
     def health_check(self) -> bool:
         self._ensure_init()
-        return self._pipeline.health_check()
+        pipeline = cast(BasePipeline, self._pipeline)
+        return pipeline.health_check()
 
 
 def get_pipeline(name: str) -> LazyPipelineProxy:
