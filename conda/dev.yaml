@@ -10,6 +10,6 @@ dependencies:
   - tesseract
   - libmagic
   - uv
-  - setuptools
   - pip:
       - paginate==0.5.6  # distlib issue
+      - setuptools  # provides pkg_resources for mkdocs-macros-plugin
