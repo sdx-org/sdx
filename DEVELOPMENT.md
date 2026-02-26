@@ -290,6 +290,25 @@ Before you submit a pull request, check that it meets these guidelines:
 
 ## GSOC & Mentorship
 
+Small, actionable starter tasks help new contributors onboard quickly. If you're mentoring
+for GSoC or similar programs, consider linking a short onboarding note and starter issues
+that point to the `research` and `src/hiperhealth/nlp` areas. Example starter work:
+
+- Improve the CLI UX (structured logging) — small, one-file change.
+- Add `--dry-run` to model generators to preview output safely.
+- Implement the pluggable NLP pipeline registry (skeleton provided in `src/hiperhealth/nlp`).
+
+For larger projects (e.g., NLP adapters), break work into phases so students can land
+incremental PRs:
+
+1. Phase 1 — skeleton + tests (registry + mock pipeline).
+2. Phase 2 — add one adapter (spaCy) behind optional deps; provide CI mocks.
+3. Phase 3 — benchmarks and docs; measure lazy vs eager initialization.
+
+When opening issues for GSoC, attach: acceptance criteria, a short roadmap, and
+3–5 starter subtasks labelled `good first issue`.
+
+
 We welcome GSOC project proposals and student contributions. To make
 projects easy to pick up and review, please follow these steps:
 
