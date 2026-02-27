@@ -64,11 +64,12 @@ dev = [
   "ipython >=8",
   "ipykernel >=6.0.0",
   "Jinja2 >=3.1.2",
-  "mkdocs >=1.4.3",
+  "mkdocs >=1.4.3,<2",
   "mkdocs-exclude >=1.0.2",
   "mkdocs-jupyter >=0.24.1",
   "mkdocs-literate-nav >=0.6.0",
   "mkdocs-macros-plugin >=0.7.0,<1",
+  "setuptools<82",  # provides pkg_resources required by mkdocs-macros-plugin
   "mkdocs-material >=9.1.15",
   "mkdocstrings >=0.21.2",
   "mkdocstrings-python >= 1.1.2",

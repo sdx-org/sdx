@@ -34,3 +34,8 @@ case "$OS" in
 esac
 
 pip install ".[dev]"
+
+# setuptools provides pkg_resources which mkdocs-macros-plugin imports.
+# On Linux the preceding `uv pip install` can displace the conda-installed
+# setuptools metadata, so we force-reinstall it as the very last step.
+pip install --force-reinstall --no-deps "setuptools<82"
