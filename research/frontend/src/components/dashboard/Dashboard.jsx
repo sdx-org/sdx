@@ -40,7 +40,19 @@ export default function Dashboard() {
 
       // Fetch all patients
       const patientsData = await consultationAPI.getPatients();
-      setPatients(Array.isArray(patientsData) ? patientsData : []);
+
+      // Sort by most recent created_at
+      const sortedPatients = Array.isArray(patientsData)
+        ? [...patientsData].sort(
+          (a, b) => {
+            const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+            const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+            return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+          }
+        )
+        : [];
+
+      setPatients(sortedPatients);
 
       // Calculate stats
       const totalPatients = patientsData?.length || 0;
