@@ -25,6 +25,7 @@ class TestRateLimiter:
     def setup_method(self):
         """Reset the global rate limit store before each test."""
         import app.rate_limiter as rl
+
         rl._rate_limit_store.clear()
 
     def test_first_request_allowed(self):
@@ -241,6 +242,7 @@ class TestGlobalInstances:
     def setup_method(self):
         """Reset global state before each test."""
         import app.rate_limiter as rl
+
         rl._rate_limit_store.clear()
 
     def test_diagnosis_rate_limiter_config(self):

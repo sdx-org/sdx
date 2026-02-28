@@ -58,7 +58,7 @@ class TestRateLimitingLogic:
         # Make 100 allowed requests
         for i in range(100):
             is_allowed, _ = ip_rate_limiter.is_allowed(ip_key)
-            assert is_allowed is True, f"Request {i} should be allowed"
+            assert is_allowed is True, f'Request {i} should be allowed'
 
         # 101st request should be rejected
         is_allowed, _ = ip_rate_limiter.is_allowed(ip_key)
@@ -122,7 +122,7 @@ class TestRateLimitingWithCaching:
     def test_cache_does_not_count_toward_limit(self):
         """Test that cached responses don't consume rate limit quota."""
         patient_key = 'patient:123'
-        response_key = f"{patient_key}:symptoms:headache"
+        response_key = f'{patient_key}:symptoms:headache'
 
         # Cache a response
         cached_data = {'diagnosis': 'migraine', 'confidence': 0.9}
@@ -275,4 +275,3 @@ class TestErrorConditions:
         # 1001st should fail
         is_allowed, _ = limiter.is_allowed(key)
         assert is_allowed is False
-
