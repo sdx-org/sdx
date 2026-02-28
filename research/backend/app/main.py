@@ -807,6 +807,14 @@ def get_diagnosis_suggestions(
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
 
+    # Check cache first (before rate limiting to avoid consuming quota)
+    cache_key = f'diagnosis:{patient_id}'
+    cached_response = diagnosis_cache.get(cache_key)
+    if cached_response:
+        response = cached_response
+        response['_cache_hit'] = True
+        return DiagnosisGetResponse(**response)
+
     # Get client IP for rate limiting
     client_ip = request.client.host if request.client else 'unknown'
 
@@ -840,14 +848,6 @@ def get_diagnosis_suggestions(
                 'Retry-After': str(patient_limits['reset'] - int(time.time())),
             },
         )
-
-    # Check cache first
-    cache_key = f'diagnosis:{patient_id}'
-    cached_response = diagnosis_cache.get(cache_key)
-    if cached_response:
-        response = cached_response
-        response['_cache_hit'] = True
-        return DiagnosisGetResponse(**response)
 
     record = patient_to_dict(patient)
     lang = record['meta']['lang']
@@ -927,6 +927,14 @@ def get_exam_suggestions(
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
 
+    # Check cache first (before rate limiting to avoid consuming quota)
+    cache_key = f'exam:{patient_id}'
+    cached_response = exam_cache.get(cache_key)
+    if cached_response:
+        response = cached_response
+        response['_cache_hit'] = True
+        return ExamGetResponse(**response)
+
     # Get client IP for rate limiting
     client_ip = request.client.host if request.client else 'unknown'
 
@@ -958,14 +966,6 @@ def get_exam_suggestions(
                 'Retry-After': str(patient_limits['reset'] - int(time.time())),
             },
         )
-
-    # Check cache first
-    cache_key = f'exam:{patient_id}'
-    cached_response = exam_cache.get(cache_key)
-    if cached_response:
-        response = cached_response
-        response['_cache_hit'] = True
-        return ExamGetResponse(**response)
 
     record = patient_to_dict(patient)
     lang = record['meta']['lang']
