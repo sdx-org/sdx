@@ -1,7 +1,10 @@
 """FastAPI backend for patient data management and wearable file uploads."""
 
 import os
+import re
+import uuid
 
+from pathlib import PurePath
 from typing import List
 
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, status
@@ -199,6 +202,54 @@ def post_note(
     return {'id': note.id, 'created_at': note.created_at}
 
 
+
+def sanitize_patient_id(pid: str) -> str:
+    """Sanitize patient_id."""
+    return re.sub(r'[^A-Za-z0-9_.-]', '_', pid)
+
+def sanitize_filename(name: str) -> str:
+    """Sanitize uploaded filename."""
+    return PurePath(name).name or "untitled"
+
+def unique_path(base_dir: str, name: str) -> str:
+    """Return a non-colliding path under base_dir."""
+    base = os.path.join(base_dir, name)
+    if not os.path.exists(base):
+        return base
+    stem, ext = os.path.splitext(name)
+    while True:
+        candidate = os.path.join(
+            base_dir, f"{stem}_{uuid.uuid4().hex}{ext}"
+        )
+        if not os.path.exists(candidate):
+            return candidate
+
+def write_stream_to_file(src, dst_path: str, max_bytes: int = 52428800) -> int:
+    """Stream upload to file with size cap and atomic creation."""
+    size = 0
+    try:
+        with open(dst_path, "xb") as fh: # Use xb to prevent TOCTOU
+            while True:
+                chunk = src.read(1024 * 1024)
+                if not chunk:
+                    break
+                size += len(chunk)
+                if size > max_bytes:
+                    fh.close()
+                    try:
+                        os.remove(dst_path)
+                    except OSError:
+                        pass
+                    raise HTTPException(
+                        status_code=413, detail="File too large"
+                    )
+                fh.write(chunk)
+        return size
+    except FileExistsError:
+        raise HTTPException(
+            status_code=409, detail="Upload path collision"
+        )
+
 @app.post('/api/v1/patients/{patient_id}/wearable/upload', status_code=201)
 def upload_wearable(
     patient_id: str,
@@ -216,38 +267,57 @@ def upload_wearable(
     if ext not in ('.csv', '.json'):
         raise HTTPException(status_code=415, detail='Unsupported file type')
 
-    # read file bytes into memory
-    file_content = file.file.read()
-    size = len(file_content)
+    # Data loss risk: secure patient id to avoid traversal
+    safe_patient_id = sanitize_patient_id(patient_id)
+    
+    # Correctness: robustly sanitize the filename
+    safe_filename = sanitize_filename(filename)
 
-    # optionally also save to disk for backup/archival
-    storage_name = f'{patient_id}_{filename}'
-    storage_path = os.path.join(UPLOAD_DIR, storage_name)
-    with open(storage_path, 'wb') as fh:
-        fh.write(file_content)
+    # Collision Prevention: Ensure unique storage path
+    storage_name = f"{safe_patient_id}_{safe_filename}"
+    storage_path = unique_path(UPLOAD_DIR, storage_name)
 
-    # parse lightweight
-    rows, summary = utils.parse_wearable_file(storage_path)
+    # Performance/DoS: Stream the file safely to disk
+    size = write_stream_to_file(file.file, storage_path)
 
-    # store file content + metadata in DB
-    meta = crud.create_wearable_metadata(
-        db,
-        patient_id,
-        filename,
-        file.content_type,
-        size,
-        file_content=file_content,  # store raw bytes
-        storage_path=storage_path,  # also store path for optional disk access
-        parsed_rows=rows,
-        parsed_summary=summary,
-    )
+    try:
+        # parse lightweight from the saved file path
+        rows, summary = utils.parse_wearable_file(storage_path)
 
-    return JSONResponse(
-        status_code=status.HTTP_201_CREATED,
-        content={
-            'id': meta.id,
-            'filename': meta.filename,
-            'parsed_rows': meta.parsed_rows,
-            'parsed_summary': meta.parsed_summary,
-        },
-    )
+        # To preserve DB behavior, read back to memory if small enough
+        final_file_content = None
+        if size <= 1 * 1024 * 1024: # 1MB cutoff
+            with open(storage_path, "rb") as fh:
+                final_file_content = fh.read()
+
+        # store file content + metadata in DB
+        meta = crud.create_wearable_metadata(
+            db,
+            patient_id,
+            filename,
+            file.content_type,
+            size,
+            file_content=final_file_content,  
+            storage_path=storage_path,  
+            parsed_rows=rows,
+            parsed_summary=summary,
+        )
+
+        return JSONResponse(
+            status_code=status.HTTP_201_CREATED,
+            content={
+                'id': meta.id,
+                'filename': meta.filename,
+                'parsed_rows': meta.parsed_rows,
+                'parsed_summary': meta.parsed_summary,
+            },
+        )
+    except Exception as e:
+        # Cleanup orphaned file on failure
+        try:
+            os.remove(storage_path)
+        except OSError:
+            pass
+        raise HTTPException(
+            status_code=500, detail=f"Processing failed: {e!s}"
+        )
