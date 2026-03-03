@@ -40,7 +40,6 @@ class RateLimiter:
             _rate_limit_store[key] = {
                 'count': 1,
                 'reset_at': now + self.time_window,
-                'calls': [now],
             }
             return True, {
                 'limit': self.max_calls,
@@ -54,7 +53,6 @@ class RateLimiter:
         if now >= entry['reset_at']:
             entry['count'] = 1
             entry['reset_at'] = now + self.time_window
-            entry['calls'] = [now]
             return True, {
                 'limit': self.max_calls,
                 'remaining': self.max_calls - 1,
@@ -71,7 +69,6 @@ class RateLimiter:
 
         # Increment counter
         entry['count'] += 1
-        entry['calls'].append(now)
 
         return True, {
             'limit': self.max_calls,

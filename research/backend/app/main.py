@@ -807,20 +807,13 @@ def get_diagnosis_suggestions(
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
 
-    # Check cache first (before rate limiting to avoid consuming quota)
-    cache_key = f'diagnosis:{patient_id}'
-    cached_response = diagnosis_cache.get(cache_key)
-    if cached_response:
-        response = cached_response
-        response['_cache_hit'] = True
-        return DiagnosisGetResponse(**response)
-
     # Get client IP for rate limiting
     client_ip = request.client.host if request.client else 'unknown'
 
-    # Check IP-based rate limit (100 per hour)
+    # Check IP-based rate limit first (even for cache hits to prevent DoS)
     ip_allowed, ip_limits = ip_rate_limiter.is_allowed(f'ip:{client_ip}')
     if not ip_allowed:
+        seconds_remaining = max(1, ip_limits['reset'] - int(time.time()))
         raise HTTPException(
             status_code=429,
             detail='Rate limit exceeded: 100 requests per hour per IP',
@@ -828,16 +821,23 @@ def get_diagnosis_suggestions(
                 'X-RateLimit-Limit': str(ip_limits['limit']),
                 'X-RateLimit-Remaining': str(ip_limits['remaining']),
                 'X-RateLimit-Reset': str(ip_limits['reset']),
-                'Retry-After': str(ip_limits['reset'] - int(time.time())),
+                'Retry-After': str(seconds_remaining),
             },
         )
 
+    # Check cache (skip patient quota check on cache hits)
+    cache_key = f'diagnosis:{patient_id}'
+    cached_response = diagnosis_cache.get(cache_key)
+    if cached_response:
+        return DiagnosisGetResponse(**dict(cached_response))
+
     # Check patient-based rate limit (5 per hour)
-    patient_key = f'patient:{patient_id}'
+    patient_key = f'diagnosis:patient:{patient_id}'
     patient_allowed, patient_limits = diagnosis_rate_limiter.is_allowed(
         patient_key
     )
     if not patient_allowed:
+        seconds_remaining = max(1, patient_limits['reset'] - int(time.time()))
         raise HTTPException(
             status_code=429,
             detail='Rate limit exceeded: 5 diagnosis requests per hour',
@@ -845,7 +845,7 @@ def get_diagnosis_suggestions(
                 'X-RateLimit-Limit': str(patient_limits['limit']),
                 'X-RateLimit-Remaining': str(patient_limits['remaining']),
                 'X-RateLimit-Reset': str(patient_limits['reset']),
-                'Retry-After': str(patient_limits['reset'] - int(time.time())),
+                'Retry-After': str(seconds_remaining),
             },
         )
 
@@ -927,20 +927,13 @@ def get_exam_suggestions(
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
 
-    # Check cache first (before rate limiting to avoid consuming quota)
-    cache_key = f'exam:{patient_id}'
-    cached_response = exam_cache.get(cache_key)
-    if cached_response:
-        response = cached_response
-        response['_cache_hit'] = True
-        return ExamGetResponse(**response)
-
     # Get client IP for rate limiting
     client_ip = request.client.host if request.client else 'unknown'
 
-    # Check IP-based rate limit (100 per hour)
+    # Check IP-based rate limit first (even for cache hits to prevent DoS)
     ip_allowed, ip_limits = ip_rate_limiter.is_allowed(f'ip:{client_ip}')
     if not ip_allowed:
+        seconds_remaining = max(1, ip_limits['reset'] - int(time.time()))
         raise HTTPException(
             status_code=429,
             detail='Rate limit exceeded: 100 requests per hour per IP',
@@ -948,14 +941,21 @@ def get_exam_suggestions(
                 'X-RateLimit-Limit': str(ip_limits['limit']),
                 'X-RateLimit-Remaining': str(ip_limits['remaining']),
                 'X-RateLimit-Reset': str(ip_limits['reset']),
-                'Retry-After': str(ip_limits['reset'] - int(time.time())),
+                'Retry-After': str(seconds_remaining),
             },
         )
 
+    # Check cache (skip patient quota check on cache hits)
+    cache_key = f'exam:{patient_id}'
+    cached_response = exam_cache.get(cache_key)
+    if cached_response:
+        return ExamGetResponse(**dict(cached_response))
+
     # Check patient-based rate limit (5 per hour)
-    patient_key = f'patient:{patient_id}'
+    patient_key = f'exam:patient:{patient_id}'
     patient_allowed, patient_limits = exam_rate_limiter.is_allowed(patient_key)
     if not patient_allowed:
+        seconds_remaining = max(1, patient_limits['reset'] - int(time.time()))
         raise HTTPException(
             status_code=429,
             detail='Rate limit exceeded: 5 exam requests per hour per patient',
@@ -963,7 +963,7 @@ def get_exam_suggestions(
                 'X-RateLimit-Limit': str(patient_limits['limit']),
                 'X-RateLimit-Remaining': str(patient_limits['remaining']),
                 'X-RateLimit-Reset': str(patient_limits['reset']),
-                'Retry-After': str(patient_limits['reset'] - int(time.time())),
+                'Retry-After': str(seconds_remaining),
             },
         )
 
