@@ -10,6 +10,7 @@ import {
   Badge,
   Spinner,
   Alert,
+  Form,
 } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import ReactPaginate from 'react-paginate';
@@ -30,10 +31,16 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [itemOffset, setItemOffset] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 5;
+  const filteredPatients = patients.filter((patient) =>
+    (patient.patient_id || '')
+      .toLowerCase()
+      .includes(searchTerm.trim().toLowerCase())
+  );
   const endOffset = itemOffset + itemsPerPage;
-  const currentItems = patients.slice(itemOffset, endOffset);
-  const pageCount = Math.ceil(patients.length / itemsPerPage);
+  const currentItems = filteredPatients.slice(itemOffset, endOffset);
+  const pageCount = Math.ceil(filteredPatients.length / itemsPerPage);
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
@@ -140,11 +147,12 @@ export default function Dashboard() {
   };
 
   const handlePageClick = (event) => {
-    const newOffset = (event.selected * itemsPerPage) % patients.length;
+    const newOffset = (event.selected * itemsPerPage) % filteredPatients.length;
     setItemOffset(newOffset);
   };
 
   const hasPatients = patients && patients.length > 0;
+  const hasFilteredPatients = filteredPatients.length > 0;
 
   return (
     <div className="bg-light min-vh-100 py-4">
@@ -284,9 +292,27 @@ export default function Dashboard() {
         ) : (
           <Card className="border-0 shadow-sm">
             <Card.Body className="p-4">
-              <h5 className="mb-4 fw-semibold">
-                Recent Patients ({patients.length})
-              </h5>
+              <div className="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+                <h5 className="mb-0 fw-semibold">
+                  Recent Patients ({filteredPatients.length})
+                </h5>
+                <Form.Control
+                  type="search"
+                  placeholder="Search by Patient ID"
+                  value={searchTerm}
+                  onChange={(event) => {
+                    setSearchTerm(event.target.value);
+                    setItemOffset(0);
+                  }}
+                  style={{ maxWidth: '320px' }}
+                />
+              </div>
+
+              {!hasFilteredPatients && (
+                <Alert variant="info" className="mb-4">
+                  No patients match this Patient ID.
+                </Alert>
+              )}
 
               <div className="table-responsive">
                 <Table hover className="align-middle">
