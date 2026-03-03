@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import ReactPaginate from 'react-paginate';
 import consultationAPI from '../../services/api';
 import { useConsultation, consultationActions } from '../../context/ConsultationContext';
+import { resumeConsultationForPatient } from '../../utils/consultationNavigation';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -107,48 +108,10 @@ export default function Dashboard() {
   };
 
   const handleResumePatient = async (patientId) => {
-    try{
-      const consultationData=await consultationAPI.getConsultationStatus(patientId);
-      if(!consultationData){
-        alert('No consultation data found for this patient.');
-        return;
-      }
-      const currentStep=consultationData.current_step || 'demographics';
-      const language=consultationData.lang || 'en';
-      dispatch(consultationActions.initConsultation(
-        patientId,
-        language,
-        currentStep
-      ));
-
-      const shouldPrefillFromLocalStorage=[
-        'demographics',
-        'lifestyle',
-        'symptoms',
-        'mental',
-      ].includes(currentStep);
-
-      if(shouldPrefillFromLocalStorage){
-        const savedState=localStorage.getItem(`consultationState_${patientId}`);
-        if(savedState){
-          const parsedState=JSON.parse(savedState);
-          if(parsedState.formData.demographics){
-            dispatch(consultationActions.updateDemographics(parsedState.formData.demographics));
-          }
-          if(parsedState.formData.lifestyle){
-            dispatch(consultationActions.updateLifestyle(parsedState.formData.lifestyle));
-          }
-          if(parsedState.formData.symptoms){
-            dispatch(consultationActions.updateSymptoms(parsedState.formData.symptoms));
-          }
-          if(parsedState.formData.mental){
-            dispatch(consultationActions.updateMentalHealth(parsedState.formData.mental));
-          }
-        }
-      }
-        navigate(`/${currentStep}`);
-    }catch(err){
-      console.error('Error resuming patient consultation:',err);
+    try {
+      await resumeConsultationForPatient({ patientId, dispatch, navigate });
+    } catch (err) {
+      console.error('Error resuming patient consultation:', err);
       alert(`Failed to resume consultation: ${err.message}`);
     }
   };

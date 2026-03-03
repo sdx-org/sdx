@@ -13,13 +13,11 @@ import {
   Col,
 } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useConsultation, consultationActions } from '../../context/ConsultationContext';
 import consultationAPI from '../../services/api';
 
 export default function MedicalReport() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const { state, dispatch } = useConsultation();
   const fileInputRef = useRef(null);
   const {

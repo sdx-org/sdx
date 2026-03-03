@@ -1,4 +1,3 @@
-import React from 'react';
 import { Alert } from 'react-bootstrap';
 
 /** stringifySafe */
@@ -34,10 +33,7 @@ export default function WearableDataTab({ data }) {
         return <p className="text-muted">No wearable data available</p>;
     }
 
-    const prettyWearable = React.useMemo(
-        () => stringifySafe(wearableData),
-        [wearableData]
-    );
+    const prettyWearable = stringifySafe(wearableData);
 
     return (
         <div>

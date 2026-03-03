@@ -13,13 +13,11 @@ import {
   ListGroup,
 } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useConsultation, consultationActions } from '../../context/ConsultationContext';
 import consultationAPI from '../../services/api';
 
 export default function Symptoms() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const { state, dispatch } = useConsultation();
   const {
     register,
