@@ -2,6 +2,11 @@ import consultationAPI from '../services/api';
 import { consultationActions } from '../context/ConsultationContext';
 
 /**
+ * ALLOWED_STEPS
+ */
+const ALLOWED_STEPS = new Set(['demographics', 'lifestyle', 'symptoms', 'mental']);
+
+/**
  * getSavedConsultationState
  */
 function getSavedConsultationState(patientId) {
@@ -21,8 +26,23 @@ function getSavedConsultationState(patientId) {
  */
 function safeStepFromServer(step) {
   const s = String(step || '').toLowerCase();
-  const ALLOWED_STEPS = new Set(['demographics', 'lifestyle', 'symptoms', 'mental']);
   return ALLOWED_STEPS.has(s) ? s : 'demographics';
+}
+
+/**
+ * safeLangFromServer
+ */
+function safeLangFromServer(lang, allowed = ['en']) {
+  const s = String(lang || '').toLowerCase();
+  return allowed.includes(s) ? s : 'en';
+}
+
+/**
+ * shouldUseLocalState
+ */
+function shouldUseLocalState(localUpdatedAt, serverUpdatedAt) {
+  if (!localUpdatedAt || !serverUpdatedAt) return true;
+  return new Date(localUpdatedAt).getTime() > new Date(serverUpdatedAt).getTime();
 }
 
 export async function resumeConsultationForPatient({ patientId, dispatch, navigate }) {
@@ -38,7 +58,7 @@ export async function resumeConsultationForPatient({ patientId, dispatch, naviga
 
   const rawStep = consultationData.current_step ?? 'demographics';
   const targetStep = safeStepFromServer(rawStep);
-  const language = consultationData.lang || 'en';
+  const language = safeLangFromServer(consultationData.lang, ['en', 'fr', 'es']);
 
   dispatch(
     consultationActions.initConsultation(
@@ -48,27 +68,26 @@ export async function resumeConsultationForPatient({ patientId, dispatch, naviga
     )
   );
 
-  const shouldPrefillFromLocalStorage = [
-    'demographics',
-    'lifestyle',
-    'symptoms',
-    'mental',
-  ].includes(targetStep);
+  const shouldPrefillFromLocalStorage = ALLOWED_STEPS.has(targetStep);
 
   if (shouldPrefillFromLocalStorage) {
     const parsedState = getSavedConsultationState(patientId);
     const fd = parsedState?.formData;
+    const useLocal = shouldUseLocalState(
+      parsedState?.updatedAt,
+      consultationData?.updated_at
+    );
 
-    if (fd?.demographics) {
+    if (useLocal && fd?.demographics) {
       dispatch(consultationActions.updateDemographics(fd.demographics));
     }
-    if (fd?.lifestyle) {
+    if (useLocal && fd?.lifestyle) {
       dispatch(consultationActions.updateLifestyle(fd.lifestyle));
     }
-    if (fd?.symptoms) {
+    if (useLocal && fd?.symptoms) {
       dispatch(consultationActions.updateSymptoms(fd.symptoms));
     }
-    if (fd?.mental) {
+    if (useLocal && fd?.mental) {
       dispatch(consultationActions.updateMentalHealth(fd.mental));
     }
   }

@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { initialState, consultationReducer, consultationActions } from './ConsultationReducer';
 
@@ -66,6 +65,7 @@ export function ConsultationProvider({ children }) {
 
 
 //Custom Hook
+// eslint-disable-next-line react-refresh/only-export-components
 export function useConsultation() {
   const context = useContext(ConsultationContext);
   if (!context) {
@@ -77,5 +77,5 @@ export function useConsultation() {
   return context;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { consultationActions };
-export default ConsultationContext;

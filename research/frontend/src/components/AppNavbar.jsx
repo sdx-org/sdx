@@ -89,8 +89,15 @@ export default function AppNavbar() {
       setResumeError('');
       await resumeConsultationForPatient({ patientId, dispatch, navigate });
     } catch (err) {
+      /** Set resume error message */
+      const message =
+        err &&
+        typeof err === 'object' &&
+        'message' in err &&
+        String(err.message)
+          ? String(err.message)
+          : t('navbar.resumeFailed');
       console.error('Error resuming patient consultation:', err);
-      const message = err?.message || t('navbar.resumeFailed');
       setResumeError(message);
     }
   };
@@ -201,7 +208,7 @@ export default function AppNavbar() {
               {t('navbar.refresh')}
             </Button>
             <NavDropdown
-              title={🌐 ${(i18n.language || 'en').toUpperCase()}}
+              title={`🌐 ${(i18n.language || 'en').toUpperCase()}`}
               id="language-dropdown"
               align="end"
               menuVariant="light"
