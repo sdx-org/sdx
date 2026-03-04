@@ -731,7 +731,7 @@ async def upload_wearable_data(
     """Upload and Process wearable data."""
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
-        raise HTTPException(status_code=404, detai='Patient not found')
+        raise HTTPException(status_code=404, detail='Patient not found')
 
     consultation = patient.consultations[-1]
 

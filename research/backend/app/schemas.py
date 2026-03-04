@@ -285,7 +285,7 @@ class ExamSubmitResponse(BaseModel):
 
 # Dashboard/ Status Models
 class ConsultationStatusResponse(BaseModel):
-    """Used to resotre state or show progress."""
+    """Used to restore state or show progress."""
 
     patient_id: str = Field(
         ..., description='The unique identifier for the patient.'
