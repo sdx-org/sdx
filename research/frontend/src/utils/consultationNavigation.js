@@ -1,7 +1,33 @@
 import consultationAPI from '../services/api';
 import { consultationActions } from '../context/ConsultationContext';
 
+/**
+ * getSavedConsultationState
+ */
+function getSavedConsultationState(patientId) {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return null;
+    const raw = window.localStorage.getItem(`consultationState_${patientId}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * safeStepFromServer
+ */
+function safeStepFromServer(step) {
+  return /^[a-z0-9-]+$/i.test(step) ? step : 'demographics';
+}
+
 export async function resumeConsultationForPatient({ patientId, dispatch, navigate }) {
+  if (!patientId) {
+    throw new Error('resumeConsultationForPatient: patientId is required.');
+  }
+
   const consultationData = await consultationAPI.getConsultationStatus(patientId);
 
   if (!consultationData) {
@@ -27,32 +53,24 @@ export async function resumeConsultationForPatient({ patientId, dispatch, naviga
   ].includes(currentStep);
 
   if (shouldPrefillFromLocalStorage) {
-    const savedState = localStorage.getItem(`consultationState_${patientId}`);
-    if (savedState) {
-      const parsedState = JSON.parse(savedState);
-      if (parsedState.formData.demographics) {
-        dispatch(
-          consultationActions.updateDemographics(parsedState.formData.demographics)
-        );
-      }
-      if (parsedState.formData.lifestyle) {
-        dispatch(
-          consultationActions.updateLifestyle(parsedState.formData.lifestyle)
-        );
-      }
-      if (parsedState.formData.symptoms) {
-        dispatch(
-          consultationActions.updateSymptoms(parsedState.formData.symptoms)
-        );
-      }
-      if (parsedState.formData.mental) {
-        dispatch(
-          consultationActions.updateMentalHealth(parsedState.formData.mental)
-        );
-      }
+    const parsedState = getSavedConsultationState(patientId);
+    const fd = parsedState?.formData;
+
+    if (fd?.demographics) {
+      dispatch(consultationActions.updateDemographics(fd.demographics));
+    }
+    if (fd?.lifestyle) {
+      dispatch(consultationActions.updateLifestyle(fd.lifestyle));
+    }
+    if (fd?.symptoms) {
+      dispatch(consultationActions.updateSymptoms(fd.symptoms));
+    }
+    if (fd?.mental) {
+      dispatch(consultationActions.updateMentalHealth(fd.mental));
     }
   }
 
-  navigate(`/${currentStep}`);
+  const targetStep = safeStepFromServer(currentStep);
+  navigate(`/${targetStep}`);
   return consultationData;
 }

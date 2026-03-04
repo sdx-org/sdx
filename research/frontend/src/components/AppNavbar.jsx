@@ -14,6 +14,17 @@ import consultationAPI from '../services/api';
 import { useConsultation, consultationActions } from '../context/ConsultationContext';
 import { resumeConsultationForPatient } from '../utils/consultationNavigation';
 
+/** Build patient detail route (URL-encodes id) */
+function buildPatientRoute(patientId) {
+  return `/patients/${encodeURIComponent(String(patientId))}`;
+}
+
+/** showResumeError */
+function showResumeError(err) {
+  console.error('Error resuming patient consultation:', err);
+  alert('Failed to resume consultation. Please try again.');
+}
+
 export default function AppNavbar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -76,9 +87,8 @@ export default function AppNavbar() {
     try {
       setResumeError('');
       await resumeConsultationForPatient({ patientId, dispatch, navigate });
-    } catch (error) {
-      console.error('Error resuming diagnosis from navbar:', error);
-      setResumeError(error.message || 'Failed to resume diagnosis.');
+    } catch (err) {
+      showResumeError(err);
     }
   };
 
@@ -118,7 +128,7 @@ export default function AppNavbar() {
                 patients.map((patient) => (
                   <NavDropdown.Item
                     key={patient.patient_id}
-                    onClick={() => navigate(`/patients/${patient.patient_id}`)}
+                    onClick={() => navigate(buildPatientRoute(patient.patient_id))}
                   >
                     <div className="d-flex justify-content-between align-items-center gap-3">
                       <code>{patient.patient_id}</code>
