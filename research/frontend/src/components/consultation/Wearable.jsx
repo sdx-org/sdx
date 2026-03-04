@@ -30,7 +30,7 @@ export default function Wearable() {
       dispatch(consultationActions.updateWearableData({
         file:null,
         skipped:false,
-      }))setApiError(err.message || 'Failed to upload wearable data. Please try again.');
+      }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);

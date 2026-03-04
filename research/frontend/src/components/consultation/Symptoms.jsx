@@ -55,7 +55,6 @@ export default function Symptoms() {
   ];
 
   const isFormComplete = watchSymptoms?.trim().length >= 10;
-  const charCount = getCharacterCount();
   const severityHint = getSeverityHint(charCount);
   const onSubmit = async (data) => {
     try {

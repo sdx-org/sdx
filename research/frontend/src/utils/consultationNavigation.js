@@ -86,18 +86,6 @@ export async function resumeConsultationForPatient({ patientId, dispatch, naviga
       parsedState?.updatedAt,
       consultationData?.updated_at
     );
-    const stateToSave = {
-      patientId: state.patientId,
-      language: state.language,
-      currentStep: state.currentStep,
-      updatedAt: new Date().toISOString(),
-      formData: {
-        demographics: state.formData?.demographics,
-        lifestyle: state.formData?.lifestyle,
-        symptoms: state.formData?.symptoms,
-        mental: state.formData?.mental,
-      },
-    };
 
     if (useLocal && isPlainObject(fd?.demographics)) {
       dispatch(consultationActions.updateDemographics(fd.demographics));

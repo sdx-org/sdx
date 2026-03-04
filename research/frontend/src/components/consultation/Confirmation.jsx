@@ -52,9 +52,10 @@ export default function Confirmation() {
     element.click();
     
     URL.revokeObjectURL(url);
+  };
 
- const generateConsultationSummary = () => {
-  const data = state.formData || {};
+  const generateConsultationSummary = () => {
+    const data = state.formData || {};
 
   let summary = `CONSULTATION SUMMARY\n`;
   summary += `Patient ID: ${state.patientId}\n`;
@@ -124,8 +125,7 @@ export default function Confirmation() {
     summary += `- ${name} (Score: ${score}/10)\n`;
   });
 
-  return summary;
-
+    return summary;
   };
 
   return (

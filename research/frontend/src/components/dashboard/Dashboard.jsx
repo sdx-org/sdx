@@ -58,13 +58,12 @@ export default function Dashboard() {
       const totalPatients = normalizedPatients.length;
 
       // Calculate stats
-      const totalPatients = patientsData?.length || 0;
-      const completedCount = patientsData?.filter(
+      const completedCount = normalizedPatients.filter(
         (p) => p.is_complete === true
-      ).length || 0;
+      ).length;
 
       // Count patients created this month (simple check)
-      const thisMonth = patientsData?.filter((p) => {
+      const thisMonth = normalizedPatients.filter((p) => {
         if (!p.created_at) return false;
         const createdDate = new Date(p.created_at);
         const now = new Date();
@@ -72,7 +71,7 @@ export default function Dashboard() {
           createdDate.getMonth() === now.getMonth() &&
           createdDate.getFullYear() === now.getFullYear()
         );
-      }).length || 0;
+      }).length;
 
       setStats({
         total_patients: totalPatients,
@@ -109,9 +108,7 @@ export default function Dashboard() {
   /** Clamp pagination offset when filteredPatients length changes */
   useEffect(() => {
     if (filteredPatients.length === 0) {
-      if (itemOffset !== 0) useEffect(() => {
-  setItemOffset(0);
-}, [searchTerm]);
+      if (itemOffset !== 0) setItemOffset(0);
       return;
     }
 
@@ -157,13 +154,13 @@ export default function Dashboard() {
       await consultationAPI.deletePatient(patientId);
 
       // Remove from local list
-      await consultationAPI.deletePatient(patientId);
+      setPatients((prev) => prev.filter((p) => p.patient_id !== patientId));
 
       // Reload stats
       await loadDashboardData();
     } catch (err) {
       console.error('Error deleting patient:', err);
-      alert(`Failed to resume consultation: ${err?.message || 'Unknown error'}`);
+      alert(`Failed to delete patient: ${err?.message || 'Unknown error'}`);
     }
   };
 
@@ -326,9 +323,7 @@ export default function Dashboard() {
                   value={searchTerm}
                   onChange={(event) => {
                     setSearchTerm(event.target.value);
-                    useEffect(() => {
-                      setItemOffset(0);
-                    }, [searchTerm]);
+                    setItemOffset(0);
                   }}
                   style={{ maxWidth: '320px' }}
                 />
