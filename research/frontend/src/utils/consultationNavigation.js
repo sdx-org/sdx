@@ -20,7 +20,9 @@ function getSavedConsultationState(patientId) {
  * safeStepFromServer
  */
 function safeStepFromServer(step) {
-  return /^[a-z0-9-]+$/i.test(step) ? step : 'demographics';
+  const s = String(step || '').toLowerCase();
+  const ALLOWED_STEPS = new Set(['demographics', 'lifestyle', 'symptoms', 'mental']);
+  return ALLOWED_STEPS.has(s) ? s : 'demographics';
 }
 
 export async function resumeConsultationForPatient({ patientId, dispatch, navigate }) {
@@ -34,14 +36,15 @@ export async function resumeConsultationForPatient({ patientId, dispatch, naviga
     throw new Error('No consultation data found for this patient.');
   }
 
-  const currentStep = consultationData.current_step || 'demographics';
+  const rawStep = consultationData.current_step ?? 'demographics';
+  const targetStep = safeStepFromServer(rawStep);
   const language = consultationData.lang || 'en';
 
   dispatch(
     consultationActions.initConsultation(
       patientId,
       language,
-      currentStep
+      targetStep
     )
   );
 
@@ -50,7 +53,7 @@ export async function resumeConsultationForPatient({ patientId, dispatch, naviga
     'lifestyle',
     'symptoms',
     'mental',
-  ].includes(currentStep);
+  ].includes(targetStep);
 
   if (shouldPrefillFromLocalStorage) {
     const parsedState = getSavedConsultationState(patientId);
@@ -70,7 +73,6 @@ export async function resumeConsultationForPatient({ patientId, dispatch, naviga
     }
   }
 
-  const targetStep = safeStepFromServer(currentStep);
   navigate(`/${targetStep}`);
   return consultationData;
 }

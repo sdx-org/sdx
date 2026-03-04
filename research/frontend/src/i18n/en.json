@@ -67,6 +67,7 @@
     "loadingResumablePatients": "Loading resumable patients...",
     "noPatientRecords": "No patient records available",
     "noConsultationsInProgress": "No consultations in progress",
+    "resumeFailed": "Failed to resume consultation.",
     "complete": "Complete",
     "inProgress": "In Progress",
     "language": "Language",

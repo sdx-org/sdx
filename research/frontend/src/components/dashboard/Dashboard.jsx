@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -33,11 +33,14 @@ export default function Dashboard() {
   const [itemOffset, setItemOffset] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 5;
-  const filteredPatients = patients.filter((patient) =>
-    (patient.patient_id || '')
-      .toLowerCase()
-      .includes(searchTerm.trim().toLowerCase())
-  );
+  const filteredPatients = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    return patients.filter((patient) =>
+      String(patient?.patient_id ?? '')
+        .toLowerCase()
+        .includes(normalizedSearch)
+    );
+  }, [patients, searchTerm]);
   const endOffset = itemOffset + itemsPerPage;
   const currentItems = filteredPatients.slice(itemOffset, endOffset);
   const pageCount = Math.ceil(filteredPatients.length / itemsPerPage);
@@ -147,6 +150,9 @@ export default function Dashboard() {
   };
 
   const handlePageClick = (event) => {
+    if (filteredPatients.length === 0) {
+      return;
+    }
     const newOffset = (event.selected * itemsPerPage) % filteredPatients.length;
     setItemOffset(newOffset);
   };

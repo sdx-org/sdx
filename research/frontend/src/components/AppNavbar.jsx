@@ -19,12 +19,6 @@ function buildPatientRoute(patientId) {
   return `/patients/${encodeURIComponent(String(patientId))}`;
 }
 
-/** showResumeError */
-function showResumeError(err) {
-  console.error('Error resuming patient consultation:', err);
-  alert('Failed to resume consultation. Please try again.');
-}
-
 export default function AppNavbar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -34,6 +28,13 @@ export default function AppNavbar() {
   const [patients, setPatients] = useState([]);
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
   const [resumeError, setResumeError] = useState('');
+
+  /** Auto-clear resume error after delay */
+  useEffect(() => {
+    if (!resumeError) return;
+    const id = setTimeout(() => setResumeError(''), 5000);
+    return () => clearTimeout(id);
+  }, [resumeError]);
 
   const isConsultationRoute = useMemo(() => {
     const consultationPaths = [
@@ -88,7 +89,9 @@ export default function AppNavbar() {
       setResumeError('');
       await resumeConsultationForPatient({ patientId, dispatch, navigate });
     } catch (err) {
-      showResumeError(err);
+      console.error('Error resuming patient consultation:', err);
+      const message = err?.message || t('navbar.resumeFailed');
+      setResumeError(message);
     }
   };
 
@@ -198,7 +201,7 @@ export default function AppNavbar() {
               {t('navbar.refresh')}
             </Button>
             <NavDropdown
-              title={`🌐 ${i18n.language.toUpperCase()}`}
+              title={🌐 ${(i18n.language || 'en').toUpperCase()}}
               id="language-dropdown"
               align="end"
               menuVariant="light"

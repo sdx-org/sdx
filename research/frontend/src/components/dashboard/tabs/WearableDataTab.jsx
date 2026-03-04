@@ -13,7 +13,11 @@ function stringifySafe(value) {
 export default function WearableDataTab({ data }) {
     const wearableData = data?.data;
     const skipped = data?.skipped;
-    const prettyWearable = useMemo(() => stringifySafe(wearableData), [wearableData]);
+    /** Avoid unnecessary stringify when skipped or no data */
+    const prettyWearable = useMemo(() => {
+        if (skipped || !wearableData) return null;
+        return stringifySafe(wearableData);
+    }, [skipped, wearableData]);
 
     if (!data) return <p className="text-muted">No data available</p>;
 

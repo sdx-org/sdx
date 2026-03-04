@@ -67,6 +67,7 @@
     "loadingResumablePatients": "Cargando consultas reanudables...",
     "noPatientRecords": "No hay registros de pacientes disponibles",
     "noConsultationsInProgress": "No hay consultas en progreso",
+    "resumeFailed": "No se pudo reanudar la consulta.",
     "complete": "Completo",
     "inProgress": "En Progreso",
     "language": "Idioma",
