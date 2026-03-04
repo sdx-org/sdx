@@ -76,7 +76,7 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
         self, file: FileInput
     ) -> list[dict[str, object]]:
         """Extract wearable data from file."""
-        # breakpoint()
+
         self._validate_or_raise(file)
         return self._process_file(file)
 
