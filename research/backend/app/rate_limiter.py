@@ -1,5 +1,6 @@
 """Rate limiting utilities for AI endpoints."""
 
+import threading
 import time
 
 from typing import Optional
@@ -7,6 +8,7 @@ from typing import Optional
 # In-memory rate limit store (for single-instance deployment)
 # In production, replace with Redis
 _rate_limit_store = {}
+_rate_limit_lock = threading.Lock()
 
 
 class RateLimiter:
@@ -34,47 +36,48 @@ class RateLimiter:
         -------
             (is_allowed, rate_limit_info)
         """
-        now = time.time()
+        with _rate_limit_lock:
+            now = time.time()
 
-        if key not in _rate_limit_store:
-            _rate_limit_store[key] = {
-                'count': 1,
-                'reset_at': now + self.time_window,
-            }
+            if key not in _rate_limit_store:
+                _rate_limit_store[key] = {
+                    'count': 1,
+                    'reset_at': now + self.time_window,
+                }
+                return True, {
+                    'limit': self.max_calls,
+                    'remaining': self.max_calls - 1,
+                    'reset': int(now + self.time_window),
+                }
+
+            entry = _rate_limit_store[key]
+
+            # Reset if window expired
+            if now >= entry['reset_at']:
+                entry['count'] = 1
+                entry['reset_at'] = now + self.time_window
+                return True, {
+                    'limit': self.max_calls,
+                    'remaining': self.max_calls - 1,
+                    'reset': int(entry['reset_at']),
+                }
+
+            # Check if limit exceeded
+            if entry['count'] >= self.max_calls:
+                return False, {
+                    'limit': self.max_calls,
+                    'remaining': 0,
+                    'reset': int(entry['reset_at']),
+                }
+
+            # Increment counter
+            entry['count'] += 1
+
             return True, {
                 'limit': self.max_calls,
-                'remaining': self.max_calls - 1,
-                'reset': int(now + self.time_window),
-            }
-
-        entry = _rate_limit_store[key]
-
-        # Reset if window expired
-        if now >= entry['reset_at']:
-            entry['count'] = 1
-            entry['reset_at'] = now + self.time_window
-            return True, {
-                'limit': self.max_calls,
-                'remaining': self.max_calls - 1,
+                'remaining': self.max_calls - entry['count'],
                 'reset': int(entry['reset_at']),
             }
-
-        # Check if limit exceeded
-        if entry['count'] >= self.max_calls:
-            return False, {
-                'limit': self.max_calls,
-                'remaining': 0,
-                'reset': int(entry['reset_at']),
-            }
-
-        # Increment counter
-        entry['count'] += 1
-
-        return True, {
-            'limit': self.max_calls,
-            'remaining': self.max_calls - entry['count'],
-            'reset': int(entry['reset_at']),
-        }
 
 
 class ResponseCache:

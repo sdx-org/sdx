@@ -285,11 +285,14 @@ class TestGlobalInstances:
             exam_rate_limiter,
         )
 
-        # Note: Limiters share the same underlying store and currently use the
-        # same key pattern (e.g., "patient:{patient_id}") for both diagnosis
-        # and exam. For this test, we verify that exhausting the diagnosis
-        # limiter for a given key also exhausts the exam limiter for that same
-        # key, reflecting the current production behavior.
+        # Note: Limiters share the same underlying store. In production,
+        # the diagnosis and exam endpoints now use distinct key prefixes
+        # (e.g., "diagnosis:patient:{patient_id}" vs "exam:patient:{
+        # patient_id}") so they have separate per-patient quotas. In this
+        # low-level test, we intentionally use the *same* key value for
+        # both limiters to verify that when keys collide, exhausting the
+        # diagnosis limiter for a given key also exhausts the exam
+        # limiter for that same key.
 
         # Exhaust diagnosis limiter with specific key
         for _ in range(5):
