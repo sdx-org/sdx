@@ -1,7 +1,7 @@
 {
-  "t("dashboard.title")": "Dashboard",
-  "t("dashboard.addPatient")": "Add Patient",
-  "t("dashboard.noRecords")": "No patient records found. Click 'Add Patient' to start a new consultation.",
+  "dashboard.title": "Dashboard",
+  "dashboard.addPatient": "Add Patient",
+  "dashboard.noRecords": "No patient records found. Click 'Add Patient' to start a new consultation.",
 
   "language.title": "Select your language",
   "language.label": "Language",
@@ -68,17 +68,6 @@
   "downloadSummary": "Download Summary",
   "newConsultation": "New Consultation"
 },
-
-{
-  "dashboard": {
-    "title": "Dashboard",
-    "addPatient": "Add Patient",
-    "noRecords": "No patient records found.",
-    "totalPatients": "Total Patients",
-    "activeRecords": "Active Records",
-    "thisMonth": "This Month"
-  },
-
   "language": {
     "title": "Select your language",
     "label": "Language",
@@ -91,7 +80,7 @@
     "gender": "Gender",
     "weight": "Weight (kg)",
     "height": "Height (cm)"
-  }
+  
 },
 
    "validation": {
