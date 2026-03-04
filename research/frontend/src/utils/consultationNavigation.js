@@ -4,7 +4,7 @@ import { consultationActions } from '../context/ConsultationContext';
 /**
  * ALLOWED_STEPS
  */
-const ALLOWED_STEPS = new Set(['demographics', 'lifestyle', 'symptoms', 'mental']);
+const ALLOWED_STEPS = new Set(['demographics', 'lifestyle', 'symptoms', 'mental', 'medical-reports', 'wearable-data', 'confirmation', 'exams', 'diagnosis']);
 
 /**
  * getSavedConsultationState
@@ -41,8 +41,17 @@ function safeLangFromServer(lang, allowed = ['en']) {
  * shouldUseLocalState
  */
 function shouldUseLocalState(localUpdatedAt, serverUpdatedAt) {
-  if (!localUpdatedAt || !serverUpdatedAt) return true;
-  return new Date(localUpdatedAt).getTime() > new Date(serverUpdatedAt).getTime();
+  const localMs = Date.parse(String(localUpdatedAt));
+  const serverMs = Date.parse(String(serverUpdatedAt));
+  if (!Number.isFinite(localMs) || !Number.isFinite(serverMs)) return false;
+  return localMs > serverMs;
+}
+
+/**
+ * isPlainObject
+ */
+function isPlainObject(v) {
+  return v !== null && typeof v === 'object' && !Array.isArray(v);
 }
 
 export async function resumeConsultationForPatient({ patientId, dispatch, navigate }) {
@@ -58,7 +67,7 @@ export async function resumeConsultationForPatient({ patientId, dispatch, naviga
 
   const rawStep = consultationData.current_step ?? 'demographics';
   const targetStep = safeStepFromServer(rawStep);
-  const language = safeLangFromServer(consultationData.lang, ['en', 'fr', 'es']);
+  const language = safeLangFromServer(consultationData.lang, ['en', 'es']);
 
   dispatch(
     consultationActions.initConsultation(
@@ -77,21 +86,45 @@ export async function resumeConsultationForPatient({ patientId, dispatch, naviga
       parsedState?.updatedAt,
       consultationData?.updated_at
     );
+    const stateToSave = {
+      patientId: state.patientId,
+      language: state.language,
+      currentStep: state.currentStep,
+      updatedAt: new Date().toISOString(),
+      formData: {
+        demographics: state.formData?.demographics,
+        lifestyle: state.formData?.lifestyle,
+        symptoms: state.formData?.symptoms,
+        mental: state.formData?.mental,
+      },
+    };
 
-    if (useLocal && fd?.demographics) {
+    if (useLocal && isPlainObject(fd?.demographics)) {
       dispatch(consultationActions.updateDemographics(fd.demographics));
     }
-    if (useLocal && fd?.lifestyle) {
+    if (useLocal && isPlainObject(fd?.lifestyle)) {
       dispatch(consultationActions.updateLifestyle(fd.lifestyle));
     }
-    if (useLocal && fd?.symptoms) {
+    if (useLocal && isPlainObject(fd?.symptoms)) {
       dispatch(consultationActions.updateSymptoms(fd.symptoms));
     }
-    if (useLocal && fd?.mental) {
+    if (useLocal && isPlainObject(fd?.mental)) {
       dispatch(consultationActions.updateMentalHealth(fd.mental));
     }
   }
 
-  navigate(`/${targetStep}`);
+  const STEP_ROUTES = {
+    demographics: '/demographics',
+    lifestyle: '/lifestyle',
+    symptoms: '/symptoms',
+    mental: '/mental',
+    'medical-reports': '/medical-reports',
+    'wearable-data': '/wearable-data',
+    diagnosis: '/diagnosis',
+    exams: '/exams',
+    confirmation: '/confirmation'
+  };
+  
+  navigate(STEP_ROUTES[targetStep] || '/demographics');
   return consultationData;
 }

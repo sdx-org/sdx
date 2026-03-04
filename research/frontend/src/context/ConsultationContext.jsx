@@ -21,7 +21,7 @@ export function ConsultationProvider({ children }) {
           const parsed=JSON.parse(tempSaved);
           if(parsed.patientId){
             const patientSaved=localStorage.getItem(getStorageKey(parsed.patientId));
-            return patientSaved? JSON.parse(patientSaved):parsed;
+            return patientSaved ? JSON.parse(patientSaved || "{}") : parsed;
         }
         return parsed;
       }
@@ -44,10 +44,10 @@ export function ConsultationProvider({ children }) {
       language: state.language,
       currentStep: state.currentStep,
       formData:{
-       demographics: state.formData.demographics,
-       lifestyle: state.formData.lifestyle,
-       symptoms: state.formData.symptoms,
-       mental: state.formData.mental
+       demographics: state.formData?.demographics,
+       lifestyle: state.formData?.lifestyle,
+       symptoms: state.formData?.symptoms,
+       mental: state.formData?.mental
       },
     };
     localStorage.setItem(key,JSON.stringify(stateToSave));
@@ -69,6 +69,8 @@ export function ConsultationProvider({ children }) {
 export function useConsultation() {
   const context = useContext(ConsultationContext);
   if (!context) {
+    const ConsultationContext = createContext(undefined);
+
     throw new Error(
       'useConsultation must be used within a ConsultationProvider. ' +
         'Make sure your App is wrapped with <ConsultationProvider> in main.jsx'

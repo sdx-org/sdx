@@ -89,13 +89,12 @@ export default function AppNavbar() {
       setResumeError('');
       await resumeConsultationForPatient({ patientId, dispatch, navigate });
     } catch (err) {
-      /** Set resume error message */
+      /** Normalize resume error message */
       const message =
-        err &&
-        typeof err === 'object' &&
-        'message' in err &&
-        String(err.message)
-          ? String(err.message)
+        err instanceof Error &&
+        typeof err.message === 'string' &&
+        err.message.trim().length > 0
+          ? err.message
           : t('navbar.resumeFailed');
       console.error('Error resuming patient consultation:', err);
       setResumeError(message);

@@ -51,7 +51,11 @@ export default function Dashboard() {
 
       // Fetch all patients
       const patientsData = await consultationAPI.getPatients();
-      setPatients(Array.isArray(patientsData) ? patientsData : []);
+      const normalizedPatients = Array.isArray(patientsData) ? patientsData : [];
+
+      setPatients(normalizedPatients);
+
+      const totalPatients = normalizedPatients.length;
 
       // Calculate stats
       const totalPatients = patientsData?.length || 0;
@@ -77,7 +81,7 @@ export default function Dashboard() {
       });
     } catch (err) {
       console.error('Error loading dashboard data:', err);
-      setError(err.message || 'Failed to load dashboard data');
+      setError(err?.message || 'Failed to load dashboard data');
     } finally {
       setIsLoading(false);
     }
@@ -102,6 +106,20 @@ export default function Dashboard() {
     };
   }, []);
 
+  /** Clamp pagination offset when filteredPatients length changes */
+  useEffect(() => {
+    if (filteredPatients.length === 0) {
+      if (itemOffset !== 0) useEffect(() => {
+  setItemOffset(0);
+}, [searchTerm]);
+      return;
+    }
+
+    const maxOffset =
+      Math.floor((filteredPatients.length - 1) / itemsPerPage) * itemsPerPage;
+    if (itemOffset > maxOffset) setItemOffset(maxOffset);
+  }, [filteredPatients.length, itemOffset, itemsPerPage]);
+
   const handleAddPatient = () => {
     // Navigate to language selection to create new patient
     Object.keys(localStorage).forEach((key) => {
@@ -122,7 +140,7 @@ export default function Dashboard() {
       await resumeConsultationForPatient({ patientId, dispatch, navigate });
     } catch (err) {
       console.error('Error resuming patient consultation:', err);
-      alert(`Failed to resume consultation: ${err.message}`);
+      alert(`Failed to resume consultation: ${err?.message || 'Unknown error'}`);
     }
   };
 
@@ -139,13 +157,13 @@ export default function Dashboard() {
       await consultationAPI.deletePatient(patientId);
 
       // Remove from local list
-      setPatients((prev) => prev.filter((p) => p.patient_id !== patientId));
+      await consultationAPI.deletePatient(patientId);
 
       // Reload stats
       await loadDashboardData();
     } catch (err) {
       console.error('Error deleting patient:', err);
-      alert(`Failed to delete patient: ${err.message}`);
+      alert(`Failed to resume consultation: ${err?.message || 'Unknown error'}`);
     }
   };
 
@@ -308,7 +326,9 @@ export default function Dashboard() {
                   value={searchTerm}
                   onChange={(event) => {
                     setSearchTerm(event.target.value);
-                    setItemOffset(0);
+                    useEffect(() => {
+                      setItemOffset(0);
+                    }, [searchTerm]);
                   }}
                   style={{ maxWidth: '320px' }}
                 />

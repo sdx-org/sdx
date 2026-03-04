@@ -24,15 +24,16 @@ export default function MedicalReport() {
     handleSubmit,
     formState: { isSubmitting },
   } = useForm();
-  useEffect(()=>{
-    if(!state.formData.medicalReports){
-      dispatch(consultationActions.updateMedicalReports({
-        files:[],
-        skipped:false,
-      }));
+  useEffect(() => {
+    if (!state.formData?.medicalReports) {
+      dispatch(
+        consultationActions.updateMedicalReports({
+          files: [],
+          skipped: false,
+        })
+      );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[]);
+  }, [dispatch, state.formData]);
   const [apiError, setApiError] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState(
     state.formData.medicalReports?.files || []
@@ -51,7 +52,7 @@ export default function MedicalReport() {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB'];
-    const i = Math.floor(Math.log(bytes, k));
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
 
@@ -79,16 +80,22 @@ export default function MedicalReport() {
       // Check size
       if (file.size > maxFileSize) {
         setApiError(
-          `File too large: ${file.name} (${formatFileSize(file.size)}). Max: 10MB`
+          `File too large: ${file.name} (${formatFileSize(file.size)}). Max: 20MB`
         );
         continue;
       }
 
-      validFiles.push(file);
+      const exists = selectedFiles.some(
+  (f) => f.name === file.name && f.size === file.size
+);
+
+if (!exists) {
+  validFiles.push(file);
+}
     }
 
     if (validFiles.length > 0) {
-      setSelectedFiles([...selectedFiles, ...validFiles]);
+      setSelectedFiles((prev) => [...prev, ...validFiles]);
     }
   };
 

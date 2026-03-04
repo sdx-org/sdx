@@ -25,10 +25,9 @@ export default function Mental() {
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
-      mental_health: state.formData.mental.mental_health || '',
+      mental_health: state.formData?.mental?.mental_health || '',
     },
   });
-
   const [apiError, setApiError] = useState(null);
   const watchMentalHealth = watch('mental_health');
   const getCharacterCount = () => watchMentalHealth?.length || 0;
@@ -61,7 +60,7 @@ export default function Mental() {
     '🧠 Problem-solving',
     '🙏 Spiritual / Religious practices',
   ];
-  const isFormComplete = watchMentalHealth && watchMentalHealth.length >= 10;
+  const isFormComplete = watchMentalHealth?.trim().length >= 10;
   const charCount = getCharacterCount();
   const detailLevel = getDetailLevel(charCount);
   const onSubmit = async (data) => {
@@ -92,7 +91,9 @@ export default function Mental() {
       navigate('/medical-reports');
     } catch (err) {
       console.error('Error saving mental health data:', err);
-      setApiError(err.message || 'Failed to save mental health information. Please try again.');
+      setApiError(
+  err?.message || 'Failed to save mental health information. Please try again.'
+);
       window.scrollTo(0, 0);
     }
   };

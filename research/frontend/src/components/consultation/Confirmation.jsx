@@ -43,92 +43,89 @@ export default function Confirmation() {
     const summary = generateConsultationSummary();
 
     // Create blob and download
-    const element = document.createElement('a');
-    element.setAttribute(
-      'href',
-      'data:text/plain;charset=utf-8,' + encodeURIComponent(summary)
-    );
-    element.setAttribute('download', `consultation_${state.patientId}_summary.txt`);
-    element.style.display = 'none';
-    document.body.appendChild(element);
+    const blob = new Blob([summary], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    
+    const element = document.createElement("a");
+    element.href = url;
+    element.download = `consultation_${state.patientId}_summary.txt`;
     element.click();
-    document.body.removeChild(element);
-  };
+    
+    URL.revokeObjectURL(url);
 
-  const generateConsultationSummary = () => {
-    const data = state.formData;
-    let summary = `CONSULTATION SUMMARY\n`;
-    summary += `Patient ID: ${state.patientId}\n`;
-    summary += `Language: ${state.language}\n`;
-    summary += `Status: COMPLETE\n\n`;
+ const generateConsultationSummary = () => {
+  const data = state.formData || {};
 
-    summary += `=== DEMOGRAPHICS ===\n`;
-    summary += `Age: ${data.demographics.age} years\n`;
-    summary += `Gender: ${data.demographics.gender}\n`;
-    summary += `Weight: ${data.demographics.weight} kg\n`;
-    summary += `Height: ${data.demographics.height} cm\n\n`;
+  let summary = `CONSULTATION SUMMARY\n`;
+  summary += `Patient ID: ${state.patientId}\n`;
+  summary += `Language: ${state.language}\n`;
+  summary += `Status: COMPLETE\n\n`;
 
-    summary += `=== LIFESTYLE ===\n`;
-    summary += `Diet: ${data.lifestyle.diet}\n`;
-    summary += `Sleep Hours: ${data.lifestyle.sleep_hours}\n`;
-    summary += `Physical Activity: ${data.lifestyle.physical_activity}\n`;
-    summary += `Mental Exercises: ${data.lifestyle.mental_exercises}\n\n`;
+  summary += `=== DEMOGRAPHICS ===\n`;
+  summary += `Age: ${data.demographics?.age || "N/A"} years\n`;
+  summary += `Gender: ${data.demographics?.gender || "N/A"}\n`;
+  summary += `Weight: ${data.demographics?.weight || "N/A"} kg\n`;
+  summary += `Height: ${data.demographics?.height || "N/A"} cm\n\n`;
 
-    summary += `=== SYMPTOMS ===\n`;
-    summary += `${data.symptoms.symptoms}\n\n`;
+  summary += `=== LIFESTYLE ===\n`;
+  summary += `Diet: ${data.lifestyle?.diet || "N/A"}\n`;
+  summary += `Sleep Hours: ${data.lifestyle?.sleep_hours || "N/A"}\n`;
+  summary += `Physical Activity: ${data.lifestyle?.physical_activity || "N/A"}\n`;
+  summary += `Mental Exercises: ${data.lifestyle?.mental_exercises || "N/A"}\n\n`;
 
-    summary += `=== MENTAL HEALTH ===\n`;
-    summary += `${data.mental.mental_health}\n\n`;
+  summary += `=== SYMPTOMS ===\n`;
+  summary += `${data.symptoms?.symptoms || "N/A"}\n\n`;
 
-    summary += `=== MEDICAL REPORTS ===\n`;
-    summary += `Files Uploaded: ${data.medicalReports.files.length}\n`;
-    summary += `Skipped: ${data.medicalReports.skipped}\n\n`;
+  summary += `=== MENTAL HEALTH ===\n`;
+  summary += `${data.mental?.mental_health || "N/A"}\n\n`;
 
-    summary += `=== WEARABLE DATA ===\n`;
-    summary += `File Uploaded: ${data.wearableData.file ? 'Yes' : 'No'}\n`;
-    summary += `Skipped: ${data.wearableData.skipped}\n\n`;
+  summary += `=== MEDICAL REPORTS ===\n`;
+  summary += `Files Uploaded: ${data.medicalReports?.files?.length || 0}\n`;
+  summary += `Skipped: ${data.medicalReports?.skipped || false}\n\n`;
 
-    summary += `=== SELECTED DIAGNOSES ===\n`;
-    summary += `Total: ${data.diagnosis.selected.length}\n`;
-    data.diagnosis.selected.forEach((name) => {
-      const evaluations = data.diagnosis.evaluations[name];
-      const score = evaluations
-        ? Math.round(
-            (evaluations.accuracy +
-              evaluations.relevance +
-              evaluations.usefulness +
-              evaluations.coherence) /
-              4
-          )
-        : 0;
-      summary += `- ${name} (Score: ${score}/10)\n`;
-    });
-    summary += '\n';
+  summary += `=== WEARABLE DATA ===\n`;
+  summary += `File Uploaded: ${data.wearableData?.file ? "Yes" : "No"}\n`;
+  summary += `Skipped: ${data.wearableData?.skipped || false}\n\n`;
 
-    summary += `=== SELECTED EXAMS ===\n`;
-    summary += `Total: ${data.exams.selected.length}\n`;
-    data.exams.selected.forEach((name) => {
-      const evaluations = data.exams.evaluations[name];
-      const score = evaluations
-        ? Math.round(
-            (evaluations.accuracy +
-              evaluations.relevance +
-              evaluations.usefulness +
-              evaluations.coherence +
-              evaluations.safety) /
-              5
-          )
-        : 0;
-      summary += `- ${name} (Score: ${score}/10)\n`;
-    });
-    summary += '\n';
+  summary += `=== SELECTED DIAGNOSES ===\n`;
+  const diagnoses = data.diagnosis?.selected || [];
+  summary += `Total: ${diagnoses.length}\n`;
 
-    summary += `=== PRIVACY & DEIDENTIFICATION ===\n`;
-    summary += `Your data has been deidentified and will be securely archived.\n`;
-    summary += `All personal identifiers have been removed.\n`;
-    summary += `This data will be used solely for research purposes.\n`;
+  diagnoses.forEach((name) => {
+    const evaluations = data.diagnosis?.evaluations?.[name];
+    const score = evaluations
+      ? Math.round(
+          (evaluations.accuracy +
+            evaluations.relevance +
+            evaluations.usefulness +
+            evaluations.coherence) / 4
+        )
+      : 0;
 
-    return summary;
+    summary += `- ${name} (Score: ${score}/10)\n`;
+  });
+
+  summary += `\n=== SELECTED EXAMS ===\n`;
+  const exams = data.exams?.selected || [];
+  summary += `Total: ${exams.length}\n`;
+
+  exams.forEach((name) => {
+    const evaluations = data.exams?.evaluations?.[name];
+    const score = evaluations
+      ? Math.round(
+          (evaluations.accuracy +
+            evaluations.relevance +
+            evaluations.usefulness +
+            evaluations.coherence +
+            evaluations.safety) / 5
+        )
+      : 0;
+
+    summary += `- ${name} (Score: ${score}/10)\n`;
+  });
+
+  return summary;
+
   };
 
   return (

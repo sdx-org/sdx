@@ -26,13 +26,13 @@ export default function Symptoms() {
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
-      symptoms: state.formData.symptoms.symptoms || '',
+      symptoms: state.formData?.symptoms?.symptoms || '',
     },
   });
 
   const [apiError, setApiError] = useState(null);
   const watchSymptoms = watch('symptoms');
-  const getCharacterCount = () => watchSymptoms?.length || 0;
+  const charCount = watchSymptoms?.length || 0;
 
   const getSeverityHint = (length) => {
     if (length < 10) return { status: 'Too short', color: 'danger' };
@@ -54,7 +54,7 @@ export default function Symptoms() {
     '💪 Weakness',
   ];
 
-  const isFormComplete = watchSymptoms && watchSymptoms.length >= 10;
+  const isFormComplete = watchSymptoms?.trim().length >= 10;
   const charCount = getCharacterCount();
   const severityHint = getSeverityHint(charCount);
   const onSubmit = async (data) => {
@@ -85,7 +85,9 @@ export default function Symptoms() {
       navigate('/mental');
     } catch (err) {
       console.error('Error saving symptoms data:', err);
-      setApiError(err.message || 'Failed to save symptoms. Please try again.');
+      setApiError(
+  err?.message || 'Failed to save symptoms. Please try again.'
+);
       window.scrollTo(0, 0);
     }
   };

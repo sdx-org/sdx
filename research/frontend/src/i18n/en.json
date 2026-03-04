@@ -1,7 +1,7 @@
 {
-  "dashboard.title": "Dashboard",
-  "dashboard.addPatient": "Add Patient",
-  "dashboard.noRecords": "No patient records found. Click 'Add Patient' to start a new consultation.",
+  "t("dashboard.title")": "Dashboard",
+  "t("dashboard.addPatient")": "Add Patient",
+  "t("dashboard.noRecords")": "No patient records found. Click 'Add Patient' to start a new consultation.",
 
   "language.title": "Select your language",
   "language.label": "Language",
@@ -24,7 +24,7 @@
   "symptoms.describe": "Describe the main symptoms",
   "symptoms.placeholder": "comma-separated or paragraph",
 
-  "mentalhealth.title": "Step 4 — Mental health",
+  "mentalHealth.title": "Step 4 — Mental health",
   "mentalhealth.label": "Mental health concerns (stress, anxiety, mood, etc.)",
 
   "exams.title": "Step 5 — Previous exams / tests",
@@ -39,6 +39,61 @@
     "upload": "Upload & Continue",
     "back": "Back"
   },
+
+  "dashboard": {
+  "title": "Dashboard",
+  "addPatient": "Add Patient",
+  "noRecords": "No patient records found.",
+  "totalPatients": "Total Patients",
+  "activeRecords": "Active Records",
+  "thisMonth": "This Month",
+  "searchPatient": "Search by Patient ID",
+  "recentPatients": "Recent Patients"
+},
+
+"diagnosis": {
+  "title": "AI Diagnosis",
+  "select": "Select relevant diagnoses",
+  "evaluation": "Evaluate the suggested diagnosis"
+},
+
+"medicalReports": {
+  "title": "Medical Reports",
+  "upload": "Upload medical reports",
+  "skip": "Skip this step"
+},
+
+"confirmation": {
+  "title": "Consultation Complete",
+  "downloadSummary": "Download Summary",
+  "newConsultation": "New Consultation"
+},
+
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "addPatient": "Add Patient",
+    "noRecords": "No patient records found.",
+    "totalPatients": "Total Patients",
+    "activeRecords": "Active Records",
+    "thisMonth": "This Month"
+  },
+
+  "language": {
+    "title": "Select your language",
+    "label": "Language",
+    "continue": "Continue"
+  },
+
+  "demographics": {
+    "title": "Step 1 — Demographics",
+    "age": "Age (years)",
+    "gender": "Gender",
+    "weight": "Weight (kg)",
+    "height": "Height (cm)"
+  }
+},
+
    "validation": {
     "ageRequired": "Age is required",
     "genderRequired": "Gender is required",

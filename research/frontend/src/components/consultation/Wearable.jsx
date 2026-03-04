@@ -26,17 +26,17 @@ export default function Wearable() {
   } = useForm();
 
   useEffect(()=>{
-    if(!state.formData.wearableData){
+    if(!state.formData?.wearableData){
       dispatch(consultationActions.updateWearableData({
         file:null,
         skipped:false,
-      }))
+      }))setApiError(err.message || 'Failed to upload wearable data. Please try again.');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
   const [apiError, setApiError] = useState(null);
   const [selectedFile, setSelectedFile] = useState(
-    state.formData.wearableData?.file || null
+    state.formData?.wearableData?.file || null
   );
 
   const acceptedFormats = [
@@ -50,13 +50,14 @@ export default function Wearable() {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB'];
-    const i = Math.floor(Math.log(bytes, k));
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
 
   const getFileIcon = (type) => {
     if (type.includes('csv')) return '📊';
     if (type.includes('json')) return '📋';
+    return "📄";
   };
 
   const handleFileSelect = (event) => {
@@ -117,7 +118,7 @@ export default function Wearable() {
       navigate('/diagnosis');
     } catch (err) {
       console.error('Error skipping wearable data:', err);
-      setApiError(err.message || 'Failed to skip wearable data. Please try again.');
+      setApiError(err?.message || 'Failed to skip wearable data. Please try again.');
       window.scrollTo(0, 0);
     }
   };
@@ -162,7 +163,7 @@ export default function Wearable() {
       navigate('/diagnosis');
     } catch (err) {
       console.error('Error uploading wearable data:', err);
-      setApiError(err.message || 'Failed to upload wearable data. Please try again.');
+      setApiError(err?.message || 'Failed to upload wearable data. Please try again.');
       window.scrollTo(0, 0);
     }
   };
