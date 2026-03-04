@@ -75,8 +75,7 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
     def extract_wearable_data(
         self, file: FileInput
     ) -> list[dict[str, object]]:
-        """Extract wearable data from file."""git add .
-git commit -m "fix: remove blank line after docstring (ruff D202)"
+        """Extract wearable data from file."""
         self._validate_or_raise(file)
         return self._process_file(file)
 
