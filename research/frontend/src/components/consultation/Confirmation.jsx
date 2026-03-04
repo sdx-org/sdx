@@ -45,12 +45,12 @@ export default function Confirmation() {
     // Create blob and download
     const blob = new Blob([summary], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    
+
     const element = document.createElement("a");
     element.href = url;
     element.download = `consultation_${state.patientId}_summary.txt`;
     element.click();
-    
+
     URL.revokeObjectURL(url);
   };
 

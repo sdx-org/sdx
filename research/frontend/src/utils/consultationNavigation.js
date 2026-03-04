@@ -112,7 +112,7 @@ export async function resumeConsultationForPatient({ patientId, dispatch, naviga
     exams: '/exams',
     confirmation: '/confirmation'
   };
-  
+
   navigate(STEP_ROUTES[targetStep] || '/demographics');
   return consultationData;
 }
