@@ -35,11 +35,17 @@ export default function Dashboard() {
   const itemsPerPage = 5;
   const filteredPatients = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
-    return patients.filter((patient) =>
-      String(patient?.patient_id ?? '')
-        .toLowerCase()
-        .includes(normalizedSearch)
-    );
+    return patients
+      .filter((patient) =>
+        String(patient?.patient_id ?? '')
+          .toLowerCase()
+          .includes(normalizedSearch)
+      )
+      .sort((a, b) => {
+        const aMs = Date.parse(a?.created_at ?? '') || 0;
+        const bMs = Date.parse(b?.created_at ?? '') || 0;
+        return bMs - aMs;
+      });
   }, [patients, searchTerm]);
   const endOffset = itemOffset + itemsPerPage;
   const currentItems = filteredPatients.slice(itemOffset, endOffset);
