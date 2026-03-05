@@ -1,5 +1,6 @@
 """API Request/ Response schemas."""
 
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
@@ -344,3 +345,63 @@ class HealthResponse(BaseModel):
 
     status: str = Field(..., description='Health status of the API service.')
     service: str = Field(..., description='Name of the service being checked.')
+
+
+class ConsentPermissions(BaseModel):
+    """Granular consent permissions toggles."""
+
+    allow_diagnostics: bool
+    allow_exam_recommendations: bool
+    allow_medical_reports: bool
+    allow_wearable_data: bool
+    allow_research_sharing: bool
+    allow_recontact: bool
+
+
+class ConsentUpdateRequest(BaseModel):
+    """Update request for patient consent permissions."""
+
+    actor: str = Field(
+        default='clinician',
+        description='Actor performing the consent change.',
+    )
+    reason: Optional[str] = Field(
+        None, description='Optional reason for auditing.'
+    )
+    allow_diagnostics: Optional[bool] = None
+    allow_exam_recommendations: Optional[bool] = None
+    allow_medical_reports: Optional[bool] = None
+    allow_wearable_data: Optional[bool] = None
+    allow_research_sharing: Optional[bool] = None
+    allow_recontact: Optional[bool] = None
+    revoke_all: bool = False
+    grant_all: bool = False
+
+
+class PatientConsentResponse(BaseModel):
+    """Current consent state for a patient."""
+
+    patient_id: str
+    consent_version: str
+    permissions: ConsentPermissions
+    granted_at: Optional[datetime]
+    revoked_at: Optional[datetime]
+    updated_at: Optional[datetime]
+
+
+class ConsentAuditEntry(BaseModel):
+    """Single consent audit entry."""
+
+    action: str
+    actor: str
+    reason: Optional[str]
+    details: Dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime
+
+
+class ConsentAuditListResponse(BaseModel):
+    """Audit response for consent events."""
+
+    patient_id: str
+    total: int
+    entries: List[ConsentAuditEntry]

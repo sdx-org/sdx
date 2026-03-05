@@ -42,3 +42,39 @@ def test_list_patients(test_repo, patients_json):
 
     # Assert
     assert len(all_patients) == len(patients_json)
+
+
+def test_default_consent_created_with_patient(test_repo, patients_json):
+    """Ensure default consent and initial audit entry are created."""
+    patient_data = patients_json[0]
+    patient_uuid = patient_data['meta']['uuid']
+    patient = test_repo.create_patient_and_consultation(patient_data)
+
+    consent = test_repo.get_patient_consent(patient_uuid)
+    logs = test_repo.list_consent_audit_logs(patient_uuid)
+
+    assert consent is not None
+    assert consent.patient_id == patient.id
+    assert consent.allow_diagnostics is True
+    assert len(logs) >= 1
+    assert logs[0].action in {'consent_created', 'consent_updated'}
+
+
+def test_update_consent_and_audit(test_repo, patients_json):
+    """Ensure consent updates are audited and persisted."""
+    patient_data = patients_json[0]
+    patient_uuid = patient_data['meta']['uuid']
+    test_repo.create_patient_and_consultation(patient_data)
+
+    updated = test_repo.update_patient_consent(
+        patient_uuid=patient_uuid,
+        updates={'allow_wearable_data': False},
+        actor='tester',
+        reason='patient opted out of wearable processing',
+    )
+    logs = test_repo.list_consent_audit_logs(patient_uuid)
+
+    assert updated is not None
+    assert updated.allow_wearable_data is False
+    assert len(logs) >= 1
+    assert any(log.action == 'consent_updated' for log in logs)

@@ -42,6 +42,9 @@ from app.reports import (
     save_fhir_reports,
 )
 from app.schemas import (
+    ConsentAuditEntry,
+    ConsentAuditListResponse,
+    ConsentUpdateRequest,
     ConsultationStatusResponse,
     CreatePatientRequest,
     CreatePatientResponse,
@@ -61,6 +64,7 @@ from app.schemas import (
     MedicalReportSkipResponse,
     MedicalReportUploadResponse,
     MentalHealthRequest,
+    PatientConsentResponse,
     PatientSummary,
     ReportSummary,
     StepResponse,
@@ -83,6 +87,14 @@ from hiperhealth.privacy.deidentifier import (
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
+CONSENT_PERMISSION_KEYS = (
+    'allow_diagnostics',
+    'allow_exam_recommendations',
+    'allow_medical_reports',
+    'allow_wearable_data',
+    'allow_research_sharing',
+    'allow_recontact',
+)
 
 APP_DIR = Path(__file__).parent
 
@@ -395,6 +407,52 @@ def _get_next_step(patient: Patient) -> str:
     return 'confirmation'
 
 
+def _consent_to_response(patient_id: str, consent) -> PatientConsentResponse:
+    """Convert ORM consent row into API response."""
+    return PatientConsentResponse(
+        patient_id=patient_id,
+        consent_version=consent.consent_version,
+        permissions={
+            key: bool(getattr(consent, key)) for key in CONSENT_PERMISSION_KEYS
+        },
+        granted_at=consent.granted_at,
+        revoked_at=consent.revoked_at,
+        updated_at=consent.updated_at,
+    )
+
+
+def _enforce_permission(
+    patient_id: str,
+    repo: ResearchRepository,
+    permission_key: str,
+    action: str,
+) -> None:
+    """Require patient consent permission before sensitive processing."""
+    consent = repo.get_patient_consent(patient_id)
+    if not consent:
+        raise HTTPException(status_code=404, detail='Patient not found')
+
+    allowed = bool(getattr(consent, permission_key))
+    if not allowed:
+        repo.log_consent_access(
+            patient_id,
+            action='consent_denied',
+            actor='api',
+            details={'action': action, 'permission': permission_key},
+        )
+        raise HTTPException(
+            status_code=403,
+            detail=f'Permission denied by consent settings: {permission_key}',
+        )
+
+    repo.log_consent_access(
+        patient_id,
+        action='consent_allowed',
+        actor='api',
+        details={'action': action, 'permission': permission_key},
+    )
+
+
 # --- FastAPI Endpoints ---
 
 
@@ -425,6 +483,76 @@ def create_new_patient(
         patient_id=patient_uuid,
         lang=req.lang,
         created_at=datetime.utcnow().isoformat(),
+    )
+
+
+@app.get(
+    '/api/patients/{patient_id}/consent',
+    response_model=PatientConsentResponse,
+)
+def get_patient_consent(
+    patient_id: str, repo: ResearchRepository = Depends(get_repository)
+):
+    """Return current patient consent permissions."""
+    consent = repo.get_patient_consent(patient_id)
+    if not consent:
+        raise HTTPException(status_code=404, detail='Patient not found')
+    return _consent_to_response(patient_id, consent)
+
+
+@app.put(
+    '/api/patients/{patient_id}/consent',
+    response_model=PatientConsentResponse,
+)
+def update_patient_consent(
+    patient_id: str,
+    req: ConsentUpdateRequest,
+    repo: ResearchRepository = Depends(get_repository),
+):
+    """Update patient consent flags with audit logging."""
+    update_payload = req.model_dump(
+        include=set(CONSENT_PERMISSION_KEYS) | {'revoke_all', 'grant_all'}
+    )
+    consent = repo.update_patient_consent(
+        patient_uuid=patient_id,
+        updates=update_payload,
+        actor=req.actor,
+        reason=req.reason,
+    )
+    if not consent:
+        raise HTTPException(status_code=404, detail='Patient not found')
+    return _consent_to_response(patient_id, consent)
+
+
+@app.get(
+    '/api/patients/{patient_id}/consent/audit',
+    response_model=ConsentAuditListResponse,
+)
+def list_patient_consent_audit(
+    patient_id: str,
+    limit: int = 100,
+    repo: ResearchRepository = Depends(get_repository),
+):
+    """List audit log entries for patient consent actions."""
+    patient = repo.get_patient_by_uuid(patient_id)
+    if not patient:
+        raise HTTPException(status_code=404, detail='Patient not found')
+
+    rows = repo.list_consent_audit_logs(
+        patient_id, limit=max(1, min(limit, 500))
+    )
+    entries = [
+        ConsentAuditEntry(
+            action=row.action,
+            actor=row.actor,
+            reason=row.reason,
+            details=row.details or {},
+            created_at=row.created_at,
+        )
+        for row in rows
+    ]
+    return ConsentAuditListResponse(
+        patient_id=patient_id, total=len(entries), entries=entries
     )
 
 
@@ -622,6 +750,12 @@ async def upload_medical_reports(
     repo: ResearchRepository = Depends(get_repository),
 ):
     """Upload and process previous medical reports."""
+    _enforce_permission(
+        patient_id=patient_id,
+        repo=repo,
+        permission_key='allow_medical_reports',
+        action='upload_medical_reports',
+    )
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
@@ -673,6 +807,12 @@ def skip_medical_reports(
     repo: ResearchRepository = Depends(get_repository),
 ):
     """Skip medical reports upload step."""
+    _enforce_permission(
+        patient_id=patient_id,
+        repo=repo,
+        permission_key='allow_medical_reports',
+        action='skip_medical_reports',
+    )
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
@@ -696,6 +836,12 @@ def get_medical_reports(
     repo: ResearchRepository = Depends(get_repository),
 ):
     """Get summary of uploaded medical reports."""
+    _enforce_permission(
+        patient_id=patient_id,
+        repo=repo,
+        permission_key='allow_medical_reports',
+        action='read_medical_reports',
+    )
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
@@ -729,9 +875,15 @@ async def upload_wearable_data(
     repo: ResearchRepository = Depends(get_repository),
 ):
     """Upload and Process wearable data."""
+    _enforce_permission(
+        patient_id=patient_id,
+        repo=repo,
+        permission_key='allow_wearable_data',
+        action='upload_wearable_data',
+    )
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
-        raise HTTPException(status_code=404, detai='Patient not found')
+        raise HTTPException(status_code=404, detail='Patient not found')
 
     consultation = patient.consultations[-1]
 
@@ -767,6 +919,12 @@ def skip_wearable_data(
     repo: ResearchRepository = Depends(get_repository),
 ):
     """Skip wearable data upload."""
+    _enforce_permission(
+        patient_id=patient_id,
+        repo=repo,
+        permission_key='allow_wearable_data',
+        action='skip_wearable_data',
+    )
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
@@ -789,6 +947,12 @@ def get_diagnosis_suggestions(
     patient_id: str, repo: ResearchRepository = Depends(get_repository)
 ):
     """Get AI-generated differential diagnosis suggestions."""
+    _enforce_permission(
+        patient_id=patient_id,
+        repo=repo,
+        permission_key='allow_diagnostics',
+        action='generate_diagnosis',
+    )
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
@@ -830,6 +994,12 @@ def submit_diagnosis_selection(
     repo: ResearchRepository = Depends(get_repository),
 ):
     """Save selected diagnosis and evaluations."""
+    _enforce_permission(
+        patient_id=patient_id,
+        repo=repo,
+        permission_key='allow_diagnostics',
+        action='submit_diagnosis_selection',
+    )
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
@@ -853,6 +1023,12 @@ def get_exam_suggestions(
     patient_id: str, repo: ResearchRepository = Depends(get_repository)
 ):
     """Get AI-generated exam suggestions."""
+    _enforce_permission(
+        patient_id=patient_id,
+        repo=repo,
+        permission_key='allow_exam_recommendations',
+        action='generate_exam_suggestions',
+    )
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')
@@ -891,6 +1067,12 @@ def submit_exams_selection(
     repo: ResearchRepository = Depends(get_repository),
 ):
     """Save selected exams and finalize record with deidentification."""
+    _enforce_permission(
+        patient_id=patient_id,
+        repo=repo,
+        permission_key='allow_exam_recommendations',
+        action='submit_exam_selection',
+    )
     patient = repo.get_patient_by_uuid(patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail='Patient not found')

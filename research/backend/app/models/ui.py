@@ -5,6 +5,7 @@ from hiperhealth.models.sqla.fhirx import (
 )
 from sqlalchemy import (
     JSON,
+    Boolean,
     Column,
     DateTime,
     Float,
@@ -26,6 +27,12 @@ class Patient(Base):
     gender = Column(String(50))
 
     consultations = relationship('Consultation', back_populates='patient')
+    consent = relationship(
+        'PatientConsent', back_populates='patient', uselist=False
+    )
+    consent_audit_logs = relationship(
+        'PatientConsentAuditLog', back_populates='patient'
+    )
 
 
 class Consultation(Base):
@@ -121,3 +128,47 @@ class ConsultationExam(Base):
 
     consultation = relationship(Consultation, back_populates='selected_exams')
     exam = relationship(Exam)
+
+
+class PatientConsent(Base):
+    """Consent settings with granular patient permissions."""
+
+    __tablename__ = 'patient_consents'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(
+        Integer, ForeignKey('patients.id'), unique=True, nullable=False
+    )
+    consent_version = Column(String(20), nullable=False, default='v1')
+
+    allow_diagnostics = Column(Boolean, nullable=False, default=True)
+    allow_exam_recommendations = Column(Boolean, nullable=False, default=True)
+    allow_medical_reports = Column(Boolean, nullable=False, default=True)
+    allow_wearable_data = Column(Boolean, nullable=False, default=True)
+    allow_research_sharing = Column(Boolean, nullable=False, default=False)
+    allow_recontact = Column(Boolean, nullable=False, default=False)
+
+    granted_at = Column(DateTime, nullable=False)
+    revoked_at = Column(DateTime)
+    updated_at = Column(DateTime, nullable=False)
+
+    patient = relationship(Patient, back_populates='consent')
+    audit_logs = relationship(
+        'PatientConsentAuditLog', back_populates='consent'
+    )
+
+
+class PatientConsentAuditLog(Base):
+    """Audit log for consent changes and permission checks."""
+
+    __tablename__ = 'patient_consent_audit_logs'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey('patients.id'), nullable=False)
+    consent_id = Column(Integer, ForeignKey('patient_consents.id'))
+    action = Column(String(50), nullable=False)
+    actor = Column(String(100), nullable=False)
+    reason = Column(Text)
+    details = Column(JSON)
+    created_at = Column(DateTime, nullable=False)
+
+    patient = relationship(Patient, back_populates='consent_audit_logs')
+    consent = relationship(PatientConsent, back_populates='audit_logs')

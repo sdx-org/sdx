@@ -11,6 +11,8 @@ from app.models.ui import (
     Diagnosis,
     Exam,
     Patient,
+    PatientConsent,
+    PatientConsentAuditLog,
 )
 from schema.ui import ConsultationCreate, PatientCreate
 from sqlalchemy.orm import Session
@@ -26,6 +28,14 @@ class ResearchRepository:
     def __init__(self, db_session: Session):
         """Initialize the repository with a database session."""
         self.db = db_session
+        self._consent_keys = (
+            'allow_diagnostics',
+            'allow_exam_recommendations',
+            'allow_medical_reports',
+            'allow_wearable_data',
+            'allow_research_sharing',
+            'allow_recontact',
+        )
 
     def get_patient_by_uuid(self, patient_uuid: UUID) -> Patient | None:
         """Retrieve a single patient by their UUID."""
@@ -71,8 +81,158 @@ class ResearchRepository:
         self.db.add(new_consultation)
         self.db.commit()
 
+        self.get_or_create_patient_consent(
+            new_patient.id, actor='system', reason='auto-created on enrollment'
+        )
         self.db.refresh(new_patient)
         return new_patient
+
+    def _create_consent_audit_log(
+        self,
+        patient_id: int,
+        consent_id: int,
+        action: str,
+        actor: str,
+        reason: str | None = None,
+        details: Dict[str, Any] | None = None,
+    ) -> None:
+        """Insert a consent audit log entry."""
+        entry = PatientConsentAuditLog(
+            patient_id=patient_id,
+            consent_id=consent_id,
+            action=action,
+            actor=actor,
+            reason=reason,
+            details=details or {},
+            created_at=datetime.utcnow(),
+        )
+        self.db.add(entry)
+
+    def get_or_create_patient_consent(
+        self, patient_id: int, actor: str = 'system', reason: str | None = None
+    ) -> PatientConsent:
+        """Fetch patient consent row, creating one with defaults if needed."""
+        consent = (
+            self.db.query(PatientConsent)
+            .filter(PatientConsent.patient_id == patient_id)
+            .first()
+        )
+        if consent:
+            return consent
+
+        now = datetime.utcnow()
+        consent = PatientConsent(
+            patient_id=patient_id, granted_at=now, updated_at=now
+        )
+        self.db.add(consent)
+        self.db.flush()
+        self._create_consent_audit_log(
+            patient_id=patient_id,
+            consent_id=consent.id,
+            action='consent_created',
+            actor=actor,
+            reason=reason,
+            details={k: getattr(consent, k) for k in self._consent_keys},
+        )
+        self.db.commit()
+        self.db.refresh(consent)
+        return consent
+
+    def get_patient_consent(self, patient_uuid: UUID) -> PatientConsent | None:
+        """Return patient consent object."""
+        patient = self.get_patient_by_uuid(patient_uuid)
+        if not patient:
+            return None
+        return self.get_or_create_patient_consent(patient.id)
+
+    def update_patient_consent(
+        self,
+        patient_uuid: UUID,
+        updates: Dict[str, Any],
+        actor: str,
+        reason: str | None = None,
+    ) -> PatientConsent | None:
+        """Apply consent changes and persist an audit entry."""
+        patient = self.get_patient_by_uuid(patient_uuid)
+        if not patient:
+            return None
+
+        consent = self.get_or_create_patient_consent(patient.id)
+        old_values = {k: getattr(consent, k) for k in self._consent_keys}
+
+        changed: Dict[str, Dict[str, Any]] = {}
+        for key in self._consent_keys:
+            if key in updates and updates[key] is not None:
+                new_value = bool(updates[key])
+                if old_values[key] != new_value:
+                    changed[key] = {'old': old_values[key], 'new': new_value}
+                setattr(consent, key, new_value)
+
+        if updates.get('revoke_all'):
+            for key in self._consent_keys:
+                if getattr(consent, key):
+                    changed[key] = {'old': True, 'new': False}
+                setattr(consent, key, False)
+            consent.revoked_at = datetime.utcnow()
+
+        if updates.get('grant_all'):
+            for key in self._consent_keys:
+                if not getattr(consent, key):
+                    changed[key] = {'old': False, 'new': True}
+                setattr(consent, key, True)
+            consent.revoked_at = None
+            consent.granted_at = datetime.utcnow()
+
+        consent.updated_at = datetime.utcnow()
+        if changed or reason:
+            self._create_consent_audit_log(
+                patient_id=patient.id,
+                consent_id=consent.id,
+                action='consent_updated',
+                actor=actor,
+                reason=reason,
+                details=changed,
+            )
+
+        self.db.commit()
+        self.db.refresh(consent)
+        return consent
+
+    def log_consent_access(
+        self,
+        patient_uuid: UUID,
+        action: str,
+        actor: str,
+        details: Dict[str, Any] | None = None,
+    ) -> None:
+        """Log consent-permission checks for sensitive operations."""
+        patient = self.get_patient_by_uuid(patient_uuid)
+        if not patient:
+            return
+        consent = self.get_or_create_patient_consent(patient.id)
+        self._create_consent_audit_log(
+            patient_id=patient.id,
+            consent_id=consent.id,
+            action=action,
+            actor=actor,
+            details=details or {},
+        )
+        self.db.commit()
+
+    def list_consent_audit_logs(
+        self, patient_uuid: UUID, limit: int = 100
+    ) -> List[PatientConsentAuditLog]:
+        """List most recent consent audit entries for a patient."""
+        patient = self.get_patient_by_uuid(patient_uuid)
+        if not patient:
+            return []
+        return (
+            self.db.query(PatientConsentAuditLog)
+            .filter(PatientConsentAuditLog.patient_id == patient.id)
+            .order_by(PatientConsentAuditLog.created_at.desc())
+            .limit(limit)
+            .all()
+        )
 
     def update_consultation(
         self, patient_uuid: UUID, full_patient_record: Dict[str, Any]

@@ -18,3 +18,5 @@ def test_database_schema_creation():
     assert 'exams' in tables
     assert 'consultation_diagnoses' in tables
     assert 'consultation_exams' in tables
+    assert 'patient_consents' in tables
+    assert 'patient_consent_audit_logs' in tables

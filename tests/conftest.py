@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import types
 import warnings
 
 from pathlib import Path
@@ -15,15 +16,47 @@ import pytest
 BACKEND_DIR = Path(__file__).parents[1] / 'research' / 'backend'
 sys.path.insert(0, str(BACKEND_DIR))
 
-from app.main import app
+
+def _install_magic_stub_if_unavailable() -> None:
+    """Fallback stub for environments without native libmagic."""
+    try:
+        import magic  # noqa: F401
+    except ImportError:
+        stub = types.ModuleType('magic')
+
+        class _MagicStub:
+            def __init__(self, mime: bool = True):
+                self.mime = mime
+
+            def from_file(self, filename: str) -> str:
+                lower = filename.lower()
+                if lower.endswith('.pdf'):
+                    return 'application/pdf'
+                if lower.endswith('.png'):
+                    return 'image/png'
+                if lower.endswith('.jpg') or lower.endswith('.jpeg'):
+                    return 'image/jpeg'
+                return 'application/octet-stream'
+
+            def from_buffer(self, data: bytes) -> str:
+                if data.startswith(b'%PDF'):
+                    return 'application/pdf'
+                if data.startswith(b'\x89PNG\r\n\x1a\n'):
+                    return 'image/png'
+                if data.startswith(b'\xff\xd8\xff'):
+                    return 'image/jpeg'
+                return 'application/octet-stream'
+
+        stub.Magic = _MagicStub
+        sys.modules['magic'] = stub
+
+
+_install_magic_stub_if_unavailable()
+
 from app.models.repositories import ResearchRepository
 from app.models.ui import Base
 from dotenv import dotenv_values, load_dotenv
 from fastapi.testclient import TestClient
-from hiperhealth.agents.extraction.medical_reports import (
-    MedicalReportFileExtractor,
-)
-from hiperhealth.agents.extraction.wearable import WearableDataFileExtractor
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -80,12 +113,20 @@ def patients_json() -> list[dict]:
 @pytest.fixture
 def wearable_extractor():
     """Provide a WearableDataFileExtractor instance for tests."""
+    from hiperhealth.agents.extraction.wearable import (
+        WearableDataFileExtractor,
+    )
+
     return WearableDataFileExtractor()
 
 
 @pytest.fixture
 def medical_extractor():
     """Provide a MedicalReportFileExtractor instance for tests."""
+    from hiperhealth.agents.extraction.medical_reports import (
+        MedicalReportFileExtractor,
+    )
+
     return MedicalReportFileExtractor()
 
 
@@ -118,4 +159,6 @@ def test_repo(db_session):
 @pytest.fixture
 def client():
     """FastAPI test client fixture."""
+    from app.main import app
+
     return TestClient(app)
