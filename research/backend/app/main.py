@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
 
-# Load environment variable
+# Load environment variables
 env_path = Path(__file__).resolve().parents[3] / '.envs' / '.env'
 load_dotenv(env_path)
 
