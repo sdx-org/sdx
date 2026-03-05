@@ -15,7 +15,7 @@ Quick start
 ```bash
 python -m venv .venv
 source .venv/Scripts/activate    # on Windows use: .venv\\Scripts\\activate
-pip install -r requirements.txt
+pip install -r s.txt
 ```
 
 2. Run the app (defaults to SQLite `backend.db` in this folder)
@@ -55,7 +55,7 @@ Notes
 
 - The app creates tables automatically on startup using SQLAlchemy
   `Base.metadata.create_all(engine)` for convenience in dev. For production,
-  replace with Alembic migrations (alembic is included in `requirements.txt`).
+  replace with Alembic migrations (alembic is included in `s.txt`).
 - Default DB is SQLite at `sqlite:///./backend.db`. To use Postgres, set
   environment variable `DATABASE_URL` to e.g.
   `postgresql+psycopg2://user:pass@host:5432/dbname` and ensure appropriate DB

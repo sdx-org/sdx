@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './i18';
 import { ConsultationProvider } from './context/ConsultationContext';
 
 import App from './App.jsx'
