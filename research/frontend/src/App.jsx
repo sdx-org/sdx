@@ -19,7 +19,6 @@ import Confirmation from "./components/consultation/Confirmation";
 
 export default function App() {
   return (
-    <ConsultationProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Dashboard />} />
@@ -37,6 +36,6 @@ export default function App() {
           <Route path="*" element={<Dashboard />} />
         </Routes>
       </Router>
-    </ConsultationProvider>
+
   );
 }
