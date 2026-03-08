@@ -21,7 +21,7 @@ application.
   - PII detection and de-identification
 - Domain schemas and models:
   - Pydantic schemas
-  - SQLAlchemy/SQLModel FHIR model definitions
+  - SQLAlchemy FHIR model definitions
 
 ## Installation
 
@@ -124,7 +124,7 @@ print(clean)
 - `src/hiperhealth/agents`: AI interaction and extraction modules
 - `src/hiperhealth/privacy`: de-identification tools
 - `src/hiperhealth/schema`: Pydantic schemas
-- `src/hiperhealth/models`: SQLAlchemy/SQLModel models
+- `src/hiperhealth/models`: SQLAlchemy models
 - `tests`: unit and integration tests
 - `docs`: MkDocs documentation source
 
