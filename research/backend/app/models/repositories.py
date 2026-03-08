@@ -160,7 +160,7 @@ class ResearchRepository:
             # Update language only if explicitly provided in meta_data
             if 'lang' in meta_data:
                 lang = _normalize_lang(meta_data.get('lang'))
-                if consultation.lang != lang:
+                if lang is not None and consultation.lang != lang:
                     consultation.lang = lang
 
         consultation.ai_diag_raw = full_patient_record.get('ai_diag')
