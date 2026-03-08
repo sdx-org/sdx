@@ -37,7 +37,7 @@ Homepage = "https://github.com/hiperhealth/hiperhealth"
 Issues = "https://github.com/hiperhealth/hiperhealth/issues"
 
 [build-system]
-requires = ["setuptools>=70.1.0,<82", "wheel"]
+requires = ["setuptools>=70.1.0,<82", "wheel", "build", "twine"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
