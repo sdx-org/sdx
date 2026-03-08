@@ -15,7 +15,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import HTTPException
 from openai import OpenAI
 from pydantic import ValidationError
 
@@ -28,6 +27,10 @@ _client = OpenAI(api_key=os.getenv('OPENAI_API_KEY', ''))
 
 _RAW_DIR = Path('data') / 'llm_raw'
 _RAW_DIR.mkdir(parents=True, exist_ok=True)
+
+
+class LLMResponseValidationError(ValueError):
+    """Raised when LLM output cannot be validated as LLMDiagnosis."""
 
 
 def dump_llm_json(text: str, sid: str | None) -> None:
@@ -63,6 +66,6 @@ def chat(
     try:
         return LLMDiagnosis.from_llm(raw)
     except ValidationError as exc:
-        raise HTTPException(
-            422, f'LLM response is not valid LLMDiagnosis: {exc}'
+        raise LLMResponseValidationError(
+            f'LLM response is not valid LLMDiagnosis: {exc}'
         ) from exc

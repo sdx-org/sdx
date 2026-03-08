@@ -2,6 +2,7 @@
 
 import io
 import os
+import shutil
 
 from pathlib import Path
 
@@ -18,6 +19,7 @@ PDF_FILE = TEST_DATA_PATH / 'pdf_reports' / 'report-1.pdf'
 IMAGE_FILE = TEST_DATA_PATH / 'image_reports' / 'image-1.png'
 UNSUPPORTED_FILE = TEST_DATA_PATH / 'pdf_reports' / 'unsupported_file.txt'
 CORRUPT_PDF_FILE = TEST_DATA_PATH / 'pdf_reports' / 'corrupt_report.txt'
+HAS_TESSERACT = shutil.which('tesseract') is not None
 
 
 @pytest.fixture
@@ -41,6 +43,7 @@ def test_extract_text_from_pdf_file(extractor):
     assert len(text) > 0
 
 
+@pytest.mark.skipif(not HAS_TESSERACT, reason='tesseract is not installed')
 def test_extract_text_from_image_file(extractor):
     """Test text extraction from image files using OCR."""
     text = extractor._extract_text_from_image(IMAGE_FILE)
@@ -74,7 +77,8 @@ def test_extract_report_data_from_pdf_file(extractor):
 
 
 @pytest.mark.skipif(
-    not os.environ.get('OPENAI_API_KEY'), reason='OpenAI API key not available'
+    (not os.environ.get('OPENAI_API_KEY')) or (not HAS_TESSERACT),
+    reason='OpenAI API key or tesseract not available',
 )
 def test_extract_report_data_from_image_file(extractor):
     """Test FHIR data extraction from image files."""
@@ -95,6 +99,7 @@ def test_support_inmemory_pdf(extractor):
     assert len(text) > 0
 
 
+@pytest.mark.skipif(not HAS_TESSERACT, reason='tesseract is not installed')
 def test_support_inmemory_image(extractor):
     """Test text extraction from in-memory image BytesIO objects."""
     with open(IMAGE_FILE, 'rb') as f:

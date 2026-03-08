@@ -78,7 +78,7 @@ groups:
         run: |
           pytest \
             --cov=hiperhealth \
-            --cov-fail-under=82 \
+            --cov-fail-under=92 \
             --cov-report term-missing \
             --no-cov-on-fail ${{ args.path }} ${{ args.params }}
 

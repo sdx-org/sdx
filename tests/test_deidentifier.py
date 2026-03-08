@@ -1,173 +1,230 @@
-"""Tests for the Deidentifier class, updated with parameterized testing."""
+"""Unit tests for de-identification helpers."""
 
+from __future__ import annotations
+
+from dataclasses import dataclass
+from types import SimpleNamespace
+from typing import Any, ClassVar
+
+import hiperhealth.privacy.deidentifier as deid_mod
 import pytest
 
-from hiperhealth.privacy.deidentifier import Deidentifier
 
-# Skipping all Deidentifier tests temporarily
-pytestmark = pytest.mark.skip(
-    reason='Temporarily skipping all Deidentifier tests'
-)
+class _NonPatternRecognizer:
+    """Recognizer type that should never be removed by replacement logic."""
 
-
-PII_TEST_CASES = [
-    ('T1_SIMPLE_EMAIL_NAME', 'Contact Jane Doe at jane.d@example.com.', True),
-    ('T2_US_PHONE', 'My phone number is 415-555-0132.', True),
-    (
-        'T3_UK_PHONE_LOCATION',
-        'Call from +44 20 7946 0958, located at 10 Downing St, London.',
-        True,
-    ),
-    ('T4_CREDIT_CARD', 'Do not use card 4111-1111-1111-1111.', True),
-    (
-        'T5_US_DRIVER_LICENSE',
-        "Driver's license number is H123-4567-8901.",
-        True,
-    ),
-    (
-        'T6_NO_PII',
-        'This is a perfectly safe sentence with no sensitive data.',
-        False,
-    ),
-    ('T7_DATE_OF_BIRTH', 'Her date of birth is 1990-01-15.', True),
-    (
-        'T8_IP_ADDRESS',
-        "The user's IP address was 203.0.113.55.",
-        True,
-    ),
-    (
-        'T9_MULTIPLE_NAMES',
-        'A meeting between Alice, Bob, and Carol.',
-        True,
-    ),
-    (
-        'T10_IBAN_CODE',
-        'Please transfer to IBAN DE89 3704 0044 0532 0130 00.',
-        True,
-    ),
-    (
-        'T11_US_SSN',
-        "The applicant's SSN is 987-65-4321.",
-        True,
-    ),
-    (
-        'T12_UK_PASSPORT',
-        'Her UK Passport number is 500000000.',
-        True,
-    ),
-    (
-        'T13_LOCATION_ONLY',
-        'He is currently in Paris for a business trip.',
-        True,
-    ),
-    (
-        'T14_COMPLEX_MIX',
-        'On 2023-05-10, Mr. Smith (john.p.smith@corp.com, '
-        'cell: (202) 555-0177) filed a report from IP 203.0.113.55.',
-        True,
-    ),
-    (
-        'T15_SPANISH_PII',
-        'Mi nombre es María López y mi correo es maria.lopez@email.es.',
-        True,
-    ),
-    (
-        'T16_US_ADDRESS',
-        'Ship to 1600 Pennsylvania Avenue, Washington, DC 20500.',
-        True,
-    ),
-    (
-        'T17_CRYPTO_ADDRESS',
-        'Send 1 BTC to 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa.',
-        True,
-    ),
-    (
-        'T18_URL_WITH_CREDENTIALS',
-        'Do not use ftp://user:password@ftp.example.com/',
-        True,
-    ),
-    (
-        'T19_MEDICAL_ACCOUNT',
-        'Patient MRN is MED-987654321.',
-        True,
-    ),
-    (
-        'T20_MIXED_NUMBERS',
-        'Order #12345 contains item #67890 but my phone is (555) 123-4567.',
-        True,
-    ),
-]
+    supported_entities: ClassVar[list[str]] = ['PERSON']
 
 
-@pytest.fixture
-def deidentifier() -> Deidentifier:
-    """Provide a fresh instance of the Deidentifier class for each test."""
-    return Deidentifier()
+class _FakePattern:
+    """Simple stand-in for Presidio Pattern."""
+
+    def __init__(self, name: str, regex: str, score: float) -> None:
+        self.name = name
+        self.regex = regex
+        self.score = score
 
 
-@pytest.mark.parametrize(
-    'test_id, text, should_find_pii',
-    PII_TEST_CASES,
-    ids=[case[0] for case in PII_TEST_CASES],  # test_id for clearer reporting
-)
-@pytest.mark.parametrize('strategy', ['mask', 'hash'])
-def test_pii_detection_and_deidentification(
-    deidentifier: Deidentifier,
-    strategy: str,
-    test_id: str,
-    text: str,
-    should_find_pii: bool,
-):
-    """
-    Verify PII detection and de-identification for various data samples.
+class _FakePatternRecognizer:
+    """Simple stand-in for Presidio PatternRecognizer."""
 
-    This test checks two key things:
-    * That the `analyze` method finds PII when it's expected to exist.
-    * That after de-identification, the original text is successfully altered.
-    """
-    analyzer_results = deidentifier.analyze(text)
+    def __init__(self, supported_entity: str, patterns: list[Any]) -> None:
+        self.supported_entities = [supported_entity]
+        self.patterns = patterns
 
-    if should_find_pii:
-        assert len(analyzer_results) > 0, (
-            f'Failed: Expected to find PII in {test_id}, but found none.'
+
+class _FakeRegistry:
+    """Minimal registry object used by fake analyzer."""
+
+    def __init__(self, recognizers: list[Any]) -> None:
+        self.recognizers = recognizers
+        self.added: list[Any] = []
+
+    def get_recognizers(self, language: str, all_fields: bool) -> list[Any]:
+        """Return recognizers currently in registry."""
+        assert language
+        assert all_fields is True
+        return list(self.recognizers)
+
+    def add_recognizer(self, recognizer: Any) -> None:
+        """Track newly added recognizer."""
+        self.added.append(recognizer)
+        self.recognizers.append(recognizer)
+
+
+class _FakeAnalyzerEngine:
+    """Minimal analyzer with configurable results."""
+
+    def __init__(self, results: list[Any], recognizers: list[Any]) -> None:
+        self._results = results
+        self.registry = _FakeRegistry(recognizers)
+        self.calls: list[dict[str, Any]] = []
+
+    def analyze(
+        self, text: str, entities: list[str] | None, language: str
+    ) -> list[Any]:
+        """Return preloaded analyzer results."""
+        self.calls.append(
+            {'text': text, 'entities': entities, 'language': language}
         )
+        return list(self._results)
 
-        deidentified_text = deidentifier.deidentify(text, strategy=strategy)
-        assert deidentified_text != text, (
-            f"De-identification failed for strategy '{strategy}' on {test_id}"
+
+class _FakeAnonymizerEngine:
+    """Minimal anonymizer returning static result."""
+
+    def __init__(self, anonymized_text: str) -> None:
+        self.anonymized_text = anonymized_text
+        self.calls: list[dict[str, Any]] = []
+
+    def anonymize(
+        self, text: str, analyzer_results: list[Any], operators: Any
+    ) -> SimpleNamespace:
+        """Return fixed anonymized text and store call args."""
+        self.calls.append(
+            {
+                'text': text,
+                'analyzer_results': analyzer_results,
+                'operators': operators,
+            }
         )
-
-        for result in analyzer_results:
-            original_pii_slice = text[result.start : result.end]
-            deidentified_slice = deidentified_text[result.start : result.end]
-            assert original_pii_slice != deidentified_slice, (
-                f"Original PII '{original_pii_slice}' at slice "
-                f'[{result.start}:{result.end}] was not altered.'
-            )
-
-    else:
-        assert len(analyzer_results) == 0, (
-            f'Failed: Expected no PII in {test_id}, but found '
-            f'{len(analyzer_results)} entities.'
-        )
+        return SimpleNamespace(text=self.anonymized_text)
 
 
-def test_add_custom_recognizer_and_analyze(deidentifier: Deidentifier):
-    """Test: Ensure a custom recognizer can be added and used for analysis."""
-    entity_name = 'ORDER_ID'
-    regex_pattern = r'ORD-\d{4}'
-    text_with_custom_id = 'The order confirmation is ORD-1234.'
+@dataclass
+class _FakeRecognizerResult:
+    """Result object used by Deidentifier.deidentify."""
 
-    deidentifier.add_custom_recognizer(entity_name, regex_pattern)
-    analyzer_results = deidentifier.analyze(text_with_custom_id)
-    entities_found = {result.entity_type for result in analyzer_results}
-
-    assert entity_name in entities_found
+    start: int
+    end: int
+    entity_type: str = 'PII'
 
 
-def test_unsupported_strategy_raises_error(deidentifier: Deidentifier):
-    """Test: Ensure that an unsupported strategy raises a ValueError."""
-    with pytest.raises(ValueError) as excinfo:
-        deidentifier.deidentify('Some text', strategy='encrypt')
+def _build_deidentifier(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    results: list[Any] | None = None,
+    recognizers: list[Any] | None = None,
+    anonymized_text: str = 'hashed',
+) -> tuple[deid_mod.Deidentifier, _FakeAnalyzerEngine, _FakeAnonymizerEngine]:
+    """Create a Deidentifier wired with in-memory fake engines."""
+    fake_analyzer = _FakeAnalyzerEngine(results or [], recognizers or [])
+    fake_anonymizer = _FakeAnonymizerEngine(anonymized_text)
 
-    assert "Unsupported strategy: 'encrypt'" in str(excinfo.value)
+    monkeypatch.setattr(deid_mod, 'AnalyzerEngine', lambda: fake_analyzer)
+    monkeypatch.setattr(deid_mod, 'AnonymizerEngine', lambda: fake_anonymizer)
+    monkeypatch.setattr(deid_mod, 'Pattern', _FakePattern)
+    monkeypatch.setattr(deid_mod, 'PatternRecognizer', _FakePatternRecognizer)
+
+    return deid_mod.Deidentifier(), fake_analyzer, fake_anonymizer
+
+
+def test_add_custom_recognizer_replaces_existing_pattern(monkeypatch):
+    """Replacing recognizers keeps non-pattern recognizers untouched."""
+    existing = _FakePatternRecognizer('ORDER_ID', [])
+    survivor = _NonPatternRecognizer()
+    deid, analyzer, _ = _build_deidentifier(
+        monkeypatch, recognizers=[existing, survivor]
+    )
+
+    deid.add_custom_recognizer('ORDER_ID', r'ORD-\d{4}', score=0.9)
+
+    assert survivor in analyzer.registry.recognizers
+    assert existing not in analyzer.registry.recognizers
+    assert len(analyzer.registry.added) == 1
+    assert analyzer.registry.added[0].supported_entities == ['ORDER_ID']
+
+
+def test_add_custom_recognizer_rejects_out_of_range_score(monkeypatch):
+    """Custom recognizer score must be between 0 and 1."""
+    deid, _, _ = _build_deidentifier(monkeypatch)
+    with pytest.raises(
+        ValueError, match=r'Score must be between 0\.0 and 1\.0'
+    ):
+        deid.add_custom_recognizer('ORDER_ID', r'ORD-\d{4}', score=1.2)
+
+
+def test_analyze_delegates_to_engine(monkeypatch):
+    """Analyze should pass parameters directly to analyzer engine."""
+    expected = [_FakeRecognizerResult(0, 4, entity_type='EMAIL')]
+    deid, analyzer, _ = _build_deidentifier(monkeypatch, results=expected)
+
+    out = deid.analyze(
+        text='user@example.com', entities=['EMAIL_ADDRESS'], language='pt'
+    )
+
+    assert out == expected
+    assert analyzer.calls == [
+        {
+            'text': 'user@example.com',
+            'entities': ['EMAIL_ADDRESS'],
+            'language': 'pt',
+        }
+    ]
+
+
+def test_deidentify_rejects_unknown_strategy(monkeypatch):
+    """Unknown de-identification strategy should raise ValueError."""
+    deid, _, _ = _build_deidentifier(monkeypatch)
+    with pytest.raises(ValueError, match="Unsupported strategy: 'encrypt'"):
+        deid.deidentify('text', strategy='encrypt')
+
+
+def test_deidentify_returns_original_when_no_entities(monkeypatch):
+    """No detected entities should keep input text unchanged."""
+    deid, _, _ = _build_deidentifier(monkeypatch, results=[])
+    assert deid.deidentify('nothing to redact', strategy='mask') == (
+        'nothing to redact'
+    )
+
+
+def test_deidentify_mask_strategy(monkeypatch):
+    """Mask strategy should replace detected slices with same-length stars."""
+    pii = [_FakeRecognizerResult(0, 4), _FakeRecognizerResult(10, 13)]
+    deid, _, _ = _build_deidentifier(monkeypatch, results=pii)
+
+    assert deid.deidentify('John says Bob', strategy='mask') == '**** says ***'
+
+
+def test_deidentify_hash_strategy_uses_anonymizer_engine(monkeypatch):
+    """Hash strategy should delegate to anonymizer with hash operator."""
+    pii = [_FakeRecognizerResult(0, 4)]
+    deid, _, anonymizer = _build_deidentifier(
+        monkeypatch, results=pii, anonymized_text='HASHED'
+    )
+
+    out = deid.deidentify('John', strategy='hash')
+
+    assert out == 'HASHED'
+    assert len(anonymizer.calls) == 1
+    call = anonymizer.calls[0]
+    assert call['text'] == 'John'
+    assert call['analyzer_results'] == pii
+    assert 'DEFAULT' in call['operators']
+
+
+def test_deidentify_patient_record_recursively():
+    """Only configured free-text keys should be de-identified recursively."""
+
+    class _StubDeidentifier:
+        def deidentify(self, text: str) -> str:
+            return f'<redacted:{text}>'
+
+    record = {
+        'symptoms': 'John Doe with headache',
+        'patient_name': 'John Doe',
+        'nested': {
+            'comments': 'Lives at 123 Main St',
+            'age': 40,
+            'inner': {'summary': 'Phone 555-0100', 'safe_key': 'keep me'},
+        },
+    }
+
+    out = deid_mod.deidentify_patient_record(record, _StubDeidentifier())
+
+    assert out is record
+    assert out['symptoms'] == '<redacted:John Doe with headache>'
+    assert out['patient_name'] == 'John Doe'
+    assert out['nested']['comments'] == '<redacted:Lives at 123 Main St>'
+    assert out['nested']['inner']['summary'] == '<redacted:Phone 555-0100>'
+    assert out['nested']['inner']['safe_key'] == 'keep me'

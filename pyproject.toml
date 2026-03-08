@@ -104,6 +104,9 @@ disable_error_code = [
 testpaths = [
     "tests",
 ]
+pythonpath = [
+    "src",
+]
 filterwarnings = [
     "error::RuntimeWarning",
     "error::typeguard.TypeHintWarning",
