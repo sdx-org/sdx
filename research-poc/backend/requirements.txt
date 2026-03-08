@@ -1,7 +1,0 @@
-fastapi==0.100.0
-uvicorn[standard]==0.22.0
-SQLAlchemy==2.0.22
-alembic==1.11.1
-python-multipart==0.0.6
-pydantic==2.3.0
-python-dotenv==1.0.0

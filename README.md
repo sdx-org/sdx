@@ -1,58 +1,163 @@
 # hiperhealth
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+Core Python library for HiperHealth clinical AI workflows.
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
+This repository is the **library/SDK** package (`hiperhealth`) and not the web
+application.
 
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
-
-[![Built with Material for MkDocs](https://img.shields.io/badge/Material_for_MkDocs-526CFE?style=for-the-badge&logo=MaterialForMkDocs&logoColor=white)](https://squidfunk.github.io/mkdocs-material/)
-![Conda](https://img.shields.io/badge/Virtual%20environment-conda-brightgreen?logo=anaconda)[![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-![vulture](https://img.shields.io/badge/Find%20unused%20code-vulture-blue)
-![mypy](https://img.shields.io/badge/Static%20typing-mypy-blue)
-![pytest](https://img.shields.io/badge/Testing-pytest-cyan?logo=pytest)[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
-![Makim](https://img.shields.io/badge/Automation%20task-Makim-blue)![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI-blue?logo=githubactions)
-
-This Project aims to ...
-
-- Software License: BSD 3 Clause
-
+- Software License: BSD 3-Clause
 - Documentation: https://hiperhealth.com
+- Source: https://github.com/hiperhealth/hiperhealth
 
-## Features
+## What this library provides
 
-TBD
+- LLM-powered clinical assistance utilities:
+  - Differential diagnosis suggestions
+  - Exam/procedure suggestions
+- Data extraction utilities:
+  - Medical reports (PDF/image) to structured FHIR-like resources
+  - Wearable data (CSV/JSON) parsing and normalization
+- Privacy utilities:
+  - PII detection and de-identification
+- Domain schemas and models:
+  - Pydantic schemas
+  - SQLAlchemy/SQLModel FHIR model definitions
 
-## Credits
+## Installation
 
-This package was created with
-[scicookie](https://github.com/osl-incubator/scicookie) project template.
+### Stable release
 
-## Contributors ✨
+```bash
+pip install hiperhealth
+```
 
-Thanks goes to these wonderful people:
+### From source (development)
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://xmnlab.github.io"><img src="https://avatars.githubusercontent.com/u/5209757?v=4?s=100" width="100px;" alt="Ivan Ogasawara"/><br /><sub><b>Ivan Ogasawara</b></sub></a><br /><a href="https://github.com/hiperhealth/hiperhealth/commits?author=xmnlab" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/sandro-loch-988a7611b/"><img src="https://avatars.githubusercontent.com/u/3450741?v=4?s=100" width="100px;" alt="Sandro Loch"/><br /><sub><b>Sandro Loch</b></sub></a><br /><a href="https://github.com/hiperhealth/hiperhealth/commits?author=esloch" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/whitewolf2000ani"><img src="https://avatars.githubusercontent.com/u/116947102?v=4?s=100" width="100px;" alt="Aniket Kumar"/><br /><sub><b>Aniket Kumar</b></sub></a><br /><a href="https://github.com/hiperhealth/hiperhealth/commits?author=whitewolf2000ani" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/abhijeetSaroha"><img src="https://avatars.githubusercontent.com/u/108522472?v=4?s=100" width="100px;" alt="Abhijeet Saroha"/><br /><sub><b>Abhijeet Saroha</b></sub></a><br /><a href="https://github.com/hiperhealth/hiperhealth/commits?author=abhijeetSaroha" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/felipepaes"><img src="https://avatars.githubusercontent.com/u/12243928?v=4?s=100" width="100px;" alt="Felipe Paes"/><br /><sub><b>Felipe Paes</b></sub></a><br /><a href="https://github.com/hiperhealth/hiperhealth/commits?author=felipepaes" title="Code">💻</a></td>
-    </tr>
-  </tbody>
-</table>
+```bash
+git clone https://github.com/hiperhealth/hiperhealth.git
+cd hiperhealth
+./scripts/install-dev.sh
+```
 
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
+## System requirements
 
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+Some extraction features depend on system packages:
 
-This project follows the
-[all-contributors](https://github.com/all-contributors/all-contributors)
-specification. Contributions of any kind welcome!
+- `tesseract` (OCR for image-based reports)
+- `libmagic` (MIME type detection)
+
+They are included in the conda dev environment (`conda/dev.yaml`).
+
+## Configuration
+
+Set these environment variables before using LLM-dependent features:
+
+- `OPENAI_API_KEY` (required)
+- `OPENAI_MODEL` (optional, defaults to `o4-mini`)
+
+Example:
+
+```bash
+export OPENAI_API_KEY="your-key"
+export OPENAI_MODEL="o4-mini"
+```
+
+## Quickstart
+
+### 1. Differential diagnosis and exam suggestions
+
+```python
+from hiperhealth.agents.diagnostics import core as diag
+
+patient = {
+    "age": 45,
+    "gender": "M",
+    "symptoms": "chest pain, shortness of breath",
+    "previous_tests": "ECG normal"
+}
+
+dx = diag.differential(patient, language="en", session_id="demo-1")
+print(dx.summary)
+print(dx.options)
+
+exams = diag.exams(["Acute coronary syndrome"], language="en", session_id="demo-1")
+print(exams.summary)
+print(exams.options)
+```
+
+### 2. Wearable data extraction (CSV/JSON)
+
+```python
+from hiperhealth.agents.extraction.wearable import WearableDataFileExtractor
+
+extractor = WearableDataFileExtractor()
+data = extractor.extract_wearable_data("tests/data/wearable/wearable_data.csv")
+print(data[:2])
+```
+
+### 3. Medical report extraction (PDF/image -> structured output)
+
+```python
+from hiperhealth.agents.extraction.medical_reports import MedicalReportFileExtractor
+
+extractor = MedicalReportFileExtractor()
+report = extractor.extract_report_data("tests/data/reports/pdf_reports/report-1.pdf")
+print(report.keys())
+```
+
+### 4. De-identification
+
+```python
+from hiperhealth.privacy.deidentifier import Deidentifier, deidentify_patient_record
+
+engine = Deidentifier()
+record = {
+    "symptoms": "Patient John Doe reports severe headache.",
+    "mental_health": "Lives at 123 Main St"
+}
+clean = deidentify_patient_record(record, engine)
+print(clean)
+```
+
+## Repository layout
+
+- `src/hiperhealth/agents`: AI interaction and extraction modules
+- `src/hiperhealth/privacy`: de-identification tools
+- `src/hiperhealth/schema`: Pydantic schemas
+- `src/hiperhealth/models`: SQLAlchemy/SQLModel models
+- `tests`: unit and integration tests
+- `docs`: MkDocs documentation source
+
+## Development
+
+### Create development environment
+
+```bash
+conda env create -f conda/dev.yaml -n hiperhealth
+conda activate hiperhealth
+./scripts/install-dev.sh
+```
+
+### Run tests
+
+```bash
+pytest -vv
+```
+
+### Run quality checks
+
+```bash
+pre-commit run --all-files
+ruff check .
+mypy .
+```
+
+### Build docs locally
+
+```bash
+mkdocs serve --watch docs --config-file mkdocs.yaml
+```
+
+## License
+
+BSD 3-Clause. See [LICENSE](LICENSE).
