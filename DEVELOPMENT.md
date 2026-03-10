@@ -101,21 +101,19 @@ PyPI.
     ./scripts/install-dev.sh
     ```
 
-4.  **Set Up the Database:** Our `makim` task runner simplifies database setup.
-    This command runs Alembic to create the `db.sqlite` file and applies all
-    migrations.
+4.  **Database & Persistence:** 
+    Note: As of the project split, `hiperhealth` (this repository) serves as the core library and is database-independent. All persistence logic, database schemas, and migrations have been moved to the `hiperhealth-web` repository.
 
-    ```bash
-    makim db.setup
-    ```
+    You do not need to set up a local database to contribute to this library.
 
-5.  **(Optional) Set Up API Keys:** Certain tests and features that interact
-    with external services (e.g., OpenAI) require API keys. Create a `.env` file
-    at `.envs/.env` and add your keys there.
-    ```dotenv
-    # In .envs/.env
-    OPENAI_API_KEY="your-key-here"
-    ```
+5.  **(Optional) Set Up API Keys:**
+    Note: The core `hiperhealth` library is designed to be functional without external dependencies. However, specific modules (such as certain AI Agents or evaluation scripts) may optionally require API keys (e.g., `OPENAI_API_KEY`).
+    
+    If you are working on a module that requires external services:
+
+    1. Create a .env file at the root or within .envs/.env.
+
+    2. Add the required keys as environment variables.
 
 ---
 
@@ -149,29 +147,21 @@ All common development tasks are managed via `makim` commands defined in
 
 ### Database Migrations
 
-The database schema is managed with Alembic. The schema's source of truth is the
-set of Pydantic models in `src/hiperhealth/schema/`, which are used to
-auto-generate the SQLAlchemy ORM models.
+The core of the `hiperhealth` library is its set of Pydantic models in `src/hiperhealth/schema/`. These serve as the source of truth for all medical data structures.
+
+While this library is stateless and does not contain a local database, it is responsible for generating the SQLAlchemy ORM models used by the `hiperhealth-web` service.
 
 If you modify a Pydantic schema that requires a database change:
 
-1.  **Regenerate the SQLAlchemy Models:**
+-  **Regenerate the SQLAlchemy Models:**
 
     ```bash
-    makim models.sqla
+    makim gen.fhir-models
     ```
 
-2.  **Generate a New Migration Script:** Provide a descriptive message for the
-    change.
+**Note on Migrations:**
 
-    ```bash
-    makim db.revision -m "A short description of the schema change"
-    ```
-
-3.  **Apply the Migration to Your Local Database:**
-    ```bash
-    makim db.setup
-    ```
+Database migrations (Alembic) are now managed within the hiperhealth-web repository. Once your schema changes are merged here, they will be used to generate migrations in the web service.
 
 ### Code Style & Linting
 
@@ -271,10 +261,10 @@ models.
     our application.
 2.  **SQLAlchemy Models (`src/hiperhealth/models/sqla/`)**: These ORM models are
     **auto-generated** from the Pydantic schemas using the
-    `scripts/gen_models/gen_sqla.py` script (`makim models.sqla`). **Do not edit
+    `scripts/gen_models/gen_sqla.py` script (`makim gen.fhir-models`). **Do not edit
     these files manually.**
-3.  **Alembic Migrations (`migrations/`)**: Alembic uses the generated
-    SQLAlchemy models to automatically create database migration scripts.
+3.  **Alembic Migrations (`migrations/`)**: While this library is stateless, 
+    the generated SQLAlchemy models are consumed by the `hiperhealth-web` repository to manage Alembic migrations.
 
 This ensures our application's data layer and database schema are always
 perfectly synchronized.

@@ -125,21 +125,3 @@ groups:
         help: Auto-generate the FHIR models
         run: |
           python scripts/gen_models/gen_sqla.py
-
-  db:
-    help: Database related tasks
-    tasks:
-      setup:
-        help: Creates and migrates the database to the latest version
-        run: |
-          mkdir -p research/backend/data
-          alembic upgrade head
-      revision:
-        help: Autogenerates a new database revision script
-        args:
-          m:
-            help: The message for the revision
-            type: string
-            required: true
-        run: |
-          alembic revision --autogenerate -m "{{ args.m }}"
