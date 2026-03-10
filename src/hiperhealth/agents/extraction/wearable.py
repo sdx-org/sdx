@@ -128,9 +128,9 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             # Return cached mimetype
             return self._mimetype_cache[cache_key]
 
-        if isinstance(file, Path):
+        if isinstance(file, (Path, str)):
             self._mimetype_cache[cache_key] = cast(
-                MimeType, self.mime.from_file(file)
+                MimeType, self.mime.from_file(str(file))
             )
             return self._mimetype_cache[cache_key]
         elif isinstance(file, IO):  # Generic IO[bytes]
@@ -200,13 +200,16 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
 
     def _process_row(self, row: dict[str, Any]) -> dict[str, object]:
         for key, value in row.items():
-            if value.isnumeric():
-                row[key] = int(value)
-            elif is_float(value):
-                row[key] = float(value)
+            stripped = value.strip()
+            # Handle signed integers (e.g., "-60", "72", "+10")
+            if stripped.isdigit() or (
+                stripped.startswith(('-', '+')) and stripped[1:].isdigit()
+            ):
+                row[key] = int(stripped)
+            elif is_float(stripped):
+                row[key] = float(stripped)
             else:
-                # remove leading and trailing whitespace
-                row[key] = value.strip()
+                row[key] = stripped
         return row
 
     def _process_json_file(self, file: FileInput) -> list[dict[str, object]]:
