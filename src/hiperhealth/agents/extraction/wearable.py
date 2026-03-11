@@ -195,11 +195,13 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
                 return False
         return (
             self._get_mime_type(file)
-            in self.allowed_extensions_mimetypes_map['csv']
+            == self.allowed_extensions_mimetypes_map['csv']
         )
 
     def _process_row(self, row: dict[str, Any]) -> dict[str, object]:
         for key, value in row.items():
+            if value is None:
+                continue
             if value.isnumeric():
                 row[key] = int(value)
             elif is_float(value):
