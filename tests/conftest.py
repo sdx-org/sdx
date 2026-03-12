@@ -7,6 +7,14 @@ import json
 import os
 import sys
 import warnings
+import pytesseract
+
+# Fix for Windows: point pytesseract to the correct Tesseract installation
+tesseract_path = os.environ.get(
+    "TESSERACT_CMD",
+    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+)
+pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
 from pathlib import Path
 

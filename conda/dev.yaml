@@ -9,6 +9,7 @@ dependencies:
   - nodejs  # used by semantic-release
   - tesseract
   - libmagic
+  - python-magic-bin  # [win]
   - uv
   - pip:
       - paginate==0.5.6  # distlib issue
