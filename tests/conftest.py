@@ -7,6 +7,10 @@ import json
 import os
 import sys
 import warnings
+
+from pathlib import Path
+
+import pytest
 import pytesseract
 
 # Fix for Windows: point pytesseract to the correct Tesseract installation
@@ -15,10 +19,6 @@ tesseract_path = os.environ.get(
     r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 )
 pytesseract.pytesseract.tesseract_cmd = tesseract_path
-
-from pathlib import Path
-
-import pytest
 
 BACKEND_DIR = Path(__file__).parents[1] / 'research' / 'backend'
 sys.path.insert(0, str(BACKEND_DIR))
