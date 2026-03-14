@@ -7,6 +7,7 @@ import json
 from typing import Any, Dict, List
 
 from hiperhealth.agents.client import chat
+from hiperhealth.llm import LLMSettings, StructuredLLM
 from hiperhealth.schema.clinical_outputs import LLMDiagnosis
 
 _DIAG_PROMPTS = {
@@ -77,25 +78,41 @@ def differential(
     patient: Dict[str, Any],
     language: str = 'en',
     session_id: str | None = None,
+    llm: StructuredLLM | None = None,
+    llm_settings: LLMSettings | None = None,
 ) -> LLMDiagnosis:
     """Return summary + list of differential diagnoses."""
     prompt = _DIAG_PROMPTS.get(language, _DIAG_PROMPTS['en'])
+    chat_kwargs: dict[str, Any] = {'session_id': session_id}
+    if llm is not None:
+        chat_kwargs['llm'] = llm
+    if llm_settings is not None:
+        chat_kwargs['llm_settings'] = llm_settings
     return chat(
         prompt,
         json.dumps(patient, ensure_ascii=False),
-        session_id=session_id,
+        **chat_kwargs,
     )
 
 
 def exams(
-    selected_dx: List[str], language: str = 'en', session_id: str | None = None
+    selected_dx: List[str],
+    language: str = 'en',
+    session_id: str | None = None,
+    llm: StructuredLLM | None = None,
+    llm_settings: LLMSettings | None = None,
 ) -> LLMDiagnosis:
     """Return summary + list of suggested examinations."""
     prompt = _EXAM_PROMPTS.get(language, _EXAM_PROMPTS['en'])
+    chat_kwargs: dict[str, Any] = {'session_id': session_id}
+    if llm is not None:
+        chat_kwargs['llm'] = llm
+    if llm_settings is not None:
+        chat_kwargs['llm_settings'] = llm_settings
     return chat(
         prompt,
         json.dumps(selected_dx, ensure_ascii=False),
-        session_id=session_id,
+        **chat_kwargs,
     )
 
 

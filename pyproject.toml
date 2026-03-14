@@ -24,7 +24,7 @@ dependencies = [
     "torch >=2",
     "langchain >=0.3.7,<1",
     "langchain-community >=0.3.7,<1",
-    "rago >=0.14.4",
+    "rago >=0.14.5",
     # NumPy: macOS stays on 1.x; others use 2.x (with your Python guards)
     "numpy >=1.26,<2 ; python_version <  '3.13' and sys_platform == 'darwin'",
     "numpy >=2       ; python_version >= '3.13' and sys_platform == 'darwin'",

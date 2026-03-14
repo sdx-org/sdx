@@ -1,29 +1,26 @@
 """
-Shared OpenAI helper used by all agents.
+Shared structured-LLM helper used by all agents.
 
-* Forces JSON responses (`response_format={"type": "json_object"}`).
-* Validates with ``LLMDiagnosis.from_llm``.
-* Persists every raw reply under ``data/llm_raw/<sid>_<UTC>.json``.
+* Validates with ``LLMDiagnosis``.
+* Persists every normalized reply under ``data/llm_raw/<sid>_<UTC>.json``.
 """
 
 from __future__ import annotations
 
-import os
 import uuid
 
 from datetime import datetime, timezone
 from pathlib import Path
 
-from dotenv import load_dotenv
-from openai import OpenAI
 from pydantic import ValidationError
 
+from hiperhealth.llm import (
+    LLMSettings,
+    StructuredLLM,
+    build_structured_llm,
+    load_diagnostics_llm_settings,
+)
 from hiperhealth.schema.clinical_outputs import LLMDiagnosis
-
-load_dotenv(Path(__file__).parents[3] / '.envs' / '.env')
-
-_MODEL_NAME = os.getenv('OPENAI_MODEL', 'o4-mini')
-_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY', ''))
 
 _RAW_DIR = Path('data') / 'llm_raw'
 _RAW_DIR.mkdir(parents=True, exist_ok=True)
@@ -49,23 +46,24 @@ def chat(
     user: str,
     *,
     session_id: str | None = None,
+    llm: StructuredLLM | None = None,
+    llm_settings: LLMSettings | None = None,
 ) -> LLMDiagnosis:
     """Send system / user prompts and return a validated ``LLMDiagnosis``."""
-    rsp = _client.chat.completions.create(
-        model=_MODEL_NAME,
-        response_format={'type': 'json_object'},
-        messages=[
-            {'role': 'system', 'content': system},
-            {'role': 'user', 'content': user},
-        ],
-    )
-
-    raw: str = rsp.choices[0].message.content or '{}'
-    dump_llm_json(raw, session_id)
+    effective_llm = llm or _get_llm(llm_settings)
 
     try:
-        return LLMDiagnosis.from_llm(raw)
+        result = effective_llm.generate(system, user, LLMDiagnosis)
     except ValidationError as exc:
         raise LLMResponseValidationError(
             f'LLM response is not valid LLMDiagnosis: {exc}'
         ) from exc
+
+    dump_llm_json(result.model_dump_json(), session_id)
+    return result
+
+
+def _get_llm(llm_settings: LLMSettings | None) -> StructuredLLM:
+    """Resolve the structured LLM adapter for the current request."""
+    settings = llm_settings or load_diagnostics_llm_settings()
+    return build_structured_llm(settings)

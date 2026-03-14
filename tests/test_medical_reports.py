@@ -13,6 +13,7 @@ from hiperhealth.agents.extraction.medical_reports import (
     MedicalReportFileExtractor,
     TextExtractionError,
 )
+from hiperhealth.llm import LLMSettings
 
 TEST_DATA_PATH = Path(__file__).parent / 'data' / 'reports'
 PDF_FILE = TEST_DATA_PATH / 'pdf_reports' / 'report-1.pdf'
@@ -114,3 +115,43 @@ def test_empty_inmemory_file_raises(extractor):
     empty_stream = io.BytesIO(b'')
     with pytest.raises(FileNotFoundError):
         extractor._validate_or_raise(empty_stream)
+
+
+def test_convert_to_fhir_uses_configured_backend_and_model():
+    """FHIR conversion should pass configured backend metadata downstream."""
+
+    class Patient:
+        """Minimal fake FHIR resource."""
+
+        def model_dump(self):
+            return {'id': 'patient-1'}
+
+    calls = {}
+
+    class FakeAnamnesisAI:
+        def __init__(self, **kwargs):
+            calls['init'] = kwargs
+
+        def extract_fhir(self, text):
+            calls['text'] = text
+            return ([Patient()], [])
+
+    extractor = MedicalReportFileExtractor(
+        llm_settings=LLMSettings(
+            provider='ollama',
+            model='llama3.2:3b',
+            api_params={'base_url': 'http://localhost:11434/v1'},
+        ),
+        anamnesis_factory=FakeAnamnesisAI,
+    )
+
+    result = extractor._convert_to_fhir('example report')
+
+    assert calls['init']['backend'] == 'ollama'
+    assert calls['init']['api_key'] == ''
+    assert calls['init']['api_params']['model_name'] == 'llama3.2:3b'
+    assert (
+        calls['init']['api_params']['base_url'] == 'http://localhost:11434/v1'
+    )
+    assert calls['text'] == 'example report'
+    assert result == {'Patient': {'id': 'patient-1'}}

@@ -1,4 +1,4 @@
-"""Unit tests for shared OpenAI client helpers."""
+"""Unit tests for shared structured-LLM client helpers."""
 
 from __future__ import annotations
 
@@ -7,30 +7,22 @@ from types import SimpleNamespace
 import hiperhealth.agents.client as client_mod
 import pytest
 
-
-class _FakeCompletions:
-    """Mock for OpenAI `chat.completions` endpoint."""
-
-    def __init__(self, content: str | None) -> None:
-        self._content = content
-        self.calls: list[dict] = []
-
-    def create(self, **kwargs):
-        """Return fake API response and keep call payload."""
-        self.calls.append(kwargs)
-        message = SimpleNamespace(content=self._content)
-        choice = SimpleNamespace(message=message)
-        return SimpleNamespace(choices=[choice])
+from hiperhealth.schema.clinical_outputs import LLMDiagnosis
 
 
-def _patch_client(monkeypatch: pytest.MonkeyPatch, content: str | None):
-    """Patch module-level OpenAI client with deterministic mock."""
-    completions = _FakeCompletions(content=content)
-    fake_client = SimpleNamespace(
-        chat=SimpleNamespace(completions=completions)
-    )
-    monkeypatch.setattr(client_mod, '_client', fake_client)
-    return completions
+class _FakeLLM:
+    """Minimal structured LLM double used by client tests."""
+
+    def __init__(self, result: LLMDiagnosis) -> None:
+        self.result = result
+        self.calls: list[dict[str, object]] = []
+
+    def generate(self, system: str, user: str, output_type):
+        """Return a fixed validated payload and capture call metadata."""
+        self.calls.append(
+            {'system': system, 'user': user, 'output_type': output_type}
+        )
+        return self.result
 
 
 def test_dump_llm_json_uses_given_session_id(tmp_path, monkeypatch):
@@ -64,10 +56,8 @@ def test_dump_llm_json_generates_uuid_suffix_when_sid_is_none(
 
 
 def test_chat_returns_validated_llm_diagnosis(monkeypatch):
-    """chat() should call OpenAI endpoint and validate JSON output."""
-    completions = _patch_client(
-        monkeypatch, content='{"summary":"ok","options":["a"]}'
-    )
+    """chat() should call the structured LLM and persist normalized JSON."""
+    fake_llm = _FakeLLM(LLMDiagnosis(summary='ok', options=['a']))
     dumped = {}
     monkeypatch.setattr(
         client_mod,
@@ -75,7 +65,7 @@ def test_chat_returns_validated_llm_diagnosis(monkeypatch):
         lambda text, sid: dumped.update({'text': text, 'sid': sid}),
     )
 
-    out = client_mod.chat('sys', 'usr', session_id='sid-1')
+    out = client_mod.chat('sys', 'usr', session_id='sid-1', llm=fake_llm)
 
     assert out.summary == 'ok'
     assert out.options == ['a']
@@ -83,23 +73,20 @@ def test_chat_returns_validated_llm_diagnosis(monkeypatch):
         'text': '{"summary":"ok","options":["a"]}',
         'sid': 'sid-1',
     }
-
-    assert len(completions.calls) == 1
-    call = completions.calls[0]
-    assert call['model'] == client_mod._MODEL_NAME
-    assert call['response_format'] == {'type': 'json_object'}
-    assert call['messages'] == [
-        {'role': 'system', 'content': 'sys'},
-        {'role': 'user', 'content': 'usr'},
+    assert fake_llm.calls == [
+        {'system': 'sys', 'user': 'usr', 'output_type': LLMDiagnosis}
     ]
 
 
 def test_chat_raises_library_exception_on_invalid_llm_json(monkeypatch):
     """Invalid LLM payload should raise a library-level validation error."""
-    _patch_client(monkeypatch, content=None)
     monkeypatch.setattr(client_mod, 'dump_llm_json', lambda *_: None)
 
+    class _InvalidLLM:
+        def generate(self, *_args, **_kwargs):
+            return LLMDiagnosis.model_validate_json('{"summary":"only"}')
+
     with pytest.raises(client_mod.LLMResponseValidationError) as exc:
-        client_mod.chat('system', 'user')
+        client_mod.chat('system', 'user', llm=_InvalidLLM())
 
     assert 'LLM response is not valid LLMDiagnosis' in str(exc.value)
