@@ -1,7 +1,6 @@
 """Test the extraction of medical report data."""
 
 import io
-import os
 import shutil
 
 from pathlib import Path
@@ -13,7 +12,6 @@ from hiperhealth.agents.extraction.medical_reports import (
     MedicalReportFileExtractor,
     TextExtractionError,
 )
-from hiperhealth.llm import LLMSettings
 
 TEST_DATA_PATH = Path(__file__).parent / 'data' / 'reports'
 PDF_FILE = TEST_DATA_PATH / 'pdf_reports' / 'report-1.pdf'
@@ -64,31 +62,25 @@ def test_extract_corrupt_pdf_raises(extractor):
         extractor._extract_text_from_pdf(CORRUPT_PDF_FILE)
 
 
-@pytest.mark.skipif(
-    not os.environ.get('OPENAI_API_KEY'), reason='OpenAI API key not available'
-)
 def test_extract_report_data_from_pdf_file(extractor):
-    """Test FHIR data extraction from PDF files."""
-    api_key = os.environ.get('OPENAI_API_KEY')  # use environment key
-    fhir_data = extractor.extract_report_data(PDF_FILE, api_key)
-    assert isinstance(fhir_data, dict)
-    assert len(fhir_data) > 0
-    expected_keys = {'Patient', 'Condition', 'Observation', 'DiagnosticReport'}
-    assert any(key in fhir_data for key in expected_keys)
+    """Test structured text extraction payload from PDF files."""
+    report = extractor.extract_report_data(PDF_FILE)
+    assert report['source_name'] == PDF_FILE.name
+    assert report['source_type'] == 'pdf'
+    assert report['mime_type'] == 'application/pdf'
+    assert isinstance(report['text'], str)
+    assert len(report['text']) > 0
 
 
-@pytest.mark.skipif(
-    (not os.environ.get('OPENAI_API_KEY')) or (not HAS_TESSERACT),
-    reason='OpenAI API key or tesseract not available',
-)
+@pytest.mark.skipif(not HAS_TESSERACT, reason='tesseract is not installed')
 def test_extract_report_data_from_image_file(extractor):
-    """Test FHIR data extraction from image files."""
-    api_key = os.environ.get('OPENAI_API_KEY')  # use environment key
-    fhir_data = extractor.extract_report_data(IMAGE_FILE, api_key)
-    assert isinstance(fhir_data, dict)
-    assert len(fhir_data) > 0
-    expected_keys = {'Patient', 'Condition', 'Observation', 'DiagnosticReport'}
-    assert any(key in fhir_data for key in expected_keys)
+    """Test structured text extraction payload from image files."""
+    report = extractor.extract_report_data(IMAGE_FILE)
+    assert report['source_name'] == IMAGE_FILE.name
+    assert report['source_type'] == 'image'
+    assert report['mime_type'] == 'image/png'
+    assert isinstance(report['text'], str)
+    assert len(report['text']) > 0
 
 
 def test_support_inmemory_pdf(extractor):
@@ -117,41 +109,8 @@ def test_empty_inmemory_file_raises(extractor):
         extractor._validate_or_raise(empty_stream)
 
 
-def test_convert_to_fhir_uses_configured_backend_and_model():
-    """FHIR conversion should pass configured backend metadata downstream."""
-
-    class Patient:
-        """Minimal fake FHIR resource."""
-
-        def model_dump(self):
-            return {'id': 'patient-1'}
-
-    calls = {}
-
-    class FakeAnamnesisAI:
-        def __init__(self, **kwargs):
-            calls['init'] = kwargs
-
-        def extract_fhir(self, text):
-            calls['text'] = text
-            return ([Patient()], [])
-
-    extractor = MedicalReportFileExtractor(
-        llm_settings=LLMSettings(
-            provider='ollama',
-            model='llama3.2:3b',
-            api_params={'base_url': 'http://localhost:11434/v1'},
-        ),
-        anamnesis_factory=FakeAnamnesisAI,
-    )
-
-    result = extractor._convert_to_fhir('example report')
-
-    assert calls['init']['backend'] == 'ollama'
-    assert calls['init']['api_key'] == ''
-    assert calls['init']['api_params']['model_name'] == 'llama3.2:3b'
-    assert (
-        calls['init']['api_params']['base_url'] == 'http://localhost:11434/v1'
-    )
-    assert calls['text'] == 'example report'
-    assert result == {'Patient': {'id': 'patient-1'}}
+def test_extract_text_public_helper_matches_payload_text(extractor):
+    """Public raw-text helper should match the structured payload content."""
+    text = extractor.extract_text(PDF_FILE)
+    report = extractor.extract_report_data(PDF_FILE)
+    assert text == report['text']

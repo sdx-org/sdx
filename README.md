@@ -15,7 +15,7 @@ application.
   - Differential diagnosis suggestions
   - Exam/procedure suggestions
 - Data extraction utilities:
-  - Medical reports (PDF/image) to structured FHIR-like resources
+  - Medical reports (PDF/image) to extracted text plus metadata
   - Wearable data (CSV/JSON) parsing and normalization
 - Privacy utilities:
   - PII detection and de-identification
@@ -50,16 +50,19 @@ They are included in the conda dev environment (`conda/dev.yaml`).
 
 ## Configuration
 
-Set these environment variables before using LLM-dependent features:
+Set these environment variables before using diagnostics/exam LLM features:
 
-- `OPENAI_API_KEY` (required)
-- `OPENAI_MODEL` (optional, defaults to `o4-mini`)
+- `HIPERHEALTH_DIAGNOSTICS_LLM_PROVIDER` (optional, defaults to `openai`)
+- `HIPERHEALTH_DIAGNOSTICS_LLM_API_KEY` (provider key; `OPENAI_API_KEY` still
+  works for OpenAI)
+- `HIPERHEALTH_DIAGNOSTICS_LLM_MODEL` (optional)
 
 Example:
 
 ```bash
-export OPENAI_API_KEY="your-key"
-export OPENAI_MODEL="o4-mini"
+export HIPERHEALTH_DIAGNOSTICS_LLM_PROVIDER="openai"
+export HIPERHEALTH_DIAGNOSTICS_LLM_API_KEY="your-key"
+export HIPERHEALTH_DIAGNOSTICS_LLM_MODEL="o4-mini"
 ```
 
 ## Quickstart
@@ -95,14 +98,15 @@ data = extractor.extract_wearable_data("tests/data/wearable/wearable_data.csv")
 print(data[:2])
 ```
 
-### 3. Medical report extraction (PDF/image -> structured output)
+### 3. Medical report extraction (PDF/image -> text)
 
 ```python
 from hiperhealth.agents.extraction.medical_reports import MedicalReportFileExtractor
 
 extractor = MedicalReportFileExtractor()
 report = extractor.extract_report_data("tests/data/reports/pdf_reports/report-1.pdf")
-print(report.keys())
+print(report["mime_type"])
+print(report["text"][:200])
 ```
 
 ### 4. De-identification

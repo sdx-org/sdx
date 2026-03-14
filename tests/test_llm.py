@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
-import pytest
-
 from hiperhealth.llm import (
     LLMSettings,
     RagoStructuredLLM,
@@ -76,11 +74,3 @@ def test_rago_structured_llm_maps_ollama_to_openai_backend():
         'query': 'usr',
         'data': [],
     }
-
-
-def test_anamnesis_backend_rejects_unsupported_provider():
-    """FHIR extraction should fail for unsupported AnamnesisAI backends."""
-    with pytest.raises(ValueError) as exc:
-        LLMSettings(provider='gemini').to_anamnesis_backend()
-
-    assert 'supports only the openai and ollama providers' in str(exc.value)

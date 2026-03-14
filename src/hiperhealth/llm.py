@@ -14,7 +14,6 @@ TModel = TypeVar('TModel', bound=BaseModel)
 
 _GENERIC_PREFIX = 'HIPERHEALTH_LLM_'
 _DIAGNOSTICS_PREFIX = 'HIPERHEALTH_DIAGNOSTICS_LLM_'
-_FHIR_PREFIX = 'HIPERHEALTH_FHIR_LLM_'
 
 _PROVIDER_API_KEY_ENV = {
     'cohere': ('COHERE_API_KEY',),
@@ -109,25 +108,6 @@ class LLMSettings:
             return 'ollama-openai'
         return provider
 
-    def to_anamnesis_backend(self) -> str:
-        """Return the backend supported by AnamnesisAI for FHIR extraction."""
-        provider = self.normalized_provider
-        if provider in {'openai', 'ollama'}:
-            return provider
-        raise ValueError(
-            'AnamnesisAI currently supports only the openai and ollama '
-            f'providers, got {self.provider!r}.'
-        )
-
-    def to_anamnesis_api_params(self) -> dict[str, Any]:
-        """Translate generic settings to AnamnesisAI generation parameters."""
-        api_params = dict(self.api_params)
-        if self.model:
-            api_params.setdefault('model_name', self.model)
-        if self.max_tokens:
-            api_params.setdefault('output_max_length', self.max_tokens)
-        return api_params
-
 
 class RagoStructuredLLM:
     """Structured-generation adapter built on top of Rago Generation."""
@@ -189,16 +169,6 @@ def load_diagnostics_llm_settings() -> LLMSettings:
     """Load diagnostics-generation settings from env variables."""
     return load_llm_settings(
         prefixes=(_DIAGNOSTICS_PREFIX, _GENERIC_PREFIX),
-        default_provider='openai',
-        legacy_model_envs=('OPENAI_MODEL',),
-        legacy_api_key_envs=('OPENAI_API_KEY',),
-    )
-
-
-def load_fhir_llm_settings() -> LLMSettings:
-    """Load FHIR-extraction settings from env variables."""
-    return load_llm_settings(
-        prefixes=(_FHIR_PREFIX, _GENERIC_PREFIX),
         default_provider='openai',
         legacy_model_envs=('OPENAI_MODEL',),
         legacy_api_key_envs=('OPENAI_API_KEY',),

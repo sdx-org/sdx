@@ -1,4 +1,4 @@
-"""Module for extracting FHIR data from PDF documents and images."""
+"""Module for extracting text from PDF documents and images."""
 
 from __future__ import annotations
 
@@ -14,7 +14,6 @@ from typing import (
     Generic,
     List,
     Literal,
-    Optional,
     TypeVar,
     Union,
     cast,
@@ -23,16 +22,11 @@ from typing import (
 import magic
 import pytesseract
 
-from anamnesisai import AnamnesisAI
 from PIL import Image
 from pypdf import PdfReader
 from pypdf.errors import EmptyFileError, PdfStreamError
 
-from hiperhealth.llm import LLMSettings, load_fhir_llm_settings
-from hiperhealth.utils import make_json_serializable
 
-
-# Exceptions
 class MedicalReportExtractorError(Exception):
     """Base class for Medical Report Extraction from pdf/images."""
 
@@ -45,17 +39,9 @@ class TextExtractionError(MedicalReportExtractorError):
     ...
 
 
-class FHIRConversionError(MedicalReportExtractorError):
-    """Exception raised for errors during FHIR conversion."""
-
-    ...
-
-
-# TypeVars for generics
 T = TypeVar('T')
 
 
-# Types
 FileInput = Union[str, Path, IO[bytes], io.BytesIO]
 FileExtension = Literal['pdf', 'png', 'jpg', 'jpeg']
 MimeType = Literal['application/pdf', 'image/png', 'image/jpeg']
@@ -68,16 +54,13 @@ class BaseMedicalReportExtractor(ABC, Generic[T]):
     def extract_report_data(
         self,
         source: T,
-        api_key: Optional[str] = None,
-        *,
-        llm_settings: LLMSettings | None = None,
     ) -> Dict[str, Any]:
-        """Extract structured report data from source file."""
+        """Extract structured text data from source file."""
         raise NotImplementedError
 
 
 class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
-    """Extract medical report data from files and in-memory objects."""
+    """Extract medical report text from files and in-memory objects."""
 
     allowed_extensions_mimetypes_map: ClassVar[
         Dict[FileExtension, MimeType]
@@ -88,18 +71,11 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
         'jpeg': 'image/jpeg',
     }
 
-    def __init__(
-        self,
-        *,
-        llm_settings: LLMSettings | None = None,
-        anamnesis_factory: Any = AnamnesisAI,
-    ) -> None:
+    def __init__(self) -> None:
         """Initialize extractor with caches and mimetype detector."""
         self._mimetype_cache: Dict[str, MimeType] = {}
         self._text_cache: Dict[str, str] = {}
         self.mime = magic.Magic(mime=True)
-        self.llm_settings = llm_settings
-        self._anamnesis_factory = anamnesis_factory
 
     @property
     def allowed_extensions(self) -> List[FileExtension]:
@@ -114,13 +90,10 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
     def extract_report_data(
         self,
         source: FileInput,
-        api_key: Optional[str] = None,
-        *,
-        llm_settings: LLMSettings | None = None,
     ) -> Dict[str, Any]:
-        """Validate and process input to extract FHIR-compliant report data."""
+        """Validate input and return extracted text plus basic metadata."""
         self._validate_or_raise(source)
-        return self._process_file(source, api_key, llm_settings=llm_settings)
+        return self._process_file(source)
 
     def _validate_or_raise(self, source: FileInput) -> None:
         """Check existence, type support, and non-empty streams."""
@@ -140,17 +113,11 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
     def _process_file(
         self,
         source: FileInput,
-        api_key: Optional[str] = None,
-        *,
-        llm_settings: LLMSettings | None = None,
     ) -> Dict[str, Any]:
-        """Extract text and convert to FHIR."""
+        """Extract text and normalize the result payload."""
+        mime = self._get_mime_type(source)
         text = self._extract_text(source)
-        return self._convert_to_fhir(
-            text,
-            api_key,
-            llm_settings=llm_settings,
-        )
+        return self._build_report_payload(source, text, mime)
 
     def _get_cache_key(self, source: FileInput) -> str:
         """Return cache key for the source object."""
@@ -191,6 +158,11 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
         self._text_cache[key] = text
         return text
 
+    def extract_text(self, source: FileInput) -> str:
+        """Validate input and return the extracted raw text only."""
+        self._validate_or_raise(source)
+        return self._extract_text(source)
+
     def _extract_text_from_pdf(self, pdf_source: FileInput) -> str:
         """Extract text content from a PDF file or in-memory stream."""
         try:
@@ -227,53 +199,27 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
             raise TextExtractionError('No extractable text in image')
         return text
 
-    def _convert_to_fhir(
+    def _build_report_payload(
         self,
-        text_content: str,
-        api_key: Optional[str] = None,
-        *,
-        llm_settings: LLMSettings | None = None,
+        source: FileInput,
+        text: str,
+        mime: MimeType,
     ) -> Dict[str, Any]:
-        """Convert extracted text to FHIR resources using Anamnesisai."""
-        settings = self._resolve_llm_settings(
-            api_key=api_key,
-            llm_settings=llm_settings,
+        """Build a stable structured payload around locally extracted text."""
+        source_type = 'pdf' if mime == 'application/pdf' else 'image'
+        source_name = (
+            Path(source).name
+            if isinstance(source, (str, Path))
+            else 'in_memory'
         )
-        backend = settings.to_anamnesis_backend()
-        key = settings.api_key
-
-        if backend == 'openai' and not key:
-            raise EnvironmentError('Missing OpenAI API key')
-
-        anaai = self._anamnesis_factory(
-            backend=backend,
-            api_key=key,
-            api_params=settings.to_anamnesis_api_params(),
-        )
-        resources = anaai.extract_fhir(text_content)
-        result: Dict[str, Any] = make_json_serializable(
-            {res.__class__.__name__: res.model_dump() for res in resources[0]}
-        )
-        return result
-
-    def _resolve_llm_settings(
-        self,
-        *,
-        api_key: Optional[str] = None,
-        llm_settings: LLMSettings | None = None,
-    ) -> LLMSettings:
-        """Resolve LLM settings from call overrides, constructor, and env."""
-        settings = (
-            llm_settings or self.llm_settings or load_fhir_llm_settings()
-        )
-        if api_key:
-            settings = settings.with_overrides(api_key=api_key)
-        return settings
+        return {
+            'source_name': source_name,
+            'source_type': source_type,
+            'mime_type': mime,
+            'text': text,
+        }
 
 
-def get_medical_report_extractor(
-    *,
-    llm_settings: LLMSettings | None = None,
-) -> MedicalReportFileExtractor:
+def get_medical_report_extractor() -> MedicalReportFileExtractor:
     """Create and return an instance of MedicalReportFileExtractor."""
-    return MedicalReportFileExtractor(llm_settings=llm_settings)
+    return MedicalReportFileExtractor()
