@@ -13,7 +13,9 @@
 ![Makim](https://img.shields.io/badge/Automation%20task-Makim-blue)
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI-blue?logo=githubactions)
 
-This Project aims to ...
+`hiperhealth` is a Python library for clinical AI workflows. It provides
+diagnostics-oriented LLM helpers, local medical report text extraction, wearable
+data normalization, de-identification utilities, and healthcare schemas/models.
 
 - License: BSD 3 Clause
 - Documentation: https://hiperhealth.com
@@ -21,7 +23,31 @@ This Project aims to ...
 
 ## Features
 
-TBD
+- Differential diagnosis suggestions from structured patient data
+- Exam and procedure suggestions from selected diagnoses
+- Provider-configurable LLM backend through LiteLLM
+- Local PDF/image medical report text extraction
+- CSV/JSON wearable data extraction and normalization
+- PII detection and de-identification helpers
+- Pydantic schemas and SQLAlchemy FHIR-oriented models
+
+## Documentation guide
+
+- Start with [Installation](./installation.md)
+- Configure LLM backends in [LLM Configuration](./llm_configuration.md)
+- See end-to-end examples in [Usage](./usage.md)
+
+## Current scope
+
+This repository is the `hiperhealth` library/SDK, not the web application.
+
+The current diagnostics pipeline returns `LLMDiagnosis` objects with:
+
+- `summary`: short clinical summary text
+- `options`: diagnoses or exam/procedure suggestions
+
+Medical report extraction currently returns extracted text and metadata rather
+than FHIR resources.
 
 ## Credits
 

@@ -2,39 +2,55 @@
 
 ## Stable release
 
-To install hiperhealth, run this command in your terminal:
+Install from PyPI:
 
 ```bash
 pip install hiperhealth
 ```
 
-This is the preferred method to install hiperhealth, as it will always install
-the most recent stable release.
+`hiperhealth` requires Python `>=3.10,<4`.
 
-If you don't have [pip](https://pip.pypa.io) installed, this
-[Python installation guide](http://docs.python-guide.org/en/latest/starting/installation/)
-can guide you through the process.
+## System dependencies
 
-## From sources
+Some extraction features rely on system packages:
 
-The sources for hiperhealth can be downloaded from the
-[Github repo](https://github.com/hiperhealth/hiperhealth).
+- `tesseract` for OCR on image-based reports
+- `libmagic` for MIME type detection
 
-You can either clone the public repository:
+The conda development environment already includes them.
+
+## From source
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/hiperhealth/hiperhealth
+cd hiperhealth
 ```
 
-Or download the
-[tarball](https://github.com/hiperhealth/hiperhealth/tarball/main):
+Create the development environment:
 
 ```bash
-curl -OJL https://github.com/hiperhealth/hiperhealth/tarball/main
+conda env create -f conda/dev.yaml -n hiperhealth
+conda activate hiperhealth
 ```
 
-Once you have a copy of the source, you can install it with:
+Install the package and development tooling:
 
 ```bash
 ./scripts/install-dev.sh
+```
+
+## Verify the installation
+
+Run the test suite:
+
+```bash
+pytest -vv
+```
+
+Build the docs locally:
+
+```bash
+mkdocs serve --watch docs --config-file mkdocs.yaml
 ```

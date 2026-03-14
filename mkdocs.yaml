@@ -9,6 +9,9 @@ site_dir: ./build/
 nav:
   - index.md
   - Installation: installation.md
+  - LLM Configuration: llm_configuration.md
+  - Usage: usage.md
+  - Informed Consent: informed_consent.md
   - Changelog: changelog.md
   - Contributing: contributing.md
   # from gen-files
