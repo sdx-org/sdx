@@ -6,38 +6,9 @@ import json
 import os
 
 from dataclasses import dataclass, field, replace
-from os import PathLike
-from pathlib import Path
-from typing import IO, Any, Callable, Protocol, TypeVar, cast
+from typing import Any, Callable, Protocol, TypeVar, cast
 
 from pydantic import BaseModel
-
-
-def _safe_load_dotenv(
-    dotenv_path: str | PathLike[str] | None = None,
-    stream: IO[str] | None = None,
-    verbose: bool = False,
-    override: bool = False,
-    interpolate: bool = True,
-    encoding: str | None = 'utf-8',
-) -> bool:
-    """Load an env file when python-dotenv is installed."""
-    try:
-        from dotenv import load_dotenv
-    except ModuleNotFoundError:  # pragma: no cover - optional dependency
-        return False
-
-    return load_dotenv(
-        dotenv_path,
-        stream,
-        verbose,
-        override,
-        interpolate,
-        encoding,
-    )
-
-
-_safe_load_dotenv(Path(__file__).parents[2] / '.envs' / '.env')
 
 TModel = TypeVar('TModel', bound=BaseModel)
 

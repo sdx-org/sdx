@@ -29,7 +29,7 @@ dependencies = [
     "numpy >=1.26,<2 ; python_version <  '3.13' and sys_platform == 'darwin'",
     "numpy >=2       ; python_version >= '3.13' and sys_platform == 'darwin'",
     "numpy >=2,<2.1  ; python_version <  '3.10' and sys_platform != 'darwin'",
-  "numpy >=2,<2.2  ; python_version == '3.10' and sys_platform != 'darwin'",
+    "numpy >=2,<2.2  ; python_version == '3.10' and sys_platform != 'darwin'",
 ]
 
 [project.urls]
