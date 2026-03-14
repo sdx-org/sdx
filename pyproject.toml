@@ -52,6 +52,7 @@ hiperhealth = ["py.typed"]
 dev = [
   "build >=1.3.0",
   "twine >=6",
+  "douki >=0.11.0",
   "pytest >=7.3.2",
   "pytest-cov >=4.1.0",
   "coverage >=7.2.7",
@@ -125,7 +126,6 @@ exclude = [
 select = [
   "E",   # pycodestyle
   "F",   # pyflakes
-  "D",   # pydocstyle
   "YTT", # flake8-2020
   "RUF", # Ruff-specific rules
   "I001",  # isort

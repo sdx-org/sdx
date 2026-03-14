@@ -1,4 +1,6 @@
-"""Wearable data module for extracting wearable data."""
+"""
+title: Wearable data module for extracting wearable data.
+"""
 
 from __future__ import annotations
 
@@ -17,13 +19,17 @@ from hiperhealth.utils import is_float
 
 
 class WearableDataExtractorError(Exception):
-    """Base class for wearable data file errors."""
+    """
+    title: Base class for wearable data file errors.
+    """
 
     ...
 
 
 class FileProcessingError(WearableDataExtractorError):
-    """File Processing Exception."""
+    """
+    title: File Processing Exception.
+    """
 
     ...
 
@@ -35,16 +41,39 @@ MimeType = Literal['application/json', 'text/csv', 'application/vnd.ms-excel']
 
 
 class BaseWearableDataExtractor(ABC, Generic[T]):
-    """Base class for wearable data extraction."""
+    """
+    title: Base class for wearable data extraction.
+    """
 
     @abstractmethod
     def extract_wearable_data(self, source: T) -> list[dict[str, object]]:
-        """Implement the wearable data extraction."""
+        """
+        title: Implement the wearable data extraction.
+        parameters:
+          source:
+            type: T
+            description: Value for source.
+        returns:
+          type: list[dict[str, object]]
+          description: Return value.
+        """
         raise NotImplementedError(source)
 
 
 class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
-    """Wearable data file based extractor."""
+    """
+    title: Wearable data file based extractor.
+    attributes:
+      allowed_extensions_mimetypes_map:
+        type: ClassVar[dict[FileExtension, MimeType]]
+        description: Value for allowed_extensions_mimetypes_map.
+      _mimetype_cache:
+        type: dict[str, MimeType]
+        description: Value for _mimetype_cache.
+      mime:
+        type: magic.Magic
+        description: Value for mime.
+    """
 
     # maps supported file extensions and respective mimetypes
     allowed_extensions_mimetypes_map: ClassVar[
@@ -55,18 +84,30 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
     }
 
     def __init__(self) -> None:
-        """Initialize caching an magic-python object."""
+        """
+        title: Initialize caching an magic-python object.
+        """
         self._mimetype_cache: dict[str, MimeType] = {}
         self.mime: magic.Magic = magic.Magic(mime=True)
 
     @property
     def allowed_extensions(self) -> list[FileExtension]:
-        """List of supported file extensions."""
+        """
+        title: List of supported file extensions.
+        returns:
+          type: list[FileExtension]
+          description: Return value.
+        """
         return [ext for ext in self.allowed_extensions_mimetypes_map.keys()]
 
     @property
     def allowed_mimetypes(self) -> list[MimeType]:
-        """List of supported mimetypes."""
+        """
+        title: List of supported mimetypes.
+        returns:
+          type: list[MimeType]
+          description: Return value.
+        """
         return [
             mimetype
             for mimetype in self.allowed_extensions_mimetypes_map.values()
@@ -75,7 +116,16 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
     def extract_wearable_data(
         self, file: FileInput
     ) -> list[dict[str, object]]:
-        """Extract wearable data from file."""
+        """
+        title: Extract wearable data from file.
+        parameters:
+          file:
+            type: FileInput
+            description: Value for file.
+        returns:
+          type: list[dict[str, object]]
+          description: Return value.
+        """
         # breakpoint()
         self._validate_or_raise(file)
         return self._process_file(file)
@@ -92,7 +142,16 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             )
 
     def is_supported(self, file: FileInput) -> bool:
-        """Check if file is supported."""
+        """
+        title: Check if file is supported.
+        parameters:
+          file:
+            type: FileInput
+            description: Value for file.
+        returns:
+          type: bool
+          description: Return value.
+        """
         if isinstance(file, (tempfile.SpooledTemporaryFile, io.BytesIO)):
             # if it's a inmemory-temp file, validate it
             return self._validate_inmemory_file(file)
@@ -121,7 +180,16 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             )
 
     def _get_mime_type(self, file: FileInput) -> str:
-        """Get MIME type of a given file input."""
+        """
+        title: Get MIME type of a given file input.
+        parameters:
+          file:
+            type: FileInput
+            description: Value for file.
+        returns:
+          type: str
+          description: Return value.
+        """
         cache_key = self._get_cache_key(file)
 
         if cache_key in self._mimetype_cache:

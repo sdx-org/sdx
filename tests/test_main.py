@@ -1,14 +1,20 @@
-"""Tests for hiperhealth package."""
+"""
+title: Tests for hiperhealth package.
+"""
 
 import pytest
 
 
 @pytest.fixture
 def response_pytest():
-    """Sample pytest fixture."""
+    """
+    title: Sample pytest fixture.
+    """
     return True
 
 
 def test_content_pytest():
-    """Test with pytest."""
+    """
+    title: Test with pytest.
+    """
     assert True

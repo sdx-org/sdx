@@ -1,8 +1,8 @@
 """
-FHIR-compatible resource definitions extended for TeleHealthCareAI.
-
-All extensions preserve FHIR element names and validation rules
-via subclassing from `fhir.resources` Pydantic models.
+title: FHIR-compatible resource definitions extended for TeleHealthCareAI.
+summary: |-
+  All extensions preserve FHIR element names and validation rules
+  via subclassing from `fhir.resources` Pydantic models.
 """
 
 from __future__ import annotations
@@ -26,7 +26,13 @@ from pydantic import BaseModel, Field
 
 @public
 class BaseLanguage(BaseModel, abc.ABC):
-    """Base class for language."""
+    """
+    title: Base class for language.
+    attributes:
+      language:
+        type: Optional[str]
+        description: Value for language.
+    """
 
     language: Optional[str] = Field(
         default=...,
@@ -38,14 +44,29 @@ class BaseLanguage(BaseModel, abc.ABC):
 
 @public
 class Patient(FhirPatient, BaseLanguage):
-    """FHIR Patient with optional preferred language for text content."""
+    """
+    title: FHIR Patient with optional preferred language for text content.
+    attributes:
+      language:
+        type: Optional[str]
+        description: Value for language.
+    """
 
     ...
 
 
 @public
 class Encounter(FhirEncounter, BaseLanguage):
-    """FHIR Encounter representing one clinical episode."""
+    """
+    title: FHIR Encounter representing one clinical episode.
+    attributes:
+      language:
+        type: Optional[str]
+        description: Value for language.
+      canonicalEpisodeId:
+        type: Optional[str]
+        description: Value for canonicalEpisodeId.
+    """
 
     canonicalEpisodeId: Optional[str] = Field(
         None,
@@ -60,7 +81,13 @@ class Encounter(FhirEncounter, BaseLanguage):
 class Observation(
     FhirObservation, BaseLanguage
 ):  # No change, subclass kept for future hooks
-    """FHIR Observation for symptoms or clinical findings."""
+    """
+    title: FHIR Observation for symptoms or clinical findings.
+    attributes:
+      language:
+        type: Optional[str]
+        description: Value for language.
+    """
 
     pass
 
@@ -69,25 +96,49 @@ class Observation(
 class Condition(
     FhirCondition, BaseLanguage
 ):  # Subclass preserved for custom search helpers
-    """FHIR Condition for AI-generated or physician-confirmed diagnoses."""
+    """
+    title: FHIR Condition for AI-generated or physician-confirmed diagnoses.
+    attributes:
+      language:
+        type: Optional[str]
+        description: Value for language.
+    """
 
     pass
 
 
 @public
 class Procedure(FhirProcedure, BaseLanguage):
-    """FHIR Procedure for treatment recommendations."""
+    """
+    title: FHIR Procedure for treatment recommendations.
+    attributes:
+      language:
+        type: Optional[str]
+        description: Value for language.
+    """
 
     pass
 
 
 @public
 class ClinicalImpression(FhirClinicalImpression, BaseLanguage):
-    """FHIR ClinicalImpression produced by the AI engine."""
+    """
+    title: FHIR ClinicalImpression produced by the AI engine.
+    attributes:
+      language:
+        type: Optional[str]
+        description: Value for language.
+    """
 
 
 @public
 class Annotation(FhirAnnotation, BaseLanguage):
-    """FHIR Annotation storing physician corrections or comments."""
+    """
+    title: FHIR Annotation storing physician corrections or comments.
+    attributes:
+      language:
+        type: Optional[str]
+        description: Value for language.
+    """
 
     pass

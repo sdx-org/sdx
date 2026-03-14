@@ -1,8 +1,8 @@
 """
-Shared structured-LLM helper used by all agents.
-
-* Validates with ``LLMDiagnosis``.
-* Persists every normalized reply under ``data/llm_raw/<sid>_<UTC>.json``.
+title: Shared structured-LLM helper used by all agents.
+summary: |-
+  * Validates with ``LLMDiagnosis``.
+  * Persists every normalized reply under ``data/llm_raw/<sid>_<UTC>.json``.
 """
 
 from __future__ import annotations
@@ -27,14 +27,22 @@ _RAW_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class LLMResponseValidationError(ValueError):
-    """Raised when LLM output cannot be validated as LLMDiagnosis."""
+    """
+    title: Raised when LLM output cannot be validated as LLMDiagnosis.
+    """
 
 
 def dump_llm_json(text: str, sid: str | None) -> None:
     """
-    Save *text* to data/llm_raw/<timestamp>_<sid>.json.
-
-    If *sid* is None, a random 8-char token is used instead.
+    title: Save *text* to data/llm_raw/<timestamp>_<sid>.json.
+    summary: If *sid* is None, a random 8-char token is used instead.
+    parameters:
+      text:
+        type: str
+        description: Value for text.
+      sid:
+        type: str | None
+        description: Value for sid.
     """
     ts = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     suffix = sid or uuid.uuid4().hex[:8]
@@ -49,7 +57,28 @@ def chat(
     llm: StructuredLLM | None = None,
     llm_settings: LLMSettings | None = None,
 ) -> LLMDiagnosis:
-    """Send system / user prompts and return a validated ``LLMDiagnosis``."""
+    """
+    title: Send system / user prompts and return a validated ``LLMDiagnosis``.
+    parameters:
+      system:
+        type: str
+        description: Value for system.
+      user:
+        type: str
+        description: Value for user.
+      session_id:
+        type: str | None
+        description: Value for session_id.
+      llm:
+        type: StructuredLLM | None
+        description: Value for llm.
+      llm_settings:
+        type: LLMSettings | None
+        description: Value for llm_settings.
+    returns:
+      type: LLMDiagnosis
+      description: Return value.
+    """
     effective_llm = llm or _get_llm(llm_settings)
 
     try:
@@ -64,6 +93,15 @@ def chat(
 
 
 def _get_llm(llm_settings: LLMSettings | None) -> StructuredLLM:
-    """Resolve the structured LLM adapter for the current request."""
+    """
+    title: Resolve the structured LLM adapter for the current request.
+    parameters:
+      llm_settings:
+        type: LLMSettings | None
+        description: Value for llm_settings.
+    returns:
+      type: StructuredLLM
+      description: Return value.
+    """
     settings = llm_settings or load_diagnostics_llm_settings()
     return build_structured_llm(settings)

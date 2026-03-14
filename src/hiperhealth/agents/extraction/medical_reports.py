@@ -1,4 +1,6 @@
-"""Module for extracting text from PDF documents and images."""
+"""
+title: Module for extracting text from PDF documents and images.
+"""
 
 from __future__ import annotations
 
@@ -28,13 +30,17 @@ from pypdf.errors import EmptyFileError, PdfStreamError
 
 
 class MedicalReportExtractorError(Exception):
-    """Base class for Medical Report Extraction from pdf/images."""
+    """
+    title: Base class for Medical Report Extraction from pdf/images.
+    """
 
     ...
 
 
 class TextExtractionError(MedicalReportExtractorError):
-    """Exception raised for errors in text extraction."""
+    """
+    title: Exception raised for errors in text extraction.
+    """
 
     ...
 
@@ -48,19 +54,44 @@ MimeType = Literal['application/pdf', 'image/png', 'image/jpeg']
 
 
 class BaseMedicalReportExtractor(ABC, Generic[T]):
-    """Base class for medical report extraction."""
+    """
+    title: Base class for medical report extraction.
+    """
 
     @abstractmethod
     def extract_report_data(
         self,
         source: T,
     ) -> Dict[str, Any]:
-        """Extract structured text data from source file."""
+        """
+        title: Extract structured text data from source file.
+        parameters:
+          source:
+            type: T
+            description: Value for source.
+        returns:
+          type: Dict[str, Any]
+          description: Return value.
+        """
         raise NotImplementedError
 
 
 class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
-    """Extract medical report text from files and in-memory objects."""
+    """
+    title: Extract medical report text from files and in-memory objects.
+    attributes:
+      allowed_extensions_mimetypes_map:
+        type: ClassVar[Dict[FileExtension, MimeType]]
+        description: Value for allowed_extensions_mimetypes_map.
+      _mimetype_cache:
+        type: Dict[str, MimeType]
+        description: Value for _mimetype_cache.
+      _text_cache:
+        type: Dict[str, str]
+        description: Value for _text_cache.
+      mime:
+        description: Value for mime.
+    """
 
     allowed_extensions_mimetypes_map: ClassVar[
         Dict[FileExtension, MimeType]
@@ -72,31 +103,58 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
     }
 
     def __init__(self) -> None:
-        """Initialize extractor with caches and mimetype detector."""
+        """
+        title: Initialize extractor with caches and mimetype detector.
+        """
         self._mimetype_cache: Dict[str, MimeType] = {}
         self._text_cache: Dict[str, str] = {}
         self.mime = magic.Magic(mime=True)
 
     @property
     def allowed_extensions(self) -> List[FileExtension]:
-        """Return supported file extensions."""
+        """
+        title: Return supported file extensions.
+        returns:
+          type: List[FileExtension]
+          description: Return value.
+        """
         return list(self.allowed_extensions_mimetypes_map.keys())
 
     @property
     def allowed_mimetypes(self) -> List[MimeType]:
-        """Return supported MIME types."""
+        """
+        title: Return supported MIME types.
+        returns:
+          type: List[MimeType]
+          description: Return value.
+        """
         return list(self.allowed_extensions_mimetypes_map.values())
 
     def extract_report_data(
         self,
         source: FileInput,
     ) -> Dict[str, Any]:
-        """Validate input and return extracted text plus basic metadata."""
+        """
+        title: Validate input and return extracted text plus basic metadata.
+        parameters:
+          source:
+            type: FileInput
+            description: Value for source.
+        returns:
+          type: Dict[str, Any]
+          description: Return value.
+        """
         self._validate_or_raise(source)
         return self._process_file(source)
 
     def _validate_or_raise(self, source: FileInput) -> None:
-        """Check existence, type support, and non-empty streams."""
+        """
+        title: Check existence, type support, and non-empty streams.
+        parameters:
+          source:
+            type: FileInput
+            description: Value for source.
+        """
         if isinstance(source, io.BytesIO):
             data = source.read(10)
             source.seek(0)
@@ -114,19 +172,46 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
         self,
         source: FileInput,
     ) -> Dict[str, Any]:
-        """Extract text and normalize the result payload."""
+        """
+        title: Extract text and normalize the result payload.
+        parameters:
+          source:
+            type: FileInput
+            description: Value for source.
+        returns:
+          type: Dict[str, Any]
+          description: Return value.
+        """
         mime = self._get_mime_type(source)
         text = self._extract_text(source)
         return self._build_report_payload(source, text, mime)
 
     def _get_cache_key(self, source: FileInput) -> str:
-        """Return cache key for the source object."""
+        """
+        title: Return cache key for the source object.
+        parameters:
+          source:
+            type: FileInput
+            description: Value for source.
+        returns:
+          type: str
+          description: Return value.
+        """
         if isinstance(source, (Path, str)):
             return str(Path(source).resolve())
         return str(id(source))
 
     def _get_mime_type(self, source: FileInput) -> MimeType:
-        """Detect MIME type and cache for the source."""
+        """
+        title: Detect MIME type and cache for the source.
+        parameters:
+          source:
+            type: FileInput
+            description: Value for source.
+        returns:
+          type: MimeType
+          description: Return value.
+        """
         key = self._get_cache_key(source)
         if key in self._mimetype_cache:
             return self._mimetype_cache[key]
@@ -144,7 +229,16 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
         return mime_literal
 
     def _extract_text(self, source: FileInput) -> str:
-        """Extract cached raw text from source."""
+        """
+        title: Extract cached raw text from source.
+        parameters:
+          source:
+            type: FileInput
+            description: Value for source.
+        returns:
+          type: str
+          description: Return value.
+        """
         key = self._get_cache_key(source)
         if key in self._text_cache:
             return self._text_cache[key]
@@ -159,12 +253,30 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
         return text
 
     def extract_text(self, source: FileInput) -> str:
-        """Validate input and return the extracted raw text only."""
+        """
+        title: Validate input and return the extracted raw text only.
+        parameters:
+          source:
+            type: FileInput
+            description: Value for source.
+        returns:
+          type: str
+          description: Return value.
+        """
         self._validate_or_raise(source)
         return self._extract_text(source)
 
     def _extract_text_from_pdf(self, pdf_source: FileInput) -> str:
-        """Extract text content from a PDF file or in-memory stream."""
+        """
+        title: Extract text content from a PDF file or in-memory stream.
+        parameters:
+          pdf_source:
+            type: FileInput
+            description: Value for pdf_source.
+        returns:
+          type: str
+          description: Return value.
+        """
         try:
             if isinstance(pdf_source, io.BytesIO):
                 data = pdf_source.read()
@@ -187,7 +299,16 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
         return '\n'.join(text_pages)
 
     def _extract_text_from_image(self, img_source: FileInput) -> str:
-        """Extract text from images using OCR."""
+        """
+        title: Extract text from images using OCR.
+        parameters:
+          img_source:
+            type: FileInput
+            description: Value for img_source.
+        returns:
+          type: str
+          description: Return value.
+        """
         if isinstance(img_source, (str, Path)):
             img = Image.open(img_source)
         else:
@@ -205,7 +326,22 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
         text: str,
         mime: MimeType,
     ) -> Dict[str, Any]:
-        """Build a stable structured payload around locally extracted text."""
+        """
+        title: Build a stable structured payload around locally extracted text.
+        parameters:
+          source:
+            type: FileInput
+            description: Value for source.
+          text:
+            type: str
+            description: Value for text.
+          mime:
+            type: MimeType
+            description: Value for mime.
+        returns:
+          type: Dict[str, Any]
+          description: Return value.
+        """
         source_type = 'pdf' if mime == 'application/pdf' else 'image'
         source_name = (
             Path(source).name
@@ -221,5 +357,10 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
 
 
 def get_medical_report_extractor() -> MedicalReportFileExtractor:
-    """Create and return an instance of MedicalReportFileExtractor."""
+    """
+    title: Create and return an instance of MedicalReportFileExtractor.
+    returns:
+      type: MedicalReportFileExtractor
+      description: Return value.
+    """
     return MedicalReportFileExtractor()

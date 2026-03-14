@@ -1,4 +1,6 @@
-"""Tests for provider-agnostic LLM settings and adapters."""
+"""
+title: Tests for provider-agnostic LLM settings and adapters.
+"""
 
 from __future__ import annotations
 
@@ -11,7 +13,12 @@ from hiperhealth.schema.clinical_outputs import LLMDiagnosis
 
 
 def test_load_diagnostics_llm_settings_prefers_specific_env(monkeypatch):
-    """Task-specific env vars should override generic and legacy ones."""
+    """
+    title: Task-specific env vars should override generic and legacy ones.
+    parameters:
+      monkeypatch:
+        description: Value for monkeypatch.
+    """
     monkeypatch.setenv('OPENAI_MODEL', 'legacy-model')
     monkeypatch.setenv('OPENAI_API_KEY', 'legacy-key')
     monkeypatch.setenv('HIPERHEALTH_LLM_PROVIDER', 'openai')
@@ -37,7 +44,9 @@ def test_load_diagnostics_llm_settings_prefers_specific_env(monkeypatch):
 
 
 def test_litellm_structured_llm_builds_messages_and_kwargs():
-    """Structured generation should map settings into LiteLLM kwargs."""
+    """
+    title: Structured generation should map settings into LiteLLM kwargs.
+    """
     calls: list[dict[str, object]] = []
 
     def _fake_completion(**kwargs: object) -> dict[str, object]:

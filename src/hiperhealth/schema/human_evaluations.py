@@ -1,4 +1,6 @@
-"""Domain-specific (non-FHIR) Pydantic models used across the platform."""
+"""
+title: Domain-specific (non-FHIR) Pydantic models used across the platform.
+"""
 
 from __future__ import annotations
 
@@ -11,7 +13,28 @@ from hiperhealth.schema.fhirx import BaseLanguage
 
 
 class AIOutput(BaseLanguage, BaseModel):
-    """Full AI-generated text associated with a particular encounter."""
+    """
+    title: Full AI-generated text associated with a particular encounter.
+    attributes:
+      id:
+        type: str
+        description: Value for id.
+      encounter_id:
+        type: str
+        description: Value for encounter_id.
+      type:
+        type: Literal[anamnesis, diagnosis, treatment]
+        description: Value for type.
+      content:
+        type: str
+        description: Value for content.
+      model_version:
+        type: str
+        description: Value for model_version.
+      timestamp:
+        type: datetime
+        description: Value for timestamp.
+    """
 
     id: str
     encounter_id: str
@@ -22,7 +45,31 @@ class AIOutput(BaseLanguage, BaseModel):
 
 
 class Evaluation(BaseLanguage, BaseModel):
-    """Structured physician rating of an AIOutput instance."""
+    """
+    title: Structured physician rating of an AIOutput instance.
+    attributes:
+      id:
+        type: str
+        description: Value for id.
+      aioutput_id:
+        type: str
+        description: Value for aioutput_id.
+      output_type:
+        type: Literal[anamnesis, diagnosis, treatment]
+        description: Value for output_type.
+      ratings:
+        type: Dict[Literal[accuracy, relevance, usefulness, coherence], int]
+        description: Value for ratings.
+      safety:
+        type: Literal[safe, needs_review, unsafe]
+        description: Value for safety.
+      comments:
+        type: Optional[str]
+        description: Value for comments.
+      timestamp:
+        type: datetime
+        description: Value for timestamp.
+    """
 
     id: str
     aioutput_id: str
@@ -36,7 +83,28 @@ class Evaluation(BaseLanguage, BaseModel):
 
 
 class DeIdentifiedDatasetDescriptor(BaseLanguage, BaseModel):
-    """Metadata describing a dataset produced for open publication."""
+    """
+    title: Metadata describing a dataset produced for open publication.
+    attributes:
+      dataset_id:
+        type: str
+        description: Value for dataset_id.
+      generation_date:
+        type: datetime
+        description: Value for generation_date.
+      version:
+        type: str
+        description: Value for version.
+      records:
+        type: int
+        description: Value for records.
+      license:
+        type: str
+        description: Value for license.
+      url:
+        type: Optional[str]
+        description: Value for url.
+    """
 
     dataset_id: str
     generation_date: datetime

@@ -1,4 +1,6 @@
-"""Privacy models package."""
+"""
+title: Privacy models package.
+"""
 
 from hiperhealth.privacy.deidentifier import (
     Deidentifier,

@@ -1,4 +1,6 @@
-"""Base script for generating models."""
+"""
+title: Base script for generating models.
+"""
 
 from __future__ import annotations
 
@@ -21,9 +23,12 @@ IGNORED_CLASSES = [BaseLanguage, BaseModel]
 
 def iter_pydantic_models() -> Dict[str, Type[BaseModel]]:
     """
-    Yield (qualified_name, model_cls).
-
-    Yield values for every subclass of BaseModel found in PACKAGE_PATHS.
+    title: Yield (qualified_name, model_cls).
+    summary: >-
+      Yield values for every subclass of BaseModel found in PACKAGE_PATHS.
+    returns:
+      type: Dict[str, Type[BaseModel]]
+      description: Return value.
     """
     discovered: dict[str, Type[BaseModel]] = {}
     for module_path in PACKAGE_PATHS:
@@ -43,13 +48,20 @@ def iter_pydantic_models() -> Dict[str, Type[BaseModel]]:
 
 def is_concrete_model(model_cls: Type[BaseModel]) -> bool:
     """
-    Return True if `model_cls` should be mapped to a table.
-
-    Heuristics
-    ----------
-    1. The class advertises itself as abstract via `__abstract__ = True`.
-    2. Inner `Config` / `model_config` sets `table_abstract = True`.
-    3. No own fields ➜ skip (helper alias such as BaseLanguage).
+    title: Return True if `model_cls` should be mapped to a table.
+    summary: |-
+      Heuristics
+      ----------
+      1. The class advertises itself as abstract via `__abstract__ = True`.
+      2. Inner `Config` / `model_config` sets `table_abstract = True`.
+      3. No own fields ➜ skip (helper alias such as BaseLanguage).
+    parameters:
+      model_cls:
+        type: Type[BaseModel]
+        description: Value for model_cls.
+    returns:
+      type: bool
+      description: Return value.
     """
     # Rule 1: explicit marker
     if getattr(model_cls, '__abstract__', False):

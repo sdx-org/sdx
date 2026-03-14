@@ -53,6 +53,16 @@ repos:
         types:
           - python
 
+      - id: douki
+        name: douki
+        entry: douki sync
+        language: system
+        pass_filenames: true
+        require_serial: yes
+        files: "./"
+        types:
+          - python
+
       - id: mypy
         name: mypy
         entry: mypy

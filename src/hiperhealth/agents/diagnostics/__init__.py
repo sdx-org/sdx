@@ -1,1 +1,3 @@
-"""The diagnostic module."""
+"""
+title: The diagnostic module.
+"""

@@ -1,1 +1,3 @@
-"""Extraction package."""
+"""
+title: Extraction package.
+"""

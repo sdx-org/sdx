@@ -1,1 +1,3 @@
-"""Treatments module."""
+"""
+title: Treatments module.
+"""

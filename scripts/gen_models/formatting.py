@@ -1,4 +1,6 @@
-"""Formatting tools."""
+"""
+title: Formatting tools.
+"""
 
 import shutil
 import subprocess
@@ -8,16 +10,23 @@ from pathlib import Path
 
 def run_ruff(path: Path, *, fix: bool = True) -> None:
     """
-    Format / lint the generated file with Ruff.
+    title: Format / lint the generated file with Ruff.
+    summary: |-
+      Parameters
+      ----------
+          path: Absolute path to the file that was just written.
+          fix:  If True, run Ruff with `--fix`; otherwise `check` only.
 
-    Parameters
-    ----------
-        path: Absolute path to the file that was just written.
-        fix:  If True, run Ruff with `--fix`; otherwise `check` only.
-
-    Raises
-    ------
-        RuntimeError: If Ruff is not installed or returns a non-zero exit code.
+      Raises
+      ------
+      RuntimeError: If Ruff is not installed or returns a non-zero exit code.
+    parameters:
+      path:
+        type: Path
+        description: Value for path.
+      fix:
+        type: bool
+        description: Value for fix.
     """
     ruff_exe = shutil.which('ruff')
     if ruff_exe is None:

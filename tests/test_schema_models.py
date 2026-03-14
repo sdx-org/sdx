@@ -1,4 +1,6 @@
-"""Tests for schema exports and model validation."""
+"""
+title: Tests for schema exports and model validation.
+"""
 
 from __future__ import annotations
 
@@ -18,13 +20,17 @@ from pydantic import ValidationError
 
 
 def test_schema_package_exports_llmdiagnosis():
-    """Top-level schema package should re-export LLMDiagnosis."""
+    """
+    title: Top-level schema package should re-export LLMDiagnosis.
+    """
     assert schema_pkg.__all__ == ['LLMDiagnosis']
     assert schema_pkg.LLMDiagnosis is LLMDiagnosis
 
 
 def test_llmdiagnosis_from_llm_parses_fenced_json():
-    """from_llm should accept markdown fenced JSON responses."""
+    """
+    title: from_llm should accept markdown fenced JSON responses.
+    """
     raw = """
     ```json
     {"summary":"Short summary","options":["A","B"]}
@@ -36,13 +42,17 @@ def test_llmdiagnosis_from_llm_parses_fenced_json():
 
 
 def test_llmdiagnosis_from_llm_invalid_payload_raises():
-    """Missing required keys should raise pydantic ValidationError."""
+    """
+    title: Missing required keys should raise pydantic ValidationError.
+    """
     with pytest.raises(ValidationError):
         LLMDiagnosis.from_llm('{"summary":"only summary"}')
 
 
 def test_fhirx_models_expose_language_field():
-    """FHIR wrapper models should expose the shared language field."""
+    """
+    title: FHIR wrapper models should expose the shared language field.
+    """
     classes = [
         fhir_mod.Patient,
         fhir_mod.Encounter,
@@ -58,13 +68,17 @@ def test_fhirx_models_expose_language_field():
 
 
 def test_base_language_requires_language_value():
-    """Base language schema should require explicit language value."""
+    """
+    title: Base language schema should require explicit language value.
+    """
     with pytest.raises(ValidationError):
         fhir_mod.BaseLanguage()
 
 
 def test_human_evaluation_models_validate_expected_shapes():
-    """Domain schemas should validate and keep typed data."""
+    """
+    title: Domain schemas should validate and keep typed data.
+    """
     now = datetime.now(timezone.utc)
 
     ai_out = AIOutput(

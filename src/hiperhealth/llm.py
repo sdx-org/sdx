@@ -1,4 +1,6 @@
-"""Provider-agnostic LLM settings and structured-generation adapters."""
+"""
+title: Provider-agnostic LLM settings and structured-generation adapters.
+"""
 
 from __future__ import annotations
 
@@ -41,7 +43,9 @@ _DEFAULT_PROVIDER_MODEL = {
 
 
 class StructuredLLM(Protocol):
-    """Minimal interface expected by hiperhealth prompt workflows."""
+    """
+    title: Minimal interface expected by hiperhealth prompt workflows.
+    """
 
     def generate(
         self,
@@ -49,7 +53,22 @@ class StructuredLLM(Protocol):
         user: str,
         output_type: type[TModel],
     ) -> TModel:
-        """Generate and validate a structured response."""
+        """
+        title: Generate and validate a structured response.
+        parameters:
+          system:
+            type: str
+            description: Value for system.
+          user:
+            type: str
+            description: Value for user.
+          output_type:
+            type: type[TModel]
+            description: Value for output_type.
+        returns:
+          type: TModel
+          description: Return value.
+        """
 
 
 _CompletionFn = Callable[..., Any]
@@ -57,7 +76,31 @@ _CompletionFn = Callable[..., Any]
 
 @dataclass(frozen=True)
 class LLMSettings:
-    """Runtime-configurable LLM settings for a single workflow."""
+    """
+    title: Runtime-configurable LLM settings for a single workflow.
+    attributes:
+      provider:
+        type: str
+        description: Value for provider.
+      model:
+        type: str
+        description: Value for model.
+      api_key:
+        type: str
+        description: Value for api_key.
+      engine:
+        type: str
+        description: Value for engine.
+      temperature:
+        type: float
+        description: Value for temperature.
+      max_tokens:
+        type: int
+        description: Value for max_tokens.
+      api_params:
+        type: dict[str, Any]
+        description: Value for api_params.
+    """
 
     provider: str = 'openai'
     model: str = ''
@@ -69,7 +112,12 @@ class LLMSettings:
 
     @property
     def normalized_provider(self) -> str:
-        """Return a canonical lowercase provider identifier."""
+        """
+        title: Return a canonical lowercase provider identifier.
+        returns:
+          type: str
+          description: Return value.
+        """
         provider = self.provider.strip().lower()
         return _PROVIDER_ALIASES.get(provider, provider)
 
@@ -84,7 +132,34 @@ class LLMSettings:
         max_tokens: int | None = None,
         api_params: dict[str, Any] | None = None,
     ) -> LLMSettings:
-        """Return a copy with selective overrides applied."""
+        """
+        title: Return a copy with selective overrides applied.
+        parameters:
+          provider:
+            type: str | None
+            description: Value for provider.
+          model:
+            type: str | None
+            description: Value for model.
+          api_key:
+            type: str | None
+            description: Value for api_key.
+          engine:
+            type: str | None
+            description: Value for engine.
+          temperature:
+            type: float | None
+            description: Value for temperature.
+          max_tokens:
+            type: int | None
+            description: Value for max_tokens.
+          api_params:
+            type: dict[str, Any] | None
+            description: Value for api_params.
+        returns:
+          type: LLMSettings
+          description: Return value.
+        """
         merged_params = dict(self.api_params)
         if api_params:
             merged_params.update(api_params)
@@ -105,7 +180,12 @@ class LLMSettings:
         )
 
     def to_litellm_model(self) -> str:
-        """Return the fully-qualified LiteLLM model identifier."""
+        """
+        title: Return the fully-qualified LiteLLM model identifier.
+        returns:
+          type: str
+          description: Return value.
+        """
         model_name = self.model or self.engine
         if not model_name:
             raise ValueError(
@@ -117,7 +197,12 @@ class LLMSettings:
         return f'{self.normalized_provider}/{model_name}'
 
     def to_litellm_kwargs(self) -> dict[str, Any]:
-        """Build LiteLLM completion kwargs from the current settings."""
+        """
+        title: Build LiteLLM completion kwargs from the current settings.
+        returns:
+          type: dict[str, Any]
+          description: Return value.
+        """
         kwargs = dict(self.api_params)
         base_url = kwargs.pop('base_url', '')
         if base_url and 'api_base' not in kwargs:
@@ -131,7 +216,14 @@ class LLMSettings:
 
 
 class LiteLLMStructuredLLM:
-    """Structured-generation adapter built on top of LiteLLM."""
+    """
+    title: Structured-generation adapter built on top of LiteLLM.
+    attributes:
+      settings:
+        description: Value for settings.
+      _completion_fn:
+        description: Value for _completion_fn.
+    """
 
     def __init__(
         self,
@@ -155,7 +247,22 @@ class LiteLLMStructuredLLM:
         user: str,
         output_type: type[TModel],
     ) -> TModel:
-        """Generate a structured response using the configured backend."""
+        """
+        title: Generate a structured response using the configured backend.
+        parameters:
+          system:
+            type: str
+            description: Value for system.
+          user:
+            type: str
+            description: Value for user.
+          output_type:
+            type: type[TModel]
+            description: Value for output_type.
+        returns:
+          type: TModel
+          description: Return value.
+        """
         completion_fn = self._get_completion_fn()
         response = completion_fn(
             messages=_build_messages(system, user, output_type),
@@ -170,7 +277,19 @@ def build_structured_llm(
     *,
     completion_fn: _CompletionFn | None = None,
 ) -> StructuredLLM:
-    """Build the default structured LLM adapter for hiperhealth workflows."""
+    """
+    title: Build the default structured LLM adapter for hiperhealth workflows.
+    parameters:
+      settings:
+        type: LLMSettings | None
+        description: Value for settings.
+      completion_fn:
+        type: _CompletionFn | None
+        description: Value for completion_fn.
+    returns:
+      type: StructuredLLM
+      description: Return value.
+    """
     effective_settings = settings or load_diagnostics_llm_settings()
     return LiteLLMStructuredLLM(
         settings=effective_settings,
@@ -179,7 +298,12 @@ def build_structured_llm(
 
 
 def load_diagnostics_llm_settings() -> LLMSettings:
-    """Load diagnostics-generation settings from env variables."""
+    """
+    title: Load diagnostics-generation settings from env variables.
+    returns:
+      type: LLMSettings
+      description: Return value.
+    """
     return load_llm_settings(
         prefixes=(_DIAGNOSTICS_PREFIX, _GENERIC_PREFIX),
         default_provider='openai',
@@ -195,7 +319,25 @@ def load_llm_settings(
     legacy_model_envs: tuple[str, ...] = (),
     legacy_api_key_envs: tuple[str, ...] = (),
 ) -> LLMSettings:
-    """Load LLM settings from env vars, with task-specific prefixes first."""
+    """
+    title: Load LLM settings from env vars, with task-specific prefixes first.
+    parameters:
+      prefixes:
+        type: tuple[str, Ellipsis]
+        description: Value for prefixes.
+      default_provider:
+        type: str
+        description: Value for default_provider.
+      legacy_model_envs:
+        type: tuple[str, Ellipsis]
+        description: Value for legacy_model_envs.
+      legacy_api_key_envs:
+        type: tuple[str, Ellipsis]
+        description: Value for legacy_api_key_envs.
+    returns:
+      type: LLMSettings
+      description: Return value.
+    """
     raw_provider = (
         (
             _first_nonempty_env(_prefixed_names(prefixes, 'PROVIDER'))
@@ -253,7 +395,19 @@ def _coerce_model_output(
     result: Any,
     output_type: type[TModel],
 ) -> TModel:
-    """Normalize provider outputs to the requested Pydantic model type."""
+    """
+    title: Normalize provider outputs to the requested Pydantic model type.
+    parameters:
+      result:
+        type: Any
+        description: Value for result.
+      output_type:
+        type: type[TModel]
+        description: Value for output_type.
+    returns:
+      type: TModel
+      description: Return value.
+    """
     if isinstance(result, output_type):
         return result
     if isinstance(result, BaseModel):
@@ -272,7 +426,22 @@ def _build_messages(
     user: str,
     output_type: type[TModel],
 ) -> list[dict[str, str]]:
-    """Build a vendor-neutral prompt for structured JSON responses."""
+    """
+    title: Build a vendor-neutral prompt for structured JSON responses.
+    parameters:
+      system:
+        type: str
+        description: Value for system.
+      user:
+        type: str
+        description: Value for user.
+      output_type:
+        type: type[TModel]
+        description: Value for output_type.
+    returns:
+      type: list[dict[str, str]]
+      description: Return value.
+    """
     schema = json.dumps(output_type.model_json_schema(), ensure_ascii=False)
     system_message = '\n\n'.join(
         (
@@ -288,7 +457,16 @@ def _build_messages(
 
 
 def _extract_message_content(response: Any) -> Any:
-    """Extract the first assistant message content from a LiteLLM response."""
+    """
+    title: Extract the first assistant message content from a LiteLLM response.
+    parameters:
+      response:
+        type: Any
+        description: Value for response.
+    returns:
+      type: Any
+      description: Return value.
+    """
     if isinstance(response, (str, BaseModel, dict)):
         if not isinstance(response, dict) or 'choices' not in response:
             return response
@@ -311,14 +489,35 @@ def _extract_message_content(response: Any) -> Any:
 
 
 def _get_mapping_or_attr(value: Any, key: str) -> Any:
-    """Read *key* from dict-like or attribute-based SDK objects."""
+    """
+    title: Read *key* from dict-like or attribute-based SDK objects.
+    parameters:
+      value:
+        type: Any
+        description: Value for value.
+      key:
+        type: str
+        description: Value for key.
+    returns:
+      type: Any
+      description: Return value.
+    """
     if isinstance(value, dict):
         return value.get(key)
     return getattr(value, key, None)
 
 
 def _join_content_blocks(blocks: list[Any]) -> str:
-    """Flatten multi-part content blocks into a single text payload."""
+    """
+    title: Flatten multi-part content blocks into a single text payload.
+    parameters:
+      blocks:
+        type: list[Any]
+        description: Value for blocks.
+    returns:
+      type: str
+      description: Return value.
+    """
     parts: list[str] = []
     for block in blocks:
         if isinstance(block, str):
@@ -332,7 +531,16 @@ def _join_content_blocks(blocks: list[Any]) -> str:
 
 
 def _clean_json_text(text: str) -> str:
-    """Strip simple fenced-markdown wrappers from provider JSON responses."""
+    """
+    title: Strip simple fenced-markdown wrappers from provider JSON responses.
+    parameters:
+      text:
+        type: str
+        description: Value for text.
+    returns:
+      type: str
+      description: Return value.
+    """
     cleaned = text.strip()
     if cleaned.startswith('```'):
         cleaned = cleaned[3:]
@@ -352,7 +560,16 @@ def _prefixed_names(
 
 
 def _load_api_params(prefixes: tuple[str, ...]) -> dict[str, Any]:
-    """Load and merge JSON api params from generic to specific prefixes."""
+    """
+    title: Load and merge JSON api params from generic to specific prefixes.
+    parameters:
+      prefixes:
+        type: tuple[str, Ellipsis]
+        description: Value for prefixes.
+    returns:
+      type: dict[str, Any]
+      description: Return value.
+    """
     params: dict[str, Any] = {}
     for prefix in reversed(prefixes):
         raw = os.getenv(f'{prefix}API_PARAMS')

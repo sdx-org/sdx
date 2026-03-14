@@ -1,4 +1,6 @@
-"""Test HiPerHealth utility functions module."""
+"""
+title: Test HiPerHealth utility functions module.
+"""
 
 import datetime
 
@@ -6,7 +8,9 @@ from hiperhealth.utils import is_float, make_json_serializable
 
 
 def test_is_float():
-    """Test if string is a float."""
+    """
+    title: Test if string is a float.
+    """
     assert is_float('1.0')
     assert is_float('   1.0    ')
     assert is_float('-3.00')
@@ -19,7 +23,9 @@ def test_is_float():
 
 
 def test_make_json_serializable_date():
-    """Test datetime.date and datetime.datetime objects are serialized."""
+    """
+    title: Test datetime.date and datetime.datetime objects are serialized.
+    """
     d = datetime.date(2023, 1, 1)
     dt = datetime.datetime(2023, 1, 1, 12, 30, 45)
 
@@ -28,7 +34,9 @@ def test_make_json_serializable_date():
 
 
 def test_make_json_serializable_dict():
-    """Test dict serialization with nested types."""
+    """
+    title: Test dict serialization with nested types.
+    """
     data = {
         'a': datetime.datetime(2023, 1, 1, 12, 0),
         'b': [1, 2, datetime.date(2023, 1, 2)],

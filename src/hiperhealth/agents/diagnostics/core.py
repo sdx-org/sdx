@@ -1,4 +1,6 @@
-"""Diagnostic-related LLM utilities."""
+"""
+title: Diagnostic-related LLM utilities.
+"""
 
 from __future__ import annotations
 
@@ -81,7 +83,28 @@ def differential(
     llm: StructuredLLM | None = None,
     llm_settings: LLMSettings | None = None,
 ) -> LLMDiagnosis:
-    """Return summary + list of differential diagnoses."""
+    """
+    title: Return summary + list of differential diagnoses.
+    parameters:
+      patient:
+        type: Dict[str, Any]
+        description: Value for patient.
+      language:
+        type: str
+        description: Value for language.
+      session_id:
+        type: str | None
+        description: Value for session_id.
+      llm:
+        type: StructuredLLM | None
+        description: Value for llm.
+      llm_settings:
+        type: LLMSettings | None
+        description: Value for llm_settings.
+    returns:
+      type: LLMDiagnosis
+      description: Return value.
+    """
     prompt = _DIAG_PROMPTS.get(language, _DIAG_PROMPTS['en'])
     chat_kwargs: dict[str, Any] = {'session_id': session_id}
     if llm is not None:
@@ -102,7 +125,28 @@ def exams(
     llm: StructuredLLM | None = None,
     llm_settings: LLMSettings | None = None,
 ) -> LLMDiagnosis:
-    """Return summary + list of suggested examinations."""
+    """
+    title: Return summary + list of suggested examinations.
+    parameters:
+      selected_dx:
+        type: List[str]
+        description: Value for selected_dx.
+      language:
+        type: str
+        description: Value for language.
+      session_id:
+        type: str | None
+        description: Value for session_id.
+      llm:
+        type: StructuredLLM | None
+        description: Value for llm.
+      llm_settings:
+        type: LLMSettings | None
+        description: Value for llm_settings.
+    returns:
+      type: LLMDiagnosis
+      description: Return value.
+    """
     prompt = _EXAM_PROMPTS.get(language, _EXAM_PROMPTS['en'])
     chat_kwargs: dict[str, Any] = {'session_id': session_id}
     if llm is not None:
