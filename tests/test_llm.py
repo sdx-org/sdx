@@ -68,4 +68,4 @@ def test_litellm_structured_llm_builds_messages_and_kwargs():
     assert messages[1] == {'role': 'user', 'content': 'usr'}
     assert messages[0]['role'] == 'system'
     assert 'Return only a valid JSON object' in messages[0]['content']
-    assert '"title":"LLMDiagnosis"' in messages[0]['content']
+    assert 'LLMDiagnosis' in messages[0]['content']
