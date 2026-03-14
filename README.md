@@ -50,7 +50,8 @@ They are included in the conda dev environment (`conda/dev.yaml`).
 
 ## Configuration
 
-Set these environment variables before using diagnostics/exam LLM features:
+Set these environment variables before using diagnostics/exam LLM features. The
+provider can be changed without code changes through the LiteLLM-backed adapter:
 
 - `HIPERHEALTH_DIAGNOSTICS_LLM_PROVIDER` (optional, defaults to `openai`)
 - `HIPERHEALTH_DIAGNOSTICS_LLM_API_KEY` (provider key; `OPENAI_API_KEY` still

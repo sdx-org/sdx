@@ -14,6 +14,14 @@ TModel = TypeVar('TModel', bound=BaseModel)
 
 _GENERIC_PREFIX = 'HIPERHEALTH_LLM_'
 _DIAGNOSTICS_PREFIX = 'HIPERHEALTH_DIAGNOSTICS_LLM_'
+_STRUCTURED_OUTPUT_INSTRUCTION = (
+    'Return only a valid JSON object that matches the provided JSON '
+    'Schema. Do not include markdown fences or explanatory text.'
+)
+
+_PROVIDER_ALIASES = {
+    'ollama-openai': 'ollama',
+}
 
 _PROVIDER_API_KEY_ENV = {
     'cohere': ('COHERE_API_KEY',),
@@ -22,14 +30,12 @@ _PROVIDER_API_KEY_ENV = {
     'groq': ('GROQ_API_KEY',),
     'huggingface': ('HUGGINGFACE_API_KEY', 'HF_TOKEN'),
     'huggingface-inference': ('HUGGINGFACE_API_KEY', 'HF_TOKEN'),
-    'ollama-openai': (),
     'openai': ('OPENAI_API_KEY',),
     'together': ('TOGETHER_API_KEY',),
 }
 
 _DEFAULT_PROVIDER_MODEL = {
     'ollama': 'llama3.2:1b',
-    'ollama-openai': 'llama3.2:1b',
     'openai': 'o4-mini',
 }
 
@@ -46,7 +52,7 @@ class StructuredLLM(Protocol):
         """Generate and validate a structured response."""
 
 
-_GenerationFactory = Callable[..., Any]
+_CompletionFn = Callable[..., Any]
 
 
 @dataclass(frozen=True)
@@ -64,7 +70,8 @@ class LLMSettings:
     @property
     def normalized_provider(self) -> str:
         """Return a canonical lowercase provider identifier."""
-        return self.provider.strip().lower()
+        provider = self.provider.strip().lower()
+        return _PROVIDER_ALIASES.get(provider, provider)
 
     def with_overrides(
         self,
@@ -97,36 +104,50 @@ class LLMSettings:
             api_params=merged_params,
         )
 
-    def to_rago_backend(self, *, structured_output: bool = False) -> str:
-        """
-        Map user-facing provider names to the corresponding Rago backend.
+    def to_litellm_model(self) -> str:
+        """Return the fully-qualified LiteLLM model identifier."""
+        model_name = self.model or self.engine
+        if not model_name:
+            raise ValueError(
+                'LLM model is required. Set HIPERHEALTH_*_LLM_MODEL or '
+                'pass LLMSettings(model=...).'
+            )
+        if '/' in model_name:
+            return model_name
+        return f'{self.normalized_provider}/{model_name}'
 
-        For structured output, Ollama must use the OpenAI-compatible backend.
-        """
-        provider = self.normalized_provider
-        if provider == 'ollama' and structured_output:
-            return 'ollama-openai'
-        return provider
+    def to_litellm_kwargs(self) -> dict[str, Any]:
+        """Build LiteLLM completion kwargs from the current settings."""
+        kwargs = dict(self.api_params)
+        base_url = kwargs.pop('base_url', '')
+        if base_url and 'api_base' not in kwargs:
+            kwargs['api_base'] = base_url
+        kwargs['model'] = self.to_litellm_model()
+        kwargs['temperature'] = self.temperature
+        kwargs['max_tokens'] = self.max_tokens
+        if self.api_key:
+            kwargs['api_key'] = self.api_key
+        return kwargs
 
 
-class RagoStructuredLLM:
-    """Structured-generation adapter built on top of Rago Generation."""
+class LiteLLMStructuredLLM:
+    """Structured-generation adapter built on top of LiteLLM."""
 
     def __init__(
         self,
         settings: LLMSettings,
-        generation_factory: _GenerationFactory | None = None,
+        completion_fn: _CompletionFn | None = None,
     ) -> None:
         self.settings = settings
-        self._generation_factory = generation_factory
+        self._completion_fn = completion_fn
 
-    def _get_generation_factory(self) -> _GenerationFactory:
-        if self._generation_factory is not None:
-            return self._generation_factory
+    def _get_completion_fn(self) -> _CompletionFn:
+        if self._completion_fn is not None:
+            return self._completion_fn
 
-        from rago import Generation
+        from litellm import completion
 
-        return cast(_GenerationFactory, Generation)
+        return cast(_CompletionFn, completion)
 
     def generate(
         self,
@@ -134,34 +155,26 @@ class RagoStructuredLLM:
         user: str,
         output_type: type[TModel],
     ) -> TModel:
-        """Generate a structured response using the configured Rago backend."""
-        generation_factory = self._get_generation_factory()
-        generation = generation_factory(
-            backend=self.settings.to_rago_backend(structured_output=True),
-            engine=self.settings.engine,
-            api_key=self.settings.api_key,
-            model_name=self.settings.model,
-            temperature=self.settings.temperature,
-            output_max_length=self.settings.max_tokens,
-            structured_output=output_type,
-            system_message=system,
-            prompt_template='{query}',
-            api_params=dict(self.settings.api_params),
+        """Generate a structured response using the configured backend."""
+        completion_fn = self._get_completion_fn()
+        response = completion_fn(
+            messages=_build_messages(system, user, output_type),
+            **self.settings.to_litellm_kwargs(),
         )
-        result = generation.generate(user, [])
+        result = _extract_message_content(response)
         return _coerce_model_output(result, output_type)
 
 
 def build_structured_llm(
     settings: LLMSettings | None = None,
     *,
-    generation_factory: _GenerationFactory | None = None,
+    completion_fn: _CompletionFn | None = None,
 ) -> StructuredLLM:
     """Build the default structured LLM adapter for hiperhealth workflows."""
     effective_settings = settings or load_diagnostics_llm_settings()
-    return RagoStructuredLLM(
+    return LiteLLMStructuredLLM(
         settings=effective_settings,
-        generation_factory=generation_factory,
+        completion_fn=completion_fn,
     )
 
 
@@ -183,7 +196,7 @@ def load_llm_settings(
     legacy_api_key_envs: tuple[str, ...] = (),
 ) -> LLMSettings:
     """Load LLM settings from env vars, with task-specific prefixes first."""
-    provider = (
+    raw_provider = (
         (
             _first_nonempty_env(_prefixed_names(prefixes, 'PROVIDER'))
             or default_provider
@@ -191,6 +204,7 @@ def load_llm_settings(
         .strip()
         .lower()
     )
+    provider = _PROVIDER_ALIASES.get(raw_provider, raw_provider)
 
     model_env_names = _prefixed_names(prefixes, 'MODEL')
     if provider == 'openai':
@@ -244,11 +258,77 @@ def _coerce_model_output(
         return result
     if isinstance(result, BaseModel):
         return output_type.model_validate(result.model_dump())
+    if isinstance(result, dict):
+        return output_type.model_validate(result)
     if isinstance(result, str):
         return output_type.model_validate_json(_clean_json_text(result))
     raise TypeError(
         f'Unsupported structured LLM result type: {type(result).__name__}'
     )
+
+
+def _build_messages(
+    system: str,
+    user: str,
+    output_type: type[TModel],
+) -> list[dict[str, str]]:
+    """Build a vendor-neutral prompt for structured JSON responses."""
+    schema = json.dumps(output_type.model_json_schema(), ensure_ascii=False)
+    system_message = '\n\n'.join(
+        (
+            system.strip(),
+            _STRUCTURED_OUTPUT_INSTRUCTION,
+            f'JSON Schema:\n{schema}',
+        )
+    ).strip()
+    return [
+        {'role': 'system', 'content': system_message},
+        {'role': 'user', 'content': user},
+    ]
+
+
+def _extract_message_content(response: Any) -> Any:
+    """Extract the first assistant message content from a LiteLLM response."""
+    if isinstance(response, (str, BaseModel, dict)):
+        if not isinstance(response, dict) or 'choices' not in response:
+            return response
+
+    choices = _get_mapping_or_attr(response, 'choices')
+    if not choices:
+        raise TypeError('LiteLLM response did not include any choices.')
+
+    choice = choices[0]
+    message = _get_mapping_or_attr(choice, 'message')
+    content = _get_mapping_or_attr(message, 'content')
+
+    if isinstance(content, list):
+        return _join_content_blocks(content)
+    if isinstance(content, (str, dict)):
+        return content
+    raise TypeError(
+        'LiteLLM response message content must be a string or dict.'
+    )
+
+
+def _get_mapping_or_attr(value: Any, key: str) -> Any:
+    """Read *key* from dict-like or attribute-based SDK objects."""
+    if isinstance(value, dict):
+        return value.get(key)
+    return getattr(value, key, None)
+
+
+def _join_content_blocks(blocks: list[Any]) -> str:
+    """Flatten multi-part content blocks into a single text payload."""
+    parts: list[str] = []
+    for block in blocks:
+        if isinstance(block, str):
+            parts.append(block)
+            continue
+        if isinstance(block, dict):
+            text = block.get('text') or block.get('content')
+            if text:
+                parts.append(str(text))
+    return '\n'.join(part for part in parts if part)
 
 
 def _clean_json_text(text: str) -> str:
