@@ -67,12 +67,12 @@ def test_fhirx_models_expose_language_field():
         assert issubclass(cls, fhir_mod.BaseLanguage)
 
 
-def test_base_language_requires_language_value():
+def test_base_language_defaults_to_none():
     """
-    title: Base language schema should require explicit language value.
+    title: Base language schema should default language to None.
     """
-    with pytest.raises(ValidationError):
-        fhir_mod.BaseLanguage()
+    instance = fhir_mod.Patient()
+    assert instance.language is None
 
 
 def test_human_evaluation_models_validate_expected_shapes():

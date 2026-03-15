@@ -17,18 +17,16 @@ dependencies = [
     "pillow >=11.3.0",
     "pytesseract >=0.3.13",
     "python-magic >=0.4.27",
-    "presidio-analyzer (>=2.2.359,<3.0.0)",
-    "presidio-anonymizer (>=2.2.359,<3.0.0)",
-    "uvicorn (>=0.38.0,<0.39.0)",
+    "presidio-analyzer >=2.2.359,<3.0.0",
+    "presidio-anonymizer >=2.2.359,<3.0.0",
     "torch >=2",
     "langchain >=0.3.7,<1",
     "langchain-community >=0.3.7,<1",
     "litellm >=1,<2",
-    # NumPy: macOS stays on 1.x; others use 2.x (with your Python guards)
-    "numpy >=1.26,<2 ; python_version <  '3.13' and sys_platform == 'darwin'",
-    "numpy >=2       ; python_version >= '3.13' and sys_platform == 'darwin'",
-    "numpy >=2,<2.1  ; python_version <  '3.10' and sys_platform != 'darwin'",
-    "numpy >=2,<2.2  ; python_version == '3.10' and sys_platform != 'darwin'",
+    # NumPy: macOS stays on 1.x for Python <3.13; others use 2.x
+    "numpy >=1.26,<2; sys_platform == 'darwin' and python_version < '3.13'",
+    "numpy >=2; sys_platform == 'darwin' and python_version >= '3.13'",
+    "numpy >=2,<3; sys_platform != 'darwin'",
 ]
 
 [project.urls]
@@ -151,34 +149,3 @@ min_confidence = 80
 paths = ["./"]
 sort_by_size = true
 verbose = false
-
-[tool.djlint]
-blank_line_after_tag="load,extends,include"
-blank_line_before_tag="load,extends,include,block"
-close_void_tags=true
-# custom_blocks="toc,example"
-# custom_html="mjml,simple-greeting,mj-\w+"
-format_attribute_template_tags=true
-format_css=true
-indent=2
-line_break_after_multiline_tag=true
-max_attribute_length=3
-max_blank_lines=1
-max_line_length=80
-profile="django"
-# following issue:
-#   - https://github.com/Riverside-Healthcare/djLint/issues/703
-exclude=".git,docs,.eggs"
-# TODO: remove from the ignore list:
-#       H013,H021,H023,D018
-ignore="H026,H029,H005,H030,H031,H006,H013,H021,H023,D018"
-preserve_blank_lines=false
-
-[tool.djlint.html]
-indent_size=2
-
-[tool.djlint.css]
-indent_size=2
-
-[tool.djlint.js]
-indent_size=2

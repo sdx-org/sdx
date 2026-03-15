@@ -6,6 +6,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+from hiperhealth.llm import _clean_json_text
+
 
 class LLMDiagnosis(BaseModel):
     """
@@ -34,10 +36,7 @@ class LLMDiagnosis(BaseModel):
           type: LLMDiagnosis
           description: Return value.
         """
-        cleaned = (
-            text.strip().lstrip('```json').lstrip('```').rstrip('```').strip()
-        )
-        return cls.model_validate_json(cleaned)
+        return cls.model_validate_json(_clean_json_text(text))
 
 
 __all__ = ['LLMDiagnosis']

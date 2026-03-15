@@ -97,6 +97,8 @@ class LLMSettings:
       max_tokens:
         type: int
         description: Value for max_tokens.
+      persist_raw:
+        type: bool
       api_params:
         type: dict[str, Any]
         description: Value for api_params.
@@ -108,6 +110,7 @@ class LLMSettings:
     engine: str = ''
     temperature: float = 0.0
     max_tokens: int = 800
+    persist_raw: bool = True
     api_params: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -130,6 +133,7 @@ class LLMSettings:
         engine: str | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
+        persist_raw: bool | None = None,
         api_params: dict[str, Any] | None = None,
     ) -> LLMSettings:
         """
@@ -153,6 +157,8 @@ class LLMSettings:
           max_tokens:
             type: int | None
             description: Value for max_tokens.
+          persist_raw:
+            type: bool | None
           api_params:
             type: dict[str, Any] | None
             description: Value for api_params.
@@ -176,6 +182,9 @@ class LLMSettings:
             max_tokens=max_tokens
             if max_tokens is not None
             else self.max_tokens,
+            persist_raw=persist_raw
+            if persist_raw is not None
+            else self.persist_raw,
             api_params=merged_params,
         )
 

@@ -2,19 +2,12 @@
 title: Tests for hiperhealth package.
 """
 
-import pytest
+import hiperhealth
 
 
-@pytest.fixture
-def response_pytest():
+def test_version_is_set():
     """
-    title: Sample pytest fixture.
+    title: Package version should be a non-empty string.
     """
-    return True
-
-
-def test_content_pytest():
-    """
-    title: Test with pytest.
-    """
-    assert True
+    assert hiperhealth.__version__
+    assert isinstance(hiperhealth.__version__, str)

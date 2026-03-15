@@ -35,7 +35,7 @@ class BaseLanguage(BaseModel, abc.ABC):
     """
 
     language: Optional[str] = Field(
-        default=...,
+        default=None,
         alias='language',
         description='IETF language tag representing the default language',
         examples=['en-US'],

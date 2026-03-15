@@ -126,7 +126,6 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
           type: list[dict[str, object]]
           description: Return value.
         """
-        # breakpoint()
         self._validate_or_raise(file)
         return self._process_file(file)
 
@@ -201,7 +200,7 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
                 MimeType, self.mime.from_file(file)
             )
             return self._mimetype_cache[cache_key]
-        elif isinstance(file, IO):  # Generic IO[bytes]
+        elif isinstance(file, io.IOBase):
             head = file.read(2048)
             file.seek(0)
             self._mimetype_cache[cache_key] = cast(
@@ -263,7 +262,7 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
                 return False
         return (
             self._get_mime_type(file)
-            in self.allowed_extensions_mimetypes_map['csv']
+            == self.allowed_extensions_mimetypes_map['csv']
         )
 
     def _process_row(self, row: dict[str, Any]) -> dict[str, object]:

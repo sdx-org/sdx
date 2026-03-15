@@ -4,7 +4,7 @@ title: A module for PII detection and de-identification.
 
 import logging
 
-from typing import Dict, List, Optional
+from typing import Optional
 
 from presidio_analyzer import (
     AnalyzerEngine,
@@ -104,9 +104,9 @@ class Deidentifier:
     def analyze(
         self,
         text: str,
-        entities: Optional[List[str]] = None,
+        entities: Optional[list[str]] = None,
         language: str = 'en',
-    ) -> List[RecognizerResult]:
+    ) -> list[RecognizerResult]:
         """
         title: Analyze text to detect and locate PII entities.
         parameters:
@@ -114,13 +114,13 @@ class Deidentifier:
             type: str
             description: Value for text.
           entities:
-            type: Optional[List[str]]
+            type: Optional[list[str]]
             description: Value for entities.
           language:
             type: str
             description: Value for language.
         returns:
-          type: List[RecognizerResult]
+          type: list[RecognizerResult]
           description: Return value.
         """
         return self.analyzer.analyze(
@@ -189,28 +189,8 @@ class Deidentifier:
         return anonymized_result.text
 
 
-def deidentify_patient_record(
-    record: Dict[str, object], deidentifier: Deidentifier
-) -> Dict[str, object]:
-    """
-    title: Recursively find and de-identify string values in a patient record.
-    summary: |-
-      Args:
-              record: The patient data dictionary.
-              deidentifier: An instance of the Deidentifier class.
-    parameters:
-      record:
-        type: Dict[str, object]
-        description: Value for record.
-      deidentifier:
-        type: Deidentifier
-        description: Value for deidentifier.
-    returns:
-      type: Dict[str, object]
-      description: Return value.
-    """
-    # Define which keys contain free-text that needs to be scanned
-    keys_to_deidentify = {
+_DEFAULT_KEYS_TO_DEIDENTIFY = frozenset(
+    {
         'symptoms',
         'physical_activity',
         'mental_exercises',
@@ -219,13 +199,44 @@ def deidentify_patient_record(
         'summary',
         'comments',
     }
+)
+
+
+def deidentify_patient_record(
+    record: dict[str, object],
+    deidentifier: Deidentifier,
+    keys_to_deidentify: frozenset[str] | None = None,
+) -> dict[str, object]:
+    """
+    title: Recursively find and de-identify string values in a patient record.
+    summary: |-
+      Args:
+              record: The patient data dictionary.
+              deidentifier: An instance of the Deidentifier class.
+    parameters:
+      record:
+        type: dict[str, object]
+        description: Value for record.
+      deidentifier:
+        type: Deidentifier
+        description: Value for deidentifier.
+      keys_to_deidentify:
+        type: frozenset[str] | None
+        description: Value for keys_to_deidentify.
+    returns:
+      type: dict[str, object]
+      description: Return value.
+    """
+    effective_keys = (
+        keys_to_deidentify
+        if keys_to_deidentify is not None
+        else _DEFAULT_KEYS_TO_DEIDENTIFY
+    )
 
     for key, value in record.items():
         if isinstance(value, dict):
-            # If the value is a dictionary, recurse into it
-            deidentify_patient_record(value, deidentifier)
-        elif isinstance(value, str) and key in keys_to_deidentify:
-            # If it's a string and its key is in our target list, de-identify
+            deidentify_patient_record(value, deidentifier, effective_keys)
+        elif isinstance(value, str) and key in effective_keys:
             record[key] = deidentifier.deidentify(value)
 
     return record

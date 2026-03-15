@@ -23,7 +23,6 @@ from hiperhealth.llm import (
 from hiperhealth.schema.clinical_outputs import LLMDiagnosis
 
 _RAW_DIR = Path('data') / 'llm_raw'
-_RAW_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class LLMResponseValidationError(ValueError):
@@ -44,6 +43,7 @@ def dump_llm_json(text: str, sid: str | None) -> None:
         type: str | None
         description: Value for sid.
     """
+    _RAW_DIR.mkdir(parents=True, exist_ok=True)
     ts = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     suffix = sid or uuid.uuid4().hex[:8]
     (_RAW_DIR / f'{ts}_{suffix}.json').write_text(text, encoding='utf-8')
@@ -88,7 +88,9 @@ def chat(
             f'LLM response is not valid LLMDiagnosis: {exc}'
         ) from exc
 
-    dump_llm_json(result.model_dump_json(), session_id)
+    effective_settings = llm_settings or load_diagnostics_llm_settings()
+    if effective_settings.persist_raw:
+        dump_llm_json(result.model_dump_json(), session_id)
     return result
 
 

@@ -12,9 +12,7 @@ from typing import (
     IO,
     Any,
     ClassVar,
-    Dict,
     Generic,
-    List,
     Literal,
     TypeVar,
     Union,
@@ -62,7 +60,7 @@ class BaseMedicalReportExtractor(ABC, Generic[T]):
     def extract_report_data(
         self,
         source: T,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         title: Extract structured text data from source file.
         parameters:
@@ -70,7 +68,7 @@ class BaseMedicalReportExtractor(ABC, Generic[T]):
             type: T
             description: Value for source.
         returns:
-          type: Dict[str, Any]
+          type: dict[str, Any]
           description: Return value.
         """
         raise NotImplementedError
@@ -81,20 +79,20 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
     title: Extract medical report text from files and in-memory objects.
     attributes:
       allowed_extensions_mimetypes_map:
-        type: ClassVar[Dict[FileExtension, MimeType]]
+        type: ClassVar[dict[FileExtension, MimeType]]
         description: Value for allowed_extensions_mimetypes_map.
       _mimetype_cache:
-        type: Dict[str, MimeType]
+        type: dict[str, MimeType]
         description: Value for _mimetype_cache.
       _text_cache:
-        type: Dict[str, str]
+        type: dict[str, str]
         description: Value for _text_cache.
       mime:
         description: Value for mime.
     """
 
     allowed_extensions_mimetypes_map: ClassVar[
-        Dict[FileExtension, MimeType]
+        dict[FileExtension, MimeType]
     ] = {
         'pdf': 'application/pdf',
         'png': 'image/png',
@@ -106,26 +104,26 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
         """
         title: Initialize extractor with caches and mimetype detector.
         """
-        self._mimetype_cache: Dict[str, MimeType] = {}
-        self._text_cache: Dict[str, str] = {}
+        self._mimetype_cache: dict[str, MimeType] = {}
+        self._text_cache: dict[str, str] = {}
         self.mime = magic.Magic(mime=True)
 
     @property
-    def allowed_extensions(self) -> List[FileExtension]:
+    def allowed_extensions(self) -> list[FileExtension]:
         """
         title: Return supported file extensions.
         returns:
-          type: List[FileExtension]
+          type: list[FileExtension]
           description: Return value.
         """
         return list(self.allowed_extensions_mimetypes_map.keys())
 
     @property
-    def allowed_mimetypes(self) -> List[MimeType]:
+    def allowed_mimetypes(self) -> list[MimeType]:
         """
         title: Return supported MIME types.
         returns:
-          type: List[MimeType]
+          type: list[MimeType]
           description: Return value.
         """
         return list(self.allowed_extensions_mimetypes_map.values())
@@ -133,7 +131,7 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
     def extract_report_data(
         self,
         source: FileInput,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         title: Validate input and return extracted text plus basic metadata.
         parameters:
@@ -141,7 +139,7 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
             type: FileInput
             description: Value for source.
         returns:
-          type: Dict[str, Any]
+          type: dict[str, Any]
           description: Return value.
         """
         self._validate_or_raise(source)
@@ -171,7 +169,7 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
     def _process_file(
         self,
         source: FileInput,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         title: Extract text and normalize the result payload.
         parameters:
@@ -179,7 +177,7 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
             type: FileInput
             description: Value for source.
         returns:
-          type: Dict[str, Any]
+          type: dict[str, Any]
           description: Return value.
         """
         mime = self._get_mime_type(source)
@@ -287,7 +285,7 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
         except (PdfStreamError, EmptyFileError) as e:
             raise TextExtractionError(f'Failed to parse PDF: {e}') from e
 
-        text_pages: List[str] = []
+        text_pages: list[str] = []
         for page in reader.pages:
             page_text = page.extract_text()
             if page_text:
@@ -325,7 +323,7 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
         source: FileInput,
         text: str,
         mime: MimeType,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         title: Build a stable structured payload around locally extracted text.
         parameters:
@@ -339,7 +337,7 @@ class MedicalReportFileExtractor(BaseMedicalReportExtractor[FileInput]):
             type: MimeType
             description: Value for mime.
         returns:
-          type: Dict[str, Any]
+          type: dict[str, Any]
           description: Return value.
         """
         source_type = 'pdf' if mime == 'application/pdf' else 'image'

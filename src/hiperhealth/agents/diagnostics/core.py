@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import json
 
-from typing import Any, Dict, List
+from typing import Any
 
 from hiperhealth.agents.client import chat
 from hiperhealth.llm import LLMSettings, StructuredLLM
@@ -77,7 +77,7 @@ _EXAM_PROMPTS = {
 
 
 def differential(
-    patient: Dict[str, Any],
+    patient: dict[str, Any],
     language: str = 'en',
     session_id: str | None = None,
     llm: StructuredLLM | None = None,
@@ -87,7 +87,7 @@ def differential(
     title: Return summary + list of differential diagnoses.
     parameters:
       patient:
-        type: Dict[str, Any]
+        type: dict[str, Any]
         description: Value for patient.
       language:
         type: str
@@ -119,7 +119,7 @@ def differential(
 
 
 def exams(
-    selected_dx: List[str],
+    selected_dx: list[str],
     language: str = 'en',
     session_id: str | None = None,
     llm: StructuredLLM | None = None,
@@ -129,7 +129,7 @@ def exams(
     title: Return summary + list of suggested examinations.
     parameters:
       selected_dx:
-        type: List[str]
+        type: list[str]
         description: Value for selected_dx.
       language:
         type: str
