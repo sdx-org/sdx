@@ -144,3 +144,28 @@ def test_support_inmemory_csv(wearable_extractor):
     assert len(wearable_data) == 4
     assert wearable_data[0]['name'] == 'John Doe'
     assert wearable_data[1]['heart_rate'] == 80
+
+
+def test_is_csv_rejects_non_csv_mime(wearable_extractor):
+    """Test that _is_csv uses exact MIME comparison, not substring match."""
+    plain_text = io.BytesIO(b'just some plain text content')
+    assert not wearable_extractor._is_csv(plain_text)
+
+
+def test_process_row_handles_none_values(wearable_extractor):
+    """Test that _process_row does not crash on None values."""
+    row = {'name': 'Alice', 'age': '30', 'missing_col': None}
+    result = wearable_extractor._process_row(row)
+    assert result['name'] == 'Alice'
+    assert result['age'] == 30
+    assert result['missing_col'] is None
+
+
+def test_csv_with_missing_columns(wearable_extractor):
+    """Test extraction of CSV where rows have fewer fields than headers."""
+    raw_csv = b'name,age,heart_rate\nAlice,30\nBob,25,70'
+    csv_file = io.BytesIO(raw_csv)
+    wearable_data = wearable_extractor.extract_wearable_data(csv_file)
+    assert len(wearable_data) == 2
+    assert wearable_data[0]['heart_rate'] is None
+    assert wearable_data[1]['heart_rate'] == 70

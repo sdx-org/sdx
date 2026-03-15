@@ -267,6 +267,8 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
 
     def _process_row(self, row: dict[str, Any]) -> dict[str, object]:
         for key, value in row.items():
+            if value is None:
+                continue
             if value.isnumeric():
                 row[key] = int(value)
             elif is_float(value):
