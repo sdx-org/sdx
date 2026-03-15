@@ -10,6 +10,16 @@ import warnings
 from pathlib import Path
 
 import pytest
+import pytesseract
+
+# Fix for Windows: point pytesseract to the correct Tesseract installation
+# On Linux/macOS, pytesseract auto-detects tesseract from PATH
+if sys.platform == 'win32':
+    tesseract_path = os.environ.get(
+        'TESSERACT_CMD',
+        r'C:\Program Files\Tesseract-OCR\tesseract.exe',
+    )
+    pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
 from dotenv import dotenv_values, load_dotenv
 from hiperhealth.agents.extraction.medical_reports import (

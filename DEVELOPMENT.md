@@ -68,6 +68,28 @@ PyPI.
   # or: sudo dnf install gcc gcc-c++ make python3-devel   # Fedora/RHEL
   ```
 
+### Windows-Specific Setup
+
+If you're developing on **Windows 10/11**, some additional configuration is needed:
+
+1. **Tesseract OCR Configuration:**
+   - `pytesseract` requires explicit path configuration on Windows
+   - This is handled automatically in the test configuration (`tests/conftest.py`)
+   - If you need to use pytesseract outside of tests, set the environment variable:
+     ```bash
+     set TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe
+     ```
+   - The Tesseract installer must be in the default location or the environment variable must be set
+
+2. **MIME Type Detection (python-magic):**
+   - The `conda/dev.yaml` includes `python-magic-bin` for Windows, which provides the necessary DLLs for libmagic
+   - This is automatically installed when creating the development environment
+   - `python-magic` alone will not work on Windows without the binary dependencies
+
+3. **Native Library Dependencies:**
+   - Windows requires pre-compiled binary packages for some C/C++ dependencies
+   - The conda environment includes these via conda-forge, so dependencies like `libmagic` and `tesseract` are properly configured
+
 ### Installation
 
 1.  **Fork & Clone the Repository:** Start by forking the repository on GitHub,

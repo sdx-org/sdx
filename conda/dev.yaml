@@ -9,6 +9,7 @@ dependencies:
   - nodejs # used by semantic-release
   - tesseract
   - libmagic
+  - python-magic-bin  # [win]
   - uv
   - compilers # conda-forge meta-package: selects the right C/C++ toolchain per platform
   - pip:

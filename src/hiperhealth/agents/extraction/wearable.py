@@ -197,7 +197,7 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
 
         if isinstance(file, Path):
             self._mimetype_cache[cache_key] = cast(
-                MimeType, self.mime.from_file(file)
+                MimeType, self.mime.from_file(str(file))
             )
             return self._mimetype_cache[cache_key]
         elif isinstance(file, io.IOBase):
@@ -230,6 +230,10 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             except json.JSONDecodeError:
                 file.seek(0)
                 return False
+        # Check extension first for Path objects (more reliable on Windows)
+        if isinstance(file, Path):
+            if file.suffix.lower() in ('.json',):
+                return True
         return (
             self._get_mime_type(file)
             == self.allowed_extensions_mimetypes_map['json']
@@ -260,6 +264,10 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             except csv.Error:
                 file.seek(0)
                 return False
+        # Check extension first for Path objects (more reliable on Windows)
+        if isinstance(file, Path):
+            if file.suffix.lower() in ('.csv',):
+                return True
         return (
             self._get_mime_type(file)
             == self.allowed_extensions_mimetypes_map['csv']
@@ -277,14 +285,19 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
         return row
 
     def _process_json_file(self, file: FileInput) -> list[dict[str, object]]:
-        if isinstance(file, (str, Path)):
-            with open(file, 'r', encoding='utf-8') as f:
-                return cast(list[dict[str, object]], json.load(f))
-        else:
-            file.seek(0)
-            return cast(
-                list[dict[str, object]],
-                json.load(io.TextIOWrapper(file, encoding='utf-8')),
+        try:
+            if isinstance(file, (str, Path)):
+                with open(file, 'r', encoding='utf-8') as f:
+                    return cast(list[dict[str, object]], json.load(f))
+            else:
+                file.seek(0)
+                return cast(
+                    list[dict[str, object]],
+                    json.load(io.TextIOWrapper(file, encoding='utf-8')),
+                )
+        except json.JSONDecodeError as e:
+            raise FileProcessingError(
+                f'File could not be processed as JSON: {e}'
             )
 
     def _process_csv_file(self, file: FileInput) -> list[dict[str, object]]:
