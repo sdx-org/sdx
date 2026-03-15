@@ -239,7 +239,7 @@ class AyurvedaSkill(BaseSkill):
 - `src/hiperhealth/schema/`: Pydantic schemas
 - `src/hiperhealth/models/`: SQLAlchemy FHIR models
 - `tests/`: unit and integration tests
-- `docs/`: MkDocs documentation source
+- `docs/`: Douki documentation source
 
 ## Development
 
@@ -268,8 +268,11 @@ mypy .
 ### Build docs locally
 
 ```bash
-mkdocs serve --watch docs --config-file mkdocs.yaml
+makim docs.preview
 ```
+
+(This will build the documentation and serve it locally at
+http://127.0.0.1:8000)
 
 ## License
 

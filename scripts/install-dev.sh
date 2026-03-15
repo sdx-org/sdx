@@ -33,4 +33,4 @@ case "$OS" in
     ;;
 esac
 
-pip install ".[dev]"
+pip install -e ".[dev]"

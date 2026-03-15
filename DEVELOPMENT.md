@@ -55,17 +55,26 @@ dependencies, virtual environments, and package versions. Uv/Setuptools also
 includes features such as dependency resolution, lock files, and publishing to
 PyPI.
 
+### Tech Stack Overview
+
+As the core clinical AI engine, this repository relies on:
+
+- **Python 3.11+** for core logic.
+- **LiteLLM** for flexible, provider-agnostic AI model integration.
+- **Pydantic / FHIR** for strict medical data validation.
+- **Douki** for docstring and documentation generation.
+- **Makim** as the task runner. _(Note: The web API, database, and UI live in
+  the separate `hiperhealth-web` repository)._
+
 ### Prerequisites
 
 - Python 3.11+
 - [Conda](https://github.com/conda-forge/miniforge?tab=readme-ov-file#download)
   installed on your system.
-- **Linux only**: C compiler toolchain and Python headers, required to compile C
-  extensions used by some pre-commit hooks (e.g. `djlint` depends on the `regex`
-  package):
-  ```bash
-  sudo apt install build-essential python3-dev   # Debian/Ubuntu
-  # or: sudo dnf install gcc gcc-c++ make python3-devel   # Fedora/RHEL
+- Linux only
+
+  ```
+
   ```
 
 ### Installation
@@ -94,21 +103,28 @@ PyPI.
     mamba activate hiperhealth
     ```
 
-3.  **Install Project Dependencies:** This command installs all required
+3.  **System Dependencies (Linux / WSL):** Before installing Python
+    dependencies, ensure you have the C-compiler toolchain required to compile C
+    extensions used by some pre-commit hooks (e.g., `djlint` depends on
+    `regex`):
+
+    ```bash
+    sudo apt update
+    sudo apt install build-essential python3-dev   # Debian/Ubuntu/WSL
+    # or: sudo dnf install gcc gcc-c++ make python3-devel   # Fedora/RHEL
+    ```
+
+4.  **Install Project Dependencies:** This command installs all required
     packages.
 
     ```bash
     ./scripts/install-dev.sh
     ```
 
-4.  **Database & Persistence:** Note: As of the project split, `hiperhealth`
-    (this repository) serves as the core library and is database-independent.
-    All persistence logic, database schemas, and migrations have been moved to
-    the `hiperhealth-web` repository.
+_(Note: As of the project split, you do not need a local database to contribute
+to this library. All persistence logic has moved to `hiperhealth-web`.)_
 
-    You do not need to set up a local database to contribute to this library.
-
-5.  **(Optional) Set Up API Keys:** Note: The core `hiperhealth` library is
+6.  **(Optional) Set Up API Keys:** Note: The core `hiperhealth` library is
     designed to be functional without external dependencies. However, specific
     modules (such as certain AI Agents or evaluation scripts) may optionally
     require API keys (e.g., `OPENAI_API_KEY`).
@@ -125,29 +141,6 @@ PyPI.
 
 All common development tasks are managed via `makim` commands defined in
 `.makim.yaml`.
-
-### Running the Applications
-
-- **To run the Research Frontend:**
-
-  ```bash
-  makim research.frontend
-  ```
-
-  The app will be available at `http://127.0.0.1:5173`.
-
-- **To run the Research Backend:**
-
-  ```bash
-  makim research.backend
-  ```
-
-  The server will listen at `http://127.0.0.1:8000`
-
-- **To run the Research CLI:**
-  ```bash
-  makim research.cli
-  ```
 
 ### Database Migrations
 
@@ -197,7 +190,7 @@ configured in `.pre-commit-config.yaml`.
 
 - **Run Hooks Manually:** To run the checks on all files at any time:
   ```bash
-  makim test.pre-commit
+  makim tests.ci
   ```
 
 ### Running Tests
@@ -207,12 +200,12 @@ Our test suite uses `pytest`.
 - **Run All Tests:**
 
   ```bash
-  makim tests.run
+  makim tests.unit
   ```
 
 - **Run Tests with Coverage Report:**
   ```bash
-  makim tests.coverage
+  makim tests.ci
   ```
 
 ---
