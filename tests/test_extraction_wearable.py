@@ -17,15 +17,37 @@ UNSUPPORTED_FILE = TEST_DATA_PATH / 'invalid_extension.txt'
 CORRUPT_FILE = TEST_DATA_PATH / 'giberish.json'
 
 
-def test_only_supported_files_can_be_extracted(wearable_extractor):
+@pytest.fixture
+def mock_excel_file(tmp_path):
+    """Create a temporary mock Excel file."""
+    from openpyxl import Workbook
+
+    wb = Workbook()
+    ws = wb.active
+    ws.append(['name', 'age', 'heart_rate', 'timestamp'])
+    ws.append(['John Doe', 30, 70, 1])
+    ws.append(['John Doe', 30, 80, 2])
+    ws.append(['John Doe', 30, 90, 3])
+    ws.append(['Supa User', 99, 60, 1])
+
+    file_path = tmp_path / 'wearable_data.xlsx'
+    wb.save(file_path)
+    wb.close()
+    return file_path
+
+
+def test_only_supported_files_can_be_extracted(wearable_extractor, mock_excel_file):
     """
     title: Test that only supported files can be extracted.
     parameters:
       wearable_extractor:
         description: Value for wearable_extractor.
+      mock_excel_file:
+        description: A temporary mock Excel file.
     """
     assert wearable_extractor.is_supported(JSON_FILE)
     assert wearable_extractor.is_supported(CSV_FILE)
+    assert wearable_extractor.is_supported(mock_excel_file)
     assert wearable_extractor.is_supported(CORRUPT_FILE)
     assert not wearable_extractor.is_supported(UNSUPPORTED_FILE)
 
@@ -144,3 +166,41 @@ def test_support_inmemory_csv(wearable_extractor):
     assert len(wearable_data) == 4
     assert wearable_data[0]['name'] == 'John Doe'
     assert wearable_data[1]['heart_rate'] == 80
+
+
+def test_extract_excel(wearable_extractor, mock_excel_file):
+    """Test that Excel file can be extracted."""
+    assert wearable_extractor._is_excel(mock_excel_file)
+    wearable_data = wearable_extractor.extract_wearable_data(mock_excel_file)
+    assert wearable_data
+    assert len(wearable_data) == 4
+    assert wearable_data[0]['name'] == 'John Doe'
+    assert wearable_data[1]['heart_rate'] == 80
+
+
+def test_support_inmemory_excel(wearable_extractor):
+    """Test that in-memory Excel can be extracted."""
+    from openpyxl import Workbook
+
+    wb = Workbook()
+    ws = wb.active
+    ws.append(['name', 'age', 'heart_rate', 'timestamp'])
+    ws.append(['John Doe', 30, 70, 1])
+    ws.append(['John Doe', 30, 80, 2])
+    ws.append(['John Doe', 30, 90, 3])
+    ws.append(['Supa User', 99, 60, 1])
+
+    some_excel = io.BytesIO()
+    wb.save(some_excel)
+    wb.close()
+    some_excel.seek(0)
+
+    assert wearable_extractor.is_supported(some_excel)
+    assert wearable_extractor._is_excel(some_excel)
+    assert not wearable_extractor._is_json(some_excel)
+    wearable_data = wearable_extractor.extract_wearable_data(some_excel)
+
+    assert isinstance(wearable_data, list)
+    assert len(wearable_data) == 4
+    assert wearable_data[0]['name'] == 'John Doe'
+    assert wearable_data[-1]['age'] == 99

@@ -36,8 +36,13 @@ class FileProcessingError(WearableDataExtractorError):
 
 T = TypeVar('T')
 FileInput = Union[str, Path, IO[bytes], tempfile.SpooledTemporaryFile[bytes]]
-FileExtension = Literal['json', 'csv']
-MimeType = Literal['application/json', 'text/csv', 'application/vnd.ms-excel']
+FileExtension = Literal['json', 'csv', 'xlsx']
+MimeType = Literal[
+    'application/json',
+    'text/csv',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+]
 
 
 class BaseWearableDataExtractor(ABC, Generic[T]):
@@ -75,12 +80,12 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
         description: Value for mime.
     """
 
-    # maps supported file extensions and respective mimetypes
     allowed_extensions_mimetypes_map: ClassVar[
         dict[FileExtension, MimeType]
     ] = {
         'json': 'application/json',
         'csv': 'text/csv',
+        'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     }
 
     def __init__(self) -> None:
@@ -134,6 +139,8 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             return self._process_json_file(file)
         elif self._is_csv(file):
             return self._process_csv_file(file)
+        elif self._is_excel(file):
+            return self._process_excel_file(file)
         else:
             raise FileProcessingError(
                 'File could not be processed. '
@@ -265,6 +272,26 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             == self.allowed_extensions_mimetypes_map['csv']
         )
 
+    def _is_excel(self, file: FileInput) -> bool:
+        if isinstance(file, (tempfile.SpooledTemporaryFile, io.BytesIO)):
+            try:
+                import openpyxl
+
+                file.seek(0)
+                wb = openpyxl.load_workbook(
+                    file, read_only=True, data_only=True
+                )
+                wb.close()
+                file.seek(0)
+                return True
+            except Exception:
+                file.seek(0)
+                return False
+        return (
+            self._get_mime_type(file)
+            == self.allowed_extensions_mimetypes_map['xlsx']
+        )
+
     def _process_row(self, row: dict[str, Any]) -> dict[str, object]:
         for key, value in row.items():
             if value.isnumeric():
@@ -296,3 +323,42 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             file.seek(0)
             reader = csv.DictReader(io.TextIOWrapper(file, encoding='utf-8'))
             return [self._process_row(row) for row in reader]
+
+    def _process_excel_file(self, file: FileInput) -> list[dict[str, object]]:
+        import openpyxl
+
+        if isinstance(file, (str, Path)):
+            wb = openpyxl.load_workbook(file, read_only=True, data_only=True)
+        else:
+            file.seek(0)
+            wb = openpyxl.load_workbook(file, read_only=True, data_only=True)
+
+        ws = wb.active
+        if not ws:
+            wb.close()
+            return []
+
+        rows = ws.iter_rows(values_only=True)
+        headers_tuple = next(rows, None)
+        if not headers_tuple:
+            wb.close()
+            return []
+
+        headers = [
+            str(h).strip() if h is not None else '' for h in headers_tuple
+        ]
+
+        data = []
+        for row in rows:
+            row_dict = {}
+            if all(cell is None for cell in row):
+                continue
+            for header, value in zip(headers, row):
+                if header:
+                    row_dict[header] = str(value) if value is not None else ''
+            data.append(self._process_row(row_dict))
+
+        wb.close()
+        if not isinstance(file, (str, Path)):
+            file.seek(0)
+        return data

@@ -22,6 +22,8 @@ dependencies = [
     "torch >=2",
     "langchain >=0.3.7,<1",
     "langchain-community >=0.3.7,<1",
+    "rago >=0.14.4",
+    "openpyxl >=3.1.2",
     "litellm >=1,<2",
     # NumPy: macOS stays on 1.x for Python <3.13; others use 2.x
     "numpy >=1.26,<2; sys_platform == 'darwin' and python_version < '3.13'",
