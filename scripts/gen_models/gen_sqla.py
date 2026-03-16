@@ -27,7 +27,7 @@ import sys
 
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Dict, Type
+from typing import Any
 
 from formatting import run_ruff
 from gen_base import is_concrete_model, iter_pydantic_models
@@ -90,7 +90,7 @@ def python_type_to_sqla(annotation: Any) -> tuple[str, str]:
     return FALLBACK_TYPE, 'Any'
 
 
-def generate_sqla_model(name: str, model_cls: Type[BaseModel]) -> str:
+def generate_sqla_model(name: str, model_cls: type[BaseModel]) -> str:
     """
     title: Return the SQLAlchemy declarative model as source code.
     parameters:
@@ -98,7 +98,7 @@ def generate_sqla_model(name: str, model_cls: Type[BaseModel]) -> str:
         type: str
         description: Value for name.
       model_cls:
-        type: Type[BaseModel]
+        type: type[BaseModel]
         description: Value for model_cls.
     returns:
       type: str
@@ -159,12 +159,12 @@ def generate_sqla_model(name: str, model_cls: Type[BaseModel]) -> str:
     return '\n'.join(lines)
 
 
-def build_orm_file(models: Dict[str, Type[BaseModel]]) -> str:
+def build_orm_file(models: dict[str, type[BaseModel]]) -> str:
     """
     title: Compose the full orm_models.py content.
     parameters:
       models:
-        type: Dict[str, Type[BaseModel]]
+        type: dict[str, type[BaseModel]]
         description: Value for models.
     returns:
       type: str

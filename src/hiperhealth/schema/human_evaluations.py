@@ -5,7 +5,7 @@ title: Domain-specific (non-FHIR) Pydantic models used across the platform.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Dict, Literal, Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
@@ -58,7 +58,7 @@ class Evaluation(BaseLanguage, BaseModel):
         type: Literal[anamnesis, diagnosis, treatment]
         description: Value for output_type.
       ratings:
-        type: Dict[Literal[accuracy, relevance, usefulness, coherence], int]
+        type: dict[Literal[accuracy, relevance, usefulness, coherence], int]
         description: Value for ratings.
       safety:
         type: Literal[safe, needs_review, unsafe]
@@ -74,7 +74,7 @@ class Evaluation(BaseLanguage, BaseModel):
     id: str
     aioutput_id: str
     output_type: Literal['anamnesis', 'diagnosis', 'treatment']
-    ratings: Dict[
+    ratings: dict[
         Literal['accuracy', 'relevance', 'usefulness', 'coherence'], int
     ]
     safety: Literal['safe', 'needs_review', 'unsafe']

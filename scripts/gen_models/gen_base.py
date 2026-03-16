@@ -8,7 +8,6 @@ import inspect
 import pkgutil
 
 from types import ModuleType
-from typing import Dict, Type
 
 from hiperhealth.schema.fhirx import BaseLanguage
 from pydantic import BaseModel
@@ -21,16 +20,16 @@ PACKAGE_PATHS = [
 IGNORED_CLASSES = [BaseLanguage, BaseModel]
 
 
-def iter_pydantic_models() -> Dict[str, Type[BaseModel]]:
+def iter_pydantic_models() -> dict[str, type[BaseModel]]:
     """
     title: Yield (qualified_name, model_cls).
     summary: >-
       Yield values for every subclass of BaseModel found in PACKAGE_PATHS.
     returns:
-      type: Dict[str, Type[BaseModel]]
+      type: dict[str, type[BaseModel]]
       description: Return value.
     """
-    discovered: dict[str, Type[BaseModel]] = {}
+    discovered: dict[str, type[BaseModel]] = {}
     for module_path in PACKAGE_PATHS:
         module: ModuleType = __import__(module_path, fromlist=['*'])
         # Walk submodules in case of package
@@ -46,7 +45,7 @@ def iter_pydantic_models() -> Dict[str, Type[BaseModel]]:
     return discovered
 
 
-def is_concrete_model(model_cls: Type[BaseModel]) -> bool:
+def is_concrete_model(model_cls: type[BaseModel]) -> bool:
     """
     title: Return True if `model_cls` should be mapped to a table.
     summary: |-
@@ -57,7 +56,7 @@ def is_concrete_model(model_cls: Type[BaseModel]) -> bool:
       3. No own fields ➜ skip (helper alias such as BaseLanguage).
     parameters:
       model_cls:
-        type: Type[BaseModel]
+        type: type[BaseModel]
         description: Value for model_cls.
     returns:
       type: bool

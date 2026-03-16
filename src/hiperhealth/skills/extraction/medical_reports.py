@@ -15,7 +15,6 @@ from typing import (
     Generic,
     Literal,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -46,7 +45,7 @@ class TextExtractionError(MedicalReportExtractorError):
 T = TypeVar('T')
 
 
-FileInput = Union[str, Path, IO[bytes], io.BytesIO]
+FileInput = str | Path | IO[bytes] | io.BytesIO
 FileExtension = Literal['pdf', 'png', 'jpg', 'jpeg']
 MimeType = Literal['application/pdf', 'image/png', 'image/jpeg']
 

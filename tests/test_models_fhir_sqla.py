@@ -22,7 +22,7 @@ from __future__ import annotations
 import inspect
 
 from datetime import date, datetime
-from typing import Any, Dict
+from typing import Any
 
 import hiperhealth.models.sqla.fhirx as orm_models
 import pytest
@@ -156,7 +156,7 @@ def test_model_basic_crud(model_cls, db_session: Session):
         description: Value for db_session.
     """
     # Build kwargs for non-nullable columns (or primary key)
-    init_kwargs: Dict[str, Any] = {}
+    init_kwargs: dict[str, Any] = {}
     for column in model_cls.__table__.columns:
         if column.primary_key or not column.nullable:
             init_kwargs[column.name] = _sample_for_column(column)

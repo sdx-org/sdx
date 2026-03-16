@@ -11,7 +11,7 @@ import tempfile
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import IO, Any, ClassVar, Generic, Literal, TypeVar, Union, cast
+from typing import IO, Any, ClassVar, Generic, Literal, TypeVar, cast
 
 import magic
 
@@ -35,7 +35,7 @@ class FileProcessingError(WearableDataExtractorError):
 
 
 T = TypeVar('T')
-FileInput = Union[str, Path, IO[bytes], tempfile.SpooledTemporaryFile[bytes]]
+FileInput = str | Path | IO[bytes] | tempfile.SpooledTemporaryFile[bytes]
 FileExtension = Literal['json', 'csv']
 MimeType = Literal['application/json', 'text/csv', 'application/vnd.ms-excel']
 

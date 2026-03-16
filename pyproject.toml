@@ -119,12 +119,14 @@ filterwarnings = [
 ]
 
 [tool.ruff]
+target-version = "py310"
 line-length = 79
 force-exclude = true
 src = ["./"]
 exclude = [
   'docs',
 ]
+fix = true
 
 [tool.ruff.lint]
 select = [
@@ -134,7 +136,10 @@ select = [
   "RUF", # Ruff-specific rules
   "I001",  # isort
 ]
-fixable = ["I001", "F401"]
+extend-select = [
+  "UP006",  # Prefer builtin generics in annotations
+  "UP007",  # Prefer | syntax for unions and optionals
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
