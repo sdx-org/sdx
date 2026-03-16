@@ -21,8 +21,6 @@ class SkillMetadata:
         type: str
       stages:
         type: tuple[str, Ellipsis]
-      priority:
-        type: int
       description:
         type: str
     """
@@ -30,7 +28,6 @@ class SkillMetadata:
     name: str
     version: str = '0.1.0'
     stages: tuple[str, ...] = ()
-    priority: int = 100
     description: str = ''
 
 

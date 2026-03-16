@@ -270,10 +270,10 @@ The library is built around a **skill-based pipeline** architecture:
 ```
 StageRunner (executes any stage independently)
     |
-    +-- Registered Skills (applied per-stage based on metadata)
-    |   +-- PrivacySkill        -> screening, intake       (priority=50)
-    |   +-- ExtractionSkill     -> intake                  (priority=100)
-    |   +-- DiagnosticsSkill    -> diagnosis, exam         (priority=100)
+    +-- Registered Skills (run in registration order per stage)
+    |   +-- PrivacySkill        -> screening, intake
+    |   +-- ExtractionSkill     -> intake
+    |   +-- DiagnosticsSkill    -> diagnosis, exam
     |   +-- (custom skills)     -> any combination of stages
     |
     +-- Usage patterns:
@@ -292,7 +292,8 @@ Key concepts:
 - **PipelineContext** is a Pydantic model that carries all data between stages
   and serializes to JSON for persistence between invocations
 - **StageRunner** orchestrates skill execution: for each stage, it runs all
-  matching skills' `pre()` -> `execute()` -> `post()` hooks in priority order
+  matching skills' `pre()` -> `execute()` -> `post()` hooks in registration
+  order
 
 Source layout:
 

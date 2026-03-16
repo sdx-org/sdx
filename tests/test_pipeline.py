@@ -80,7 +80,6 @@ class TestSkillMetadata:
         assert meta.name == 'test'
         assert meta.version == '0.1.0'
         assert meta.stages == ()
-        assert meta.priority == 100
         assert meta.description == ''
 
     def test_custom_values(self) -> None:
@@ -88,11 +87,9 @@ class TestSkillMetadata:
             name='ayurveda',
             version='1.0.0',
             stages=(Stage.DIAGNOSIS, Stage.TREATMENT),
-            priority=50,
             description='Ayurvedic perspective',
         )
         assert meta.stages == ('diagnosis', 'treatment')
-        assert meta.priority == 50
 
 
 class _CounterSkill(BaseSkill):
@@ -111,11 +108,8 @@ class _CounterSkill(BaseSkill):
         self,
         name: str = 'counter',
         stages: tuple[str, ...] = (Stage.DIAGNOSIS,),
-        priority: int = 100,
     ) -> None:
-        super().__init__(
-            SkillMetadata(name=name, stages=stages, priority=priority)
-        )
+        super().__init__(SkillMetadata(name=name, stages=stages))
         self.pre_count = 0
         self.execute_count = 0
         self.post_count = 0
@@ -144,7 +138,6 @@ class _PromptFragmentSkill(BaseSkill):
             SkillMetadata(
                 name='fragment_injector',
                 stages=(Stage.DIAGNOSIS,),
-                priority=50,
             )
         )
 
@@ -204,32 +197,43 @@ class TestStageRunner:
         assert Stage.DIAGNOSIS in result.results
         assert Stage.EXAM in result.results
 
-    def test_priority_ordering(self) -> None:
-        high = _CounterSkill(
-            name='high',
-            priority=10,
+    def test_registration_order(self) -> None:
+        first = _CounterSkill(
+            name='first',
             stages=(Stage.DIAGNOSIS,),
         )
-        low = _CounterSkill(
-            name='low',
-            priority=200,
+        second = _CounterSkill(
+            name='second',
             stages=(Stage.DIAGNOSIS,),
         )
-        runner = StageRunner(skills=[low, high])
+        runner = StageRunner(skills=[first, second])
         ctx = PipelineContext()
 
         result = runner.run(Stage.DIAGNOSIS, ctx)
 
-        # high priority (10) runs first, low (200) runs second
-        # low overwrites the result
-        assert result.results[Stage.DIAGNOSIS] == 'low_executed'
+        # second overwrites the result (runs after first)
+        assert result.results[Stage.DIAGNOSIS] == 'second_executed'
         # Both ran
-        assert high.execute_count == 1
-        assert low.execute_count == 1
-        # Audit shows correct order
+        assert first.execute_count == 1
+        assert second.execute_count == 1
+        # Audit shows registration order
         exec_audits = [a for a in result.audit if a.hook == 'execute']
-        assert exec_audits[0].skill_name == 'high'
-        assert exec_audits[1].skill_name == 'low'
+        assert exec_audits[0].skill_name == 'first'
+        assert exec_audits[1].skill_name == 'second'
+
+    def test_install_with_index(self) -> None:
+        first = _CounterSkill(name='first', stages=(Stage.DIAGNOSIS,))
+        last = _CounterSkill(name='last', stages=(Stage.DIAGNOSIS,))
+        runner = StageRunner(skills=[first, last])
+
+        middle = _CounterSkill(name='middle', stages=(Stage.DIAGNOSIS,))
+        runner.install(middle, index=1)
+
+        assert [s.metadata.name for s in runner.skills] == [
+            'first',
+            'middle',
+            'last',
+        ]
 
     def test_install_skill(self) -> None:
         runner = StageRunner()

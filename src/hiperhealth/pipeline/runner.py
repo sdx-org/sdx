@@ -23,20 +23,24 @@ class StageRunner:
     """
 
     def __init__(self, skills: list[Skill] | None = None) -> None:
-        self._skills: list[Skill] = sorted(
-            skills or [],
-            key=lambda s: s.metadata.priority,
-        )
+        self._skills: list[Skill] = list(skills or [])
 
-    def install(self, skill: Skill) -> None:
+    def install(self, skill: Skill, index: int | None = None) -> None:
         """
         title: Add a skill at runtime.
+        summary: |-
+          By default the skill is appended at the end. Pass ``index``
+          to insert at a specific position in the execution order.
         parameters:
           skill:
             type: Skill
+          index:
+            type: int | None
         """
-        self._skills.append(skill)
-        self._skills.sort(key=lambda s: s.metadata.priority)
+        if index is not None:
+            self._skills.insert(index, skill)
+        else:
+            self._skills.append(skill)
 
     @property
     def skills(self) -> list[Skill]:

@@ -65,15 +65,16 @@ ctx = runner.run(Stage.DIAGNOSIS, ctx)
 
 ### Built-in skills
 
-The `create_default_runner()` factory registers three built-in skills:
+The `create_default_runner()` factory registers three built-in skills in this
+order:
 
-| Skill              | Stages            | Priority | Description                                          |
-| ------------------ | ----------------- | -------- | ---------------------------------------------------- |
-| `PrivacySkill`     | screening, intake | 50       | De-identifies PII in patient data                    |
-| `ExtractionSkill`  | intake            | 100      | Extracts text from medical reports and wearable data |
-| `DiagnosticsSkill` | diagnosis, exam   | 100      | LLM-powered diagnosis and exam suggestions           |
+| Skill              | Stages            | Description                                          |
+| ------------------ | ----------------- | ---------------------------------------------------- |
+| `PrivacySkill`     | screening, intake | De-identifies PII in patient data                    |
+| `ExtractionSkill`  | intake            | Extracts text from medical reports and wearable data |
+| `DiagnosticsSkill` | diagnosis, exam   | LLM-powered diagnosis and exam suggestions           |
 
-Lower priority numbers run first, so `PrivacySkill` always runs before
+Skills run in registration order, so `PrivacySkill` always runs before
 `ExtractionSkill` within the same stage.
 
 ## Diagnostics

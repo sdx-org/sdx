@@ -8,18 +8,21 @@ affect one or more stages and is a Python class that subclasses `BaseSkill`.
 ```
 StageRunner
     |
-    +-- PrivacySkill        (screening, intake)   priority=50
-    +-- ExtractionSkill     (intake)              priority=100
-    +-- DiagnosticsSkill    (diagnosis, exam)     priority=100
-    +-- YourCustomSkill     (diagnosis, treatment) priority=150
+    +-- PrivacySkill        (screening, intake)
+    +-- ExtractionSkill     (intake)
+    +-- DiagnosticsSkill    (diagnosis, exam)
+    +-- YourCustomSkill     (diagnosis, treatment)
 ```
 
 When a stage runs, the runner finds all skills that declare that stage in their
-metadata, orders them by priority (lower runs first), and calls their hooks:
+metadata and calls their hooks in **registration order** (the order you pass
+them to `StageRunner`):
 
-1. All `pre()` hooks (in priority order)
-2. All `execute()` hooks (in priority order)
-3. All `post()` hooks (in priority order)
+1. All `pre()` hooks (in registration order)
+2. All `execute()` hooks (in registration order)
+3. All `post()` hooks (in registration order)
+
+The system integrator controls execution order — not the skill author.
 
 ## Minimal skill
 
@@ -35,7 +38,6 @@ class GreetingSkill(BaseSkill):
                 name='my_org.greeting',
                 version='1.0.0',
                 stages=(Stage.SCREENING,),
-                priority=200,
                 description='Adds a greeting to the context.',
             )
         )
@@ -48,13 +50,12 @@ class GreetingSkill(BaseSkill):
 
 ## SkillMetadata fields
 
-| Field         | Type              | Default   | Description                                    |
-| ------------- | ----------------- | --------- | ---------------------------------------------- |
-| `name`        | `str`             | required  | Unique identifier, e.g. `my_org.skill_name`    |
-| `version`     | `str`             | `"0.1.0"` | Semantic version of the skill                  |
-| `stages`      | `tuple[str, ...]` | `()`      | Which stages this skill participates in        |
-| `priority`    | `int`             | `100`     | Execution order within a stage (lower = first) |
-| `description` | `str`             | `""`      | Human-readable description                     |
+| Field         | Type              | Default   | Description                                 |
+| ------------- | ----------------- | --------- | ------------------------------------------- |
+| `name`        | `str`             | required  | Unique identifier, e.g. `my_org.skill_name` |
+| `version`     | `str`             | `"0.1.0"` | Semantic version of the skill               |
+| `stages`      | `tuple[str, ...]` | `()`      | Which stages this skill participates in     |
+| `description` | `str`             | `""`      | Human-readable description                  |
 
 ## Hooks
 
@@ -115,7 +116,6 @@ class AyurvedaSkill(BaseSkill):
             SkillMetadata(
                 name='ayurveda',
                 stages=(Stage.DIAGNOSIS, Stage.TREATMENT),
-                priority=150,
             )
         )
 
@@ -135,14 +135,16 @@ matching fragments to the system prompt for each stage.
 
 ### Register skills at construction time
 
+The list order defines execution order:
+
 ```python
 from hiperhealth.pipeline import StageRunner, Stage
 
 runner = StageRunner(skills=[
-    PrivacySkill(),
-    ExtractionSkill(),
-    DiagnosticsSkill(),
-    AyurvedaSkill(),
+    PrivacySkill(),       # runs first
+    ExtractionSkill(),    # runs second
+    DiagnosticsSkill(),   # runs third
+    AyurvedaSkill(),      # runs last
 ])
 
 ctx = runner.run(Stage.DIAGNOSIS, ctx)
@@ -152,7 +154,8 @@ ctx = runner.run(Stage.DIAGNOSIS, ctx)
 
 ```python
 runner = create_default_runner()
-runner.install(AyurvedaSkill())
+runner.install(AyurvedaSkill())           # appends at the end
+runner.install(AnotherSkill(), index=0)   # inserts at the beginning
 ```
 
 ### Run multiple stages
@@ -227,7 +230,6 @@ class BMICalculatorSkill(BaseSkill):
                 name='my_clinic.bmi_calculator',
                 version='1.0.0',
                 stages=(Stage.INTAKE,),
-                priority=110,
                 description='Calculates BMI from patient height and weight.',
             )
         )

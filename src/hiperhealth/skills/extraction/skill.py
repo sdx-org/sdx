@@ -36,7 +36,6 @@ class ExtractionSkill(BaseSkill):
                 name='hiperhealth.extraction',
                 version='0.4.0',
                 stages=(Stage.INTAKE,),
-                priority=100,
                 description=(
                     'Extract text from medical reports and '
                     'wearable data files.'

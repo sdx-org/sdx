@@ -441,18 +441,14 @@ class TestCreateDefaultRunner:
         assert 'hiperhealth.extraction' in skill_names
         assert 'hiperhealth.diagnostics' in skill_names
 
-    def test_privacy_has_lowest_priority(self) -> None:
+    def test_privacy_runs_first(self) -> None:
         """
-        title: Privacy skill should run first (lowest priority number).
+        title: Privacy skill should be registered first in the default runner.
         """
         runner = create_default_runner()
 
-        priorities = [
-            (s.metadata.name, s.metadata.priority) for s in runner.skills
-        ]
-        # Skills should be sorted by priority
-        sorted_priorities = sorted(priorities, key=lambda x: x[1])
-        assert sorted_priorities[0][0] == 'hiperhealth.privacy'
+        skill_names = [s.metadata.name for s in runner.skills]
+        assert skill_names[0] == 'hiperhealth.privacy'
 
 
 class TestDiscoverSkills:

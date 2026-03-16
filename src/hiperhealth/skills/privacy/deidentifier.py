@@ -260,7 +260,6 @@ class PrivacySkill(BaseSkill):
                 name='hiperhealth.privacy',
                 version='0.4.0',
                 stages=(Stage.SCREENING, Stage.INTAKE),
-                priority=50,
                 description=(
                     'De-identifies PII from patient data before processing.'
                 ),

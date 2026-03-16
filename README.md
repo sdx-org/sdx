@@ -202,7 +202,6 @@ class AyurvedaSkill(BaseSkill):
         super().__init__(SkillMetadata(
             name="ayurveda",
             stages=(Stage.DIAGNOSIS, Stage.TREATMENT),
-            priority=150,
         ))
 
     def pre(self, stage, ctx):

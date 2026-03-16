@@ -174,7 +174,6 @@ class DiagnosticsSkill(BaseSkill):
                 name='hiperhealth.diagnostics',
                 version='0.4.0',
                 stages=(Stage.DIAGNOSIS, Stage.EXAM),
-                priority=100,
                 description=(
                     'Core differential diagnosis and exam suggestion.'
                 ),
