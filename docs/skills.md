@@ -279,14 +279,6 @@ runner = StageRunner(skills=[
 ctx = runner.run(Stage.DIAGNOSIS, ctx)
 ```
 
-### Install skill instances at runtime
-
-```python
-runner = create_default_runner()
-runner.install(AyurvedaSkill())           # appends at the end
-runner.install(AnotherSkill(), index=0)   # inserts at the beginning
-```
-
 ### Run multiple stages
 
 ```python

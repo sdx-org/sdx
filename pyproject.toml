@@ -64,6 +64,7 @@ dev = [
   "pre-commit >=3.3.2",
   "ruff >=0.2.0",
   "mypy >=1.5.0",
+  "types-PyYAML >=6",
   "bandit >=1.7.5",
   "vulture >=2.7",
   "ipython >=8",

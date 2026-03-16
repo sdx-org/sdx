@@ -35,23 +35,6 @@ class StageRunner:
         self._skills: list[Skill] = list(skills or [])
         self._registry = registry
 
-    def install(self, skill: Skill, index: int | None = None) -> None:
-        """
-        title: Add a skill instance directly at runtime.
-        summary: |-
-          By default the skill is appended at the end. Pass ``index``
-          to insert at a specific position in the execution order.
-        parameters:
-          skill:
-            type: Skill
-          index:
-            type: int | None
-        """
-        if index is not None:
-            self._skills.insert(index, skill)
-        else:
-            self._skills.append(skill)
-
     def register(self, name: str, index: int | None = None) -> None:
         """
         title: Load a skill from the registry by name and activate it.
@@ -70,7 +53,13 @@ class StageRunner:
 
             self._registry = SkillRegistry()
         skill = self._registry.load(name)
-        self.install(skill, index=index)
+        self._add_skill(skill, index=index)
+
+    def _add_skill(self, skill: Skill, index: int | None = None) -> None:
+        if index is not None:
+            self._skills.insert(index, skill)
+        else:
+            self._skills.append(skill)
 
     @property
     def skills(self) -> list[Skill]:

@@ -221,29 +221,29 @@ class TestStageRunner:
         assert exec_audits[0].skill_name == 'first'
         assert exec_audits[1].skill_name == 'second'
 
-    def test_install_with_index(self) -> None:
-        first = _CounterSkill(name='first', stages=(Stage.DIAGNOSIS,))
-        last = _CounterSkill(name='last', stages=(Stage.DIAGNOSIS,))
-        runner = StageRunner(skills=[first, last])
+    def test_register_with_index(self) -> None:
+        """
+        title: register() should insert at the given index.
+        """
+        runner = StageRunner()
+        runner.register('hiperhealth.diagnostics')
+        runner.register('hiperhealth.privacy', index=0)
 
-        middle = _CounterSkill(name='middle', stages=(Stage.DIAGNOSIS,))
-        runner.install(middle, index=1)
-
-        assert [s.metadata.name for s in runner.skills] == [
-            'first',
-            'middle',
-            'last',
+        names = [s.metadata.name for s in runner.skills]
+        assert names == [
+            'hiperhealth.privacy',
+            'hiperhealth.diagnostics',
         ]
 
-    def test_install_skill(self) -> None:
+    def test_register_skill(self) -> None:
+        """
+        title: register() should load and activate a built-in skill.
+        """
         runner = StageRunner()
-        skill = _CounterSkill()
-        runner.install(skill)
+        runner.register('hiperhealth.diagnostics')
 
         assert len(runner.skills) == 1
-        result = runner.run(Stage.DIAGNOSIS, PipelineContext())
-        assert skill.execute_count == 1
-        assert Stage.DIAGNOSIS in result.results
+        assert runner.skills[0].metadata.name == ('hiperhealth.diagnostics')
 
     def test_prompt_fragments(self) -> None:
         fragment_skill = _PromptFragmentSkill()
