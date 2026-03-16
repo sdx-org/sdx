@@ -4,10 +4,13 @@ title: StageRunner — executes pipeline stages independently.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from hiperhealth.pipeline.context import AuditEntry, PipelineContext
 from hiperhealth.pipeline.skill import Skill
+
+if TYPE_CHECKING:
+    from hiperhealth.pipeline.registry import SkillRegistry
 
 
 class StageRunner:
@@ -20,14 +23,21 @@ class StageRunner:
     attributes:
       _skills:
         type: list[Skill]
+      _registry:
+        description: Value for _registry.
     """
 
-    def __init__(self, skills: list[Skill] | None = None) -> None:
+    def __init__(
+        self,
+        skills: list[Skill] | None = None,
+        registry: SkillRegistry | None = None,
+    ) -> None:
         self._skills: list[Skill] = list(skills or [])
+        self._registry = registry
 
     def install(self, skill: Skill, index: int | None = None) -> None:
         """
-        title: Add a skill at runtime.
+        title: Add a skill instance directly at runtime.
         summary: |-
           By default the skill is appended at the end. Pass ``index``
           to insert at a specific position in the execution order.
@@ -41,6 +51,26 @@ class StageRunner:
             self._skills.insert(index, skill)
         else:
             self._skills.append(skill)
+
+    def register(self, name: str, index: int | None = None) -> None:
+        """
+        title: Load a skill from the registry by name and activate it.
+        summary: |-
+          Looks up the skill in the attached SkillRegistry,
+          instantiates it, and adds it to the execution list.
+          Pass ``index`` to control execution order.
+        parameters:
+          name:
+            type: str
+          index:
+            type: int | None
+        """
+        if self._registry is None:
+            from hiperhealth.pipeline.registry import SkillRegistry
+
+            self._registry = SkillRegistry()
+        skill = self._registry.load(name)
+        self.install(skill, index=index)
 
     @property
     def skills(self) -> list[Skill]:

@@ -23,6 +23,7 @@ dependencies = [
     "langchain >=0.3.7,<1",
     "langchain-community >=0.3.7,<1",
     "litellm >=1,<2",
+    "pyyaml >=6",
     # NumPy: macOS stays on 1.x for Python <3.13; others use 2.x
     "numpy >=1.26,<2; sys_platform == 'darwin' and python_version < '3.13'",
     "numpy >=2; sys_platform == 'darwin' and python_version >= '3.13'",
@@ -49,7 +50,7 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-hiperhealth = ["py.typed"]
+hiperhealth = ["py.typed", "skills/*/hiperhealth.yaml"]
 
 [project.optional-dependencies]
 dev = [

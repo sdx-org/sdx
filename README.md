@@ -190,12 +190,32 @@ record = {
 clean = deidentify_patient_record(record, engine)
 ```
 
-### 5. Custom skills
+### 5. Installing and registering custom skills
 
-See [Creating Skills](docs/skills.md) for a full guide.
+Skills are installed from local paths or Git URLs into an internal registry,
+then registered into a runner by name:
 
 ```python
-from hiperhealth.pipeline import BaseSkill, SkillMetadata, Stage, StageRunner
+from hiperhealth.pipeline import SkillRegistry, create_default_runner, Stage
+
+# Install a skill (copies into ~/.hiperhealth/skills/)
+registry = SkillRegistry()
+registry.install('/path/to/ayurveda_skill/')
+registry.install('https://github.com/my_org/tcm_skill')
+
+# Register installed skills into a pipeline
+runner = create_default_runner()
+runner.register('ayurveda', index=0)       # insert at the beginning
+runner.register('traditional-chinese-medicine')  # append at the end
+```
+
+Each skill project must include a `hiperhealth.yaml` metadata file. See
+[Creating Skills](docs/skills.md) for a full guide on writing skill projects.
+
+### 6. Custom skill class
+
+```python
+from hiperhealth.pipeline import BaseSkill, SkillMetadata, Stage
 
 class AyurvedaSkill(BaseSkill):
     def __init__(self):
@@ -213,7 +233,7 @@ class AyurvedaSkill(BaseSkill):
 ## Repository layout
 
 - `src/hiperhealth/pipeline/`: stage runner, context, skill base classes,
-  discovery
+  registry, discovery
 - `src/hiperhealth/skills/`: built-in skills (diagnostics, extraction, privacy)
 - `src/hiperhealth/agents/`: backward-compatible re-exports and shared utilities
 - `src/hiperhealth/schema/`: Pydantic schemas

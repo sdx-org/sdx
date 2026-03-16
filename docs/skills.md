@@ -24,6 +24,61 @@ them to `StageRunner`):
 
 The system integrator controls execution order — not the skill author.
 
+## Skill project structure
+
+Every skill project is a directory containing at minimum a `hiperhealth.yaml`
+metadata file and a Python module with the skill class:
+
+```
+my_skill/
+├── hiperhealth.yaml          # required: skill metadata
+├── skill.py                  # required: contains the BaseSkill subclass
+├── prompts/                  # optional: prompt templates
+│   └── diagnosis.txt
+├── data/                     # optional: reference data, lookup tables
+│   └── herbs.json
+└── requirements.txt          # optional: extra pip dependencies
+```
+
+### `hiperhealth.yaml`
+
+```yaml
+# Required fields
+name: my_org.skill_name # unique identifier
+version: 1.0.0 # semver
+entry_point: "skill:MySkillClass" # module:ClassName within the folder
+stages:
+  - diagnosis
+  - treatment
+
+# Human-readable (optional)
+description: >-
+  A brief description of what this skill does.
+author: "Your Name <email@example.com>"
+license: MIT
+homepage: https://github.com/my_org/my_skill
+
+# Compatibility (optional)
+min_hiperhealth_version: "0.4.0"
+
+# Extra pip dependencies this skill needs (optional)
+dependencies:
+  - some-package>=1.0
+```
+
+| Field                     | Required | Description                                         |
+| ------------------------- | -------- | --------------------------------------------------- |
+| `name`                    | yes      | Unique skill identifier. Used in `register("name")` |
+| `version`                 | yes      | Semver string                                       |
+| `entry_point`             | yes      | `module:ClassName` relative to the skill folder     |
+| `stages`                  | yes      | List of stage names this skill participates in      |
+| `description`             | no       | Human-readable description                          |
+| `author`                  | no       | Author name and contact                             |
+| `license`                 | no       | License identifier                                  |
+| `homepage`                | no       | URL for documentation or source                     |
+| `min_hiperhealth_version` | no       | Minimum compatible hiperhealth version              |
+| `dependencies`            | no       | Extra pip packages the skill requires               |
+
 ## Minimal skill
 
 ```python
@@ -131,6 +186,80 @@ class AyurvedaSkill(BaseSkill):
 The `DiagnosticsSkill` checks `ctx.extras['prompt_fragments']` and appends
 matching fragments to the system prompt for each stage.
 
+## Skill registry
+
+The `SkillRegistry` manages skill installation and loading. Skills can be
+installed from local paths or Git URLs, and are stored in an internal registry
+directory (`~/.hiperhealth/skills/`).
+
+### Installing skills
+
+```python
+from hiperhealth.pipeline import SkillRegistry
+
+registry = SkillRegistry()
+
+# Install from a local directory
+registry.install('/path/to/my_skill/')
+
+# Install from a Git repository
+registry.install('https://github.com/my_org/my_skill')
+
+# List all available skills (built-in + installed)
+for manifest in registry.list_skills():
+    print(f'{manifest.name} v{manifest.version}: {manifest.description}')
+
+# Remove an installed skill
+registry.uninstall('my_org.skill_name')
+```
+
+### Registering skills in the runner
+
+Use `register()` to activate an installed skill by name:
+
+```python
+from hiperhealth.pipeline import SkillRegistry, StageRunner, Stage
+
+registry = SkillRegistry()
+runner = StageRunner(registry=registry)
+
+# Register skills — order defines execution order
+runner.register('hiperhealth.privacy')
+runner.register('hiperhealth.diagnostics')
+
+# Insert a custom skill at the beginning
+runner.register('my_org.greeting', index=0)
+```
+
+### Using the default runner with custom skills
+
+```python
+from hiperhealth.pipeline import create_default_runner
+
+runner = create_default_runner()
+
+# Add an externally installed skill
+runner.register('ayurveda')
+
+ctx = runner.run(Stage.DIAGNOSIS, ctx)
+```
+
+### Internal registry layout
+
+```
+~/.hiperhealth/
+└── skills/
+    ├── manifest.json                    # index of installed skills
+    ├── ayurveda/
+    │   ├── hiperhealth.yaml
+    │   └── skill.py
+    └── traditional-chinese-medicine/
+        ├── hiperhealth.yaml
+        ├── skill.py
+        └── data/
+            └── herbs.json
+```
+
 ## Using the runner
 
 ### Register skills at construction time
@@ -150,7 +279,7 @@ runner = StageRunner(skills=[
 ctx = runner.run(Stage.DIAGNOSIS, ctx)
 ```
 
-### Install skills at runtime
+### Install skill instances at runtime
 
 ```python
 runner = create_default_runner()
@@ -194,7 +323,7 @@ enum values.
 
 ## Skill discovery via entry points
 
-Third-party skills can be auto-discovered if they register as Python entry
+Third-party skills can also be auto-discovered if they register as Python entry
 points:
 
 ```toml
@@ -256,13 +385,31 @@ class BMICalculatorSkill(BaseSkill):
         return 'obese'
 ```
 
+With `hiperhealth.yaml`:
+
+```yaml
+name: my_clinic.bmi_calculator
+version: 1.0.0
+entry_point: "skill:BMICalculatorSkill"
+stages:
+  - intake
+description: Calculates BMI from patient height and weight.
+```
+
 Usage:
 
 ```python
-from hiperhealth.pipeline import PipelineContext, Stage, create_default_runner
+from hiperhealth.pipeline import (
+    PipelineContext, SkillRegistry, Stage, create_default_runner,
+)
 
+# Install the skill
+registry = SkillRegistry()
+registry.install('/path/to/bmi_calculator/')
+
+# Use it in a pipeline
 runner = create_default_runner()
-runner.install(BMICalculatorSkill())
+runner.register('my_clinic.bmi_calculator')
 
 ctx = PipelineContext(
     patient={'height_m': 1.75, 'weight_kg': 70},

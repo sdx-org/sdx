@@ -294,11 +294,16 @@ Key concepts:
 - **StageRunner** orchestrates skill execution: for each stage, it runs all
   matching skills' `pre()` -> `execute()` -> `post()` hooks in registration
   order
+- **SkillRegistry** manages skill installation (from local paths or Git URLs)
+  and loading. Skills are stored in `~/.hiperhealth/skills/` and activated via
+  `runner.register("skill-name")`
+- **hiperhealth.yaml** is a metadata file every skill project must include,
+  declaring name, version, entry point, and stages
 
 Source layout:
 
 - `src/hiperhealth/pipeline/` — core engine (stages, context, skill base
-  classes, runner, discovery)
+  classes, runner, registry, discovery)
 - `src/hiperhealth/skills/` — built-in skills (diagnostics, extraction, privacy)
 - `src/hiperhealth/agents/` — shared utilities (e.g. `client.py`) and
   backward-compatible re-exports from `skills/`

@@ -77,6 +77,27 @@ order:
 Skills run in registration order, so `PrivacySkill` always runs before
 `ExtractionSkill` within the same stage.
 
+### Installing and registering custom skills
+
+Custom skills can be installed from local paths or Git URLs using the
+`SkillRegistry`, then activated in a runner by name:
+
+```python
+from hiperhealth.pipeline import SkillRegistry, create_default_runner, Stage
+
+# Install skills into the internal registry (~/.hiperhealth/skills/)
+registry = SkillRegistry()
+registry.install('/path/to/ayurveda_skill/')
+registry.install('https://github.com/my_org/tcm_skill')
+
+# Create a runner and register installed skills
+runner = create_default_runner()
+runner.register('ayurveda', index=0)       # insert before built-ins
+runner.register('traditional-chinese-medicine')  # append at end
+```
+
+See [Creating Skills](skills.md) for details on writing skill projects.
+
 ## Diagnostics
 
 The diagnostics helpers return `LLMDiagnosis` objects with:
