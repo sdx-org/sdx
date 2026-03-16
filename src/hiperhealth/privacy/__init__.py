@@ -1,8 +1,11 @@
 """
 title: Privacy models package.
+summary: |-
+  Re-exports from ``hiperhealth.skills.privacy``
+  for backward compatibility.
 """
 
-from hiperhealth.privacy.deidentifier import (
+from hiperhealth.skills.privacy.deidentifier import (
     Deidentifier,
     deidentify_patient_record,
 )

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any, ClassVar
 
-import hiperhealth.privacy.deidentifier as deid_mod
+import hiperhealth.skills.privacy.deidentifier as deid_mod
 import pytest
 
 

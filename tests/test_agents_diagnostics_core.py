@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import json
 
-import hiperhealth.agents.diagnostics.core as diag_mod
+import hiperhealth.skills.diagnostics.core as diag_mod
 import pytest
 
 from hiperhealth.schema.clinical_outputs import LLMDiagnosis

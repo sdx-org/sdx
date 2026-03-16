@@ -83,7 +83,7 @@ repos:
 
       - id: vulture
         name: vulture
-        entry: vulture
+        entry: vulture vulture_whitelist.py
         language: system
         files: "src/hiperhealth"
         description: Find unused Python code.

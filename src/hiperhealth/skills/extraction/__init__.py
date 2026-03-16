@@ -1,8 +1,5 @@
 """
-title: Module for extracting text from PDF documents and images.
-summary: |-
-  Re-exports from ``hiperhealth.skills.extraction.medical_reports``
-  for backward compatibility.
+title: Extraction skill package.
 """
 
 from hiperhealth.skills.extraction.medical_reports import (
@@ -15,14 +12,24 @@ from hiperhealth.skills.extraction.medical_reports import (
     TextExtractionError,
     get_medical_report_extractor,
 )
+from hiperhealth.skills.extraction.skill import ExtractionSkill
+from hiperhealth.skills.extraction.wearable import (
+    BaseWearableDataExtractor,
+    WearableDataExtractorError,
+    WearableDataFileExtractor,
+)
 
 __all__ = [
     'BaseMedicalReportExtractor',
+    'BaseWearableDataExtractor',
+    'ExtractionSkill',
     'FileExtension',
     'FileInput',
     'MedicalReportExtractorError',
     'MedicalReportFileExtractor',
     'MimeType',
     'TextExtractionError',
+    'WearableDataExtractorError',
+    'WearableDataFileExtractor',
     'get_medical_report_extractor',
 ]
