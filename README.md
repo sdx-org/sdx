@@ -11,14 +11,17 @@ application.
 
 ## What this library provides
 
-- LLM-powered clinical assistance utilities:
-  - Differential diagnosis suggestions
-  - Exam/procedure suggestions
-- Data extraction utilities:
-  - Medical reports (PDF/image) to extracted text plus metadata
-  - Wearable data (CSV/JSON) parsing and normalization
-- Privacy utilities:
-  - PII detection and de-identification
+- **Skill-based pipeline** for composable clinical workflows:
+  - Stages (screening, intake, diagnosis, exam, treatment, prescription) that
+    can be executed independently at different times by different actors
+  - Skills are composable plugins that affect one or more stages
+  - Serializable context for persistence between invocations
+- **Built-in skills:**
+  - **DiagnosticsSkill** — LLM-powered differential diagnosis and exam
+    suggestions
+  - **ExtractionSkill** — medical reports (PDF/image) and wearable data
+    (CSV/JSON) extraction
+  - **PrivacySkill** — PII detection and de-identification
 - Domain schemas and models:
   - Pydantic schemas
   - SQLAlchemy FHIR model definitions
@@ -115,93 +118,109 @@ More detail is available in
 
 ## Quickstart
 
-### 1. Differential diagnosis and exam suggestions
+### 1. Pipeline-based workflow (recommended)
+
+The pipeline runs stages independently through composable skills:
 
 ```python
-from hiperhealth.agents.diagnostics import core as diag
+from hiperhealth.pipeline import PipelineContext, Stage, create_default_runner
 
-patient = {
-    "age": 45,
-    "gender": "M",
-    "symptoms": "chest pain, shortness of breath",
-    "previous_tests": "ECG normal"
-}
+# Create a runner with all built-in skills
+runner = create_default_runner()
 
-dx = diag.differential(patient, language="en", session_id="demo-1")
-print(dx.summary)
-print(dx.options)
-
-exams = diag.exams(["Acute coronary syndrome"], language="en", session_id="demo-1")
-print(exams.summary)
-print(exams.options)
-```
-
-Supported languages for diagnostics/exam prompts are `en`, `pt`, `es`, `fr`, and
-`it`. Unknown values fall back to English.
-
-To configure the backend directly in code instead of environment variables:
-
-```python
-from hiperhealth.agents.diagnostics import core as diag
-from hiperhealth.llm import LLMSettings
-
-settings = LLMSettings(
-    provider="ollama",
-    model="llama3.2:3b",
-    api_params={"base_url": "http://localhost:11434/v1"},
-)
-
-dx = diag.differential(
-    patient,
+# Run screening (de-identifies PII)
+ctx = PipelineContext(
+    patient={"symptoms": "Patient John has chest pain", "age": 45},
     language="en",
-    session_id="demo-2",
-    llm_settings=settings,
+    session_id="visit-1",
 )
+ctx = runner.run(Stage.SCREENING, ctx)
+
+# Serialize context — different actor can resume later
+saved = ctx.model_dump_json()
+
+# ... hours later, restore and run diagnosis
+ctx = PipelineContext.model_validate_json(saved)
+ctx = runner.run(Stage.DIAGNOSIS, ctx)
+print(ctx.results["diagnosis"].summary)
 ```
 
-### 2. Wearable data extraction (CSV/JSON)
+### 2. Standalone diagnostic functions
 
 ```python
-from hiperhealth.agents.extraction.wearable import WearableDataFileExtractor
+from hiperhealth.skills.diagnostics.core import differential, exams
 
-extractor = WearableDataFileExtractor()
-data = extractor.extract_wearable_data("tests/data/wearable/wearable_data.csv")
-print(data[:2])
+patient = {"age": 45, "symptoms": "chest pain, shortness of breath"}
+
+dx = differential(patient, language="en", session_id="demo-1")
+print(dx.summary, dx.options)
+
+ex = exams(["Acute coronary syndrome"], language="en", session_id="demo-1")
+print(ex.summary, ex.options)
 ```
 
-### 3. Medical report extraction (PDF/image -> text)
+Supported languages: `en`, `pt`, `es`, `fr`, `it`. Unknown values fall back to
+English.
+
+### 3. Data extraction
 
 ```python
-from hiperhealth.agents.extraction.medical_reports import MedicalReportFileExtractor
+from hiperhealth.skills.extraction.medical_reports import MedicalReportFileExtractor
+from hiperhealth.skills.extraction.wearable import WearableDataFileExtractor
 
-extractor = MedicalReportFileExtractor()
-report = extractor.extract_report_data("tests/data/reports/pdf_reports/report-1.pdf")
-print(report["mime_type"])
-print(report["text"][:200])
+# Medical reports (PDF/image)
+report_ext = MedicalReportFileExtractor()
+report = report_ext.extract_report_data("path/to/report.pdf")
+
+# Wearable data (CSV/JSON)
+wearable_ext = WearableDataFileExtractor()
+data = wearable_ext.extract_wearable_data("path/to/data.csv")
 ```
 
 ### 4. De-identification
 
 ```python
-from hiperhealth.privacy.deidentifier import Deidentifier, deidentify_patient_record
+from hiperhealth.skills.privacy.deidentifier import Deidentifier, deidentify_patient_record
 
 engine = Deidentifier()
 record = {
     "symptoms": "Patient John Doe reports severe headache.",
-    "mental_health": "Lives at 123 Main St"
+    "mental_health": "Lives at 123 Main St",
 }
 clean = deidentify_patient_record(record, engine)
-print(clean)
+```
+
+### 5. Custom skills
+
+See [Creating Skills](docs/skills.md) for a full guide.
+
+```python
+from hiperhealth.pipeline import BaseSkill, SkillMetadata, Stage, StageRunner
+
+class AyurvedaSkill(BaseSkill):
+    def __init__(self):
+        super().__init__(SkillMetadata(
+            name="ayurveda",
+            stages=(Stage.DIAGNOSIS, Stage.TREATMENT),
+            priority=150,
+        ))
+
+    def pre(self, stage, ctx):
+        fragments = ctx.extras.setdefault("prompt_fragments", {})
+        fragments[stage] = "Also consider Ayurvedic perspectives."
+        return ctx
 ```
 
 ## Repository layout
 
-- `src/hiperhealth/agents`: AI interaction and extraction modules
-- `src/hiperhealth/privacy`: de-identification tools
-- `src/hiperhealth/schema`: Pydantic schemas
-- `src/hiperhealth/models`: SQLAlchemy models
-- `tests`: unit and integration tests
-- `docs`: MkDocs documentation source
+- `src/hiperhealth/pipeline/`: stage runner, context, skill base classes,
+  discovery
+- `src/hiperhealth/skills/`: built-in skills (diagnostics, extraction, privacy)
+- `src/hiperhealth/agents/`: backward-compatible re-exports and shared utilities
+- `src/hiperhealth/schema/`: Pydantic schemas
+- `src/hiperhealth/models/`: SQLAlchemy FHIR models
+- `tests/`: unit and integration tests
+- `docs/`: MkDocs documentation source
 
 ## Development
 

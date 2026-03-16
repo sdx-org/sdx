@@ -1,5 +1,81 @@
 # Usage
 
+## Pipeline
+
+The pipeline is the recommended way to use hiperhealth. It runs clinical stages
+independently through composable skills.
+
+### Running a single stage
+
+```python
+from hiperhealth.pipeline import PipelineContext, Stage, create_default_runner
+
+runner = create_default_runner()
+
+ctx = PipelineContext(
+    patient={'symptoms': 'chest pain, shortness of breath', 'age': 45},
+    language='en',
+    session_id='visit-1',
+)
+
+ctx = runner.run(Stage.DIAGNOSIS, ctx)
+print(ctx.results['diagnosis'].summary)
+print(ctx.results['diagnosis'].options)
+```
+
+### Running multiple stages
+
+```python
+ctx = runner.run_many([Stage.SCREENING, Stage.DIAGNOSIS, Stage.EXAM], ctx)
+```
+
+### Persisting context between sessions
+
+Stages can be executed at different times by different actors. Serialize the
+context to JSON between invocations:
+
+```python
+# Monday — nurse runs screening
+ctx = PipelineContext(
+    patient={'symptoms': 'Patient John has fever and cough', 'age': 30},
+    language='pt',
+    session_id='encounter-42',
+)
+runner = create_default_runner()
+ctx = runner.run(Stage.SCREENING, ctx)
+
+# Save to database, file, or message queue
+saved_json = ctx.model_dump_json()
+
+# Wednesday — physician restores context and runs diagnosis
+ctx = PipelineContext.model_validate_json(saved_json)
+ctx = runner.run(Stage.DIAGNOSIS, ctx)
+```
+
+### Available stages
+
+| Stage          | Description                                            |
+| -------------- | ------------------------------------------------------ |
+| `screening`    | Initial triage, PII de-identification                  |
+| `intake`       | Data extraction from reports and wearable files        |
+| `diagnosis`    | LLM-powered differential diagnosis                     |
+| `exam`         | Exam/procedure suggestions based on diagnosis          |
+| `treatment`    | Treatment planning (extensible via custom skills)      |
+| `prescription` | Prescription generation (extensible via custom skills) |
+
+### Built-in skills
+
+The `create_default_runner()` factory registers three built-in skills:
+
+| Skill              | Stages            | Priority | Description                                          |
+| ------------------ | ----------------- | -------- | ---------------------------------------------------- |
+| `PrivacySkill`     | screening, intake | 50       | De-identifies PII in patient data                    |
+| `ExtractionSkill`  | intake            | 100      | Extracts text from medical reports and wearable data |
+| `DiagnosticsSkill` | diagnosis, exam   | 100      | LLM-powered diagnosis and exam suggestions           |
+
+Lower priority numbers run first, so `PrivacySkill` always runs before
+`ExtractionSkill` within the same stage.
+
 ## Diagnostics
 
 The diagnostics helpers return `LLMDiagnosis` objects with:
@@ -20,7 +96,7 @@ Unknown language values fall back to English.
 ### Differential diagnosis
 
 ```python
-from hiperhealth.agents.diagnostics import core as diag
+from hiperhealth.skills.diagnostics.core import differential
 
 patient = {
     'age': 45,
@@ -29,7 +105,7 @@ patient = {
     'previous_tests': 'ECG normal',
 }
 
-result = diag.differential(patient, language='en', session_id='demo-1')
+result = differential(patient, language='en', session_id='demo-1')
 print(result.summary)
 print(result.options)
 ```
@@ -37,9 +113,9 @@ print(result.options)
 ### Suggested exams and procedures
 
 ```python
-from hiperhealth.agents.diagnostics import core as diag
+from hiperhealth.skills.diagnostics.core import exams
 
-result = diag.exams(
+result = exams(
     ['Acute coronary syndrome'],
     language='en',
     session_id='demo-1',
@@ -51,7 +127,7 @@ print(result.options)
 ### Runtime configuration in code
 
 ```python
-from hiperhealth.agents.diagnostics import core as diag
+from hiperhealth.skills.diagnostics.core import differential
 from hiperhealth.llm import LLMSettings
 
 settings = LLMSettings(
@@ -60,7 +136,7 @@ settings = LLMSettings(
     api_params={'base_url': 'http://localhost:11434/v1'},
 )
 
-result = diag.differential(
+result = differential(
     {'symptoms': 'headache'},
     llm_settings=settings,
 )
@@ -81,7 +157,7 @@ Supported inputs:
 Example:
 
 ```python
-from hiperhealth.agents.extraction.medical_reports import (
+from hiperhealth.skills.extraction.medical_reports import (
     MedicalReportFileExtractor,
 )
 
@@ -114,7 +190,7 @@ Wearable data extraction supports CSV and JSON inputs and returns a normalized
 list of dictionaries.
 
 ```python
-from hiperhealth.agents.extraction.wearable import WearableDataFileExtractor
+from hiperhealth.skills.extraction.wearable import WearableDataFileExtractor
 
 extractor = WearableDataFileExtractor()
 data = extractor.extract_wearable_data(
@@ -123,7 +199,39 @@ data = extractor.extract_wearable_data(
 print(data[:2])
 ```
 
+## De-identification
+
+```python
+from hiperhealth.skills.privacy.deidentifier import (
+    Deidentifier,
+    deidentify_patient_record,
+)
+
+engine = Deidentifier()
+record = {
+    'symptoms': 'Patient John Doe reports severe headache.',
+    'mental_health': 'Lives at 123 Main St',
+}
+clean = deidentify_patient_record(record, engine)
+print(clean)
+```
+
 ## Raw LLM output capture
 
 Diagnostics responses are normalized and then written to `data/llm_raw/` using
 the supplied `session_id` when present.
+
+## Backward compatibility
+
+The old import paths continue to work:
+
+```python
+# These still work
+from hiperhealth.agents.diagnostics.core import differential, exams
+from hiperhealth.agents.extraction.medical_reports import MedicalReportFileExtractor
+from hiperhealth.agents.extraction.wearable import WearableDataFileExtractor
+from hiperhealth.privacy.deidentifier import Deidentifier
+```
+
+The canonical locations are now under `hiperhealth.skills.*` and
+`hiperhealth.pipeline`.

@@ -263,8 +263,50 @@ If you are proposing a feature:
 
 ## 3. Architectural Overview
 
-The `hiperhealth` library follows a "schema-first" approach for its database
-models.
+### Pipeline and Skills
+
+The library is built around a **skill-based pipeline** architecture:
+
+```
+StageRunner (executes any stage independently)
+    |
+    +-- Registered Skills (applied per-stage based on metadata)
+    |   +-- PrivacySkill        -> screening, intake       (priority=50)
+    |   +-- ExtractionSkill     -> intake                  (priority=100)
+    |   +-- DiagnosticsSkill    -> diagnosis, exam         (priority=100)
+    |   +-- (custom skills)     -> any combination of stages
+    |
+    +-- Usage patterns:
+        +-- runner.run("screening", ctx)     # Monday, nurse
+        +-- runner.run("diagnosis", ctx)     # Wednesday, physician A
+        +-- runner.run("treatment", ctx)     # Friday, physician B
+        +-- runner.run_many([...], ctx)      # batch
+```
+
+Key concepts:
+
+- **Stages** are independently executable clinical phases (screening, intake,
+  diagnosis, exam, treatment, prescription)
+- **Skills** are composable plugins (`BaseSkill` subclasses) that declare which
+  stages they affect via `SkillMetadata`
+- **PipelineContext** is a Pydantic model that carries all data between stages
+  and serializes to JSON for persistence between invocations
+- **StageRunner** orchestrates skill execution: for each stage, it runs all
+  matching skills' `pre()` -> `execute()` -> `post()` hooks in priority order
+
+Source layout:
+
+- `src/hiperhealth/pipeline/` — core engine (stages, context, skill base
+  classes, runner, discovery)
+- `src/hiperhealth/skills/` — built-in skills (diagnostics, extraction, privacy)
+- `src/hiperhealth/agents/` — shared utilities (e.g. `client.py`) and
+  backward-compatible re-exports from `skills/`
+
+See [Creating Skills](docs/skills.md) for a guide on writing custom skills.
+
+### Schema-First Data Layer
+
+The library follows a "schema-first" approach for its database models.
 
 1.  **Pydantic Schemas (`src/hiperhealth/schema/`)**: These are the primary
     source of truth. They define the data structures and validation rules for
