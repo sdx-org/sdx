@@ -35,26 +35,6 @@ groups:
         run: |
           mkdocs serve --watch docs --config-file mkdocs.yaml
 
-  research:
-    tasks:
-      cli:
-        help: Run the Research CLI
-        dir: research/backend
-        run: python cli.py
-      backend:
-        help: Run the Research backend (FastAPI)
-        dir: research/backend
-        run: uvicorn app.main:app --reload
-      frontend:
-        help: Run the Research frontend (React/Vite)
-        dir: research/frontend
-        run: npm run dev
-      seed:
-        help: Run the script to migrate legacy patient data to the DB
-        dir: scripts
-        run: |
-          python migrate_json_to_db.py
-
   tests:
     tasks:
       linter:
