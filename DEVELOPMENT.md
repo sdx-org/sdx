@@ -59,23 +59,17 @@ PyPI.
 
 As the core clinical AI engine, this repository relies on:
 
-- **Python 3.11+** for core logic.
+- **Python 3.10+** for core logic.
 - **LiteLLM** for flexible, provider-agnostic AI model integration.
 - **Pydantic / FHIR** for strict medical data validation.
 - **Douki** for docstring and documentation generation.
-- **Makim** as the task runner. _(Note: The web API, database, and UI live in
-  the separate `hiperhealth-web` repository)._
+- **Makim** as the task runner.
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.10+
 - [Conda](https://github.com/conda-forge/miniforge?tab=readme-ov-file#download)
   installed on your system.
-- Linux only
-
-  ```
-
-  ```
 
 ### Installation
 
@@ -103,28 +97,14 @@ As the core clinical AI engine, this repository relies on:
     mamba activate hiperhealth
     ```
 
-3.  **System Dependencies (Linux / WSL):** Before installing Python
-    dependencies, ensure you have the C-compiler toolchain required to compile C
-    extensions used by some pre-commit hooks (e.g., `djlint` depends on
-    `regex`):
-
-    ```bash
-    sudo apt update
-    sudo apt install build-essential python3-dev   # Debian/Ubuntu/WSL
-    # or: sudo dnf install gcc gcc-c++ make python3-devel   # Fedora/RHEL
-    ```
-
-4.  **Install Project Dependencies:** This command installs all required
+3.  **Install Project Dependencies:** This command installs all required
     packages.
 
     ```bash
     ./scripts/install-dev.sh
     ```
 
-_(Note: As of the project split, you do not need a local database to contribute
-to this library. All persistence logic has moved to `hiperhealth-web`.)_
-
-6.  **(Optional) Set Up API Keys:** Note: The core `hiperhealth` library is
+4.  **(Optional) Set Up API Keys:** Note: The core `hiperhealth` library is
     designed to be functional without external dependencies. However, specific
     modules (such as certain AI Agents or evaluation scripts) may optionally
     require API keys (e.g., `OPENAI_API_KEY`).
@@ -142,15 +122,9 @@ to this library. All persistence logic has moved to `hiperhealth-web`.)_
 All common development tasks are managed via `makim` commands defined in
 `.makim.yaml`.
 
-### Database Migrations
-
 The core of the `hiperhealth` library is its set of Pydantic models in
 `src/hiperhealth/schema/`. These serve as the source of truth for all medical
 data structures.
-
-While this library is stateless and does not contain a local database, it is
-responsible for generating the SQLAlchemy ORM models used by the
-`hiperhealth-web` service.
 
 If you modify a Pydantic schema that requires a database change:
 
@@ -159,12 +133,6 @@ If you modify a Pydantic schema that requires a database change:
   ```bash
   makim gen.fhir-models
   ```
-
-**Note on Migrations:**
-
-Database migrations (Alembic) are now managed within the hiperhealth-web
-repository. Once your schema changes are merged here, they will be used to
-generate migrations in the web service.
 
 ### Code Style & Linting
 
@@ -314,12 +282,6 @@ The library follows a "schema-first" approach for its database models.
     **auto-generated** from the Pydantic schemas using the
     `scripts/gen_models/gen_sqla.py` script (`makim gen.fhir-models`). **Do not
     edit these files manually.**
-3.  **Alembic Migrations (`migrations/`)**: While this library is stateless, the
-    generated SQLAlchemy models are consumed by the `hiperhealth-web` repository
-    to manage Alembic migrations.
-
-This ensures our application's data layer and database schema are always
-perfectly synchronized.
 
 ---
 
