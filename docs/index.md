@@ -13,7 +13,10 @@
 ![Makim](https://img.shields.io/badge/Automation%20task-Makim-blue)
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI-blue?logo=githubactions)
 
-This Project aims to ...
+`hiperhealth` is a Python library for clinical AI workflows. It provides a
+**skill-based pipeline** for composable, stage-independent execution of clinical
+tasks — from screening and intake through diagnosis, exams, treatment, and
+prescription.
 
 - License: BSD 3 Clause
 - Documentation: https://hiperhealth.com
@@ -21,7 +24,32 @@ This Project aims to ...
 
 ## Features
 
-TBD
+- **Skill-based pipeline** — stages run independently, at different times, by
+  different actors. Context serializes to JSON between invocations.
+- **Built-in skills:**
+  - **DiagnosticsSkill** — differential diagnosis and exam suggestions via LLM
+  - **ExtractionSkill** — PDF/image medical report and CSV/JSON wearable data
+    extraction
+  - **PrivacySkill** — PII detection and de-identification
+- **Extensible** — create custom skills as Python classes, install third-party
+  skills via entry points
+- Provider-configurable LLM backend through LiteLLM (8+ providers)
+- Pydantic schemas and SQLAlchemy FHIR-oriented models
+
+## Documentation guide
+
+- Start with [Installation](./installation.md)
+- Configure LLM backends in [LLM Configuration](./llm_configuration.md)
+- See end-to-end examples in [Usage](./usage.md)
+- Learn how to build custom skills in [Creating Skills](./skills.md)
+
+## Current scope
+
+This repository is the `hiperhealth` library/SDK, not the web application.
+
+The pipeline operates through `PipelineContext`, a Pydantic model that carries
+patient data, results, and audit entries across stages. Each stage produces
+results accessible via `ctx.results[stage_name]`.
 
 ## Credits
 

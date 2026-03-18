@@ -1,1 +1,3 @@
-"""Agents package."""
+"""
+title: Agents package.
+"""

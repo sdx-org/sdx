@@ -1,1 +1,3 @@
-"""SQLAlchemy models package."""
+"""
+title: SQLAlchemy models package.
+"""

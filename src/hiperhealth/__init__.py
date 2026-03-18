@@ -1,14 +1,21 @@
-"""hiperhealth."""
+"""
+title: hiperhealth.
+"""
 
 from importlib import metadata as importlib_metadata
 
 
 def get_version() -> str:
-    """Return the program version."""
+    """
+    title: Return the program version.
+    returns:
+      type: str
+      description: Return value.
+    """
     try:
         return importlib_metadata.version(__name__)
     except importlib_metadata.PackageNotFoundError:  # pragma: no cover
-        return '0.3.1'  # semantic-release
+        return '0.4.0'  # semantic-release
 
 
 version = get_version()

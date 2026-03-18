@@ -1,6 +1,26 @@
 # Release Notes
 ---
 
+# [0.4.0](https://github.com/hiperhealth/hiperhealth/compare/0.3.1...0.4.0) (2026-03-08)
+
+
+### Bug Fixes
+
+* .gitignore path separation in the content ([#105](https://github.com/hiperhealth/hiperhealth/issues/105)) ([f53a208](https://github.com/hiperhealth/hiperhealth/commit/f53a20889345b9fba5be763f389c8a4da4a16803))
+* Clarify is_float logic and add direct test ([#99](https://github.com/hiperhealth/hiperhealth/issues/99)) ([68c254a](https://github.com/hiperhealth/hiperhealth/commit/68c254a4f7627a8a2080b68ddb7fb18a2da27515))
+* **packaging:** Add build and twine to the release stack ([#181](https://github.com/hiperhealth/hiperhealth/issues/181)) ([40f748b](https://github.com/hiperhealth/hiperhealth/commit/40f748bbff2bac7a1bb97fe6e808700b9dd0475d))
+* **patient-view:** refactor dashboard into tabs and fix data mismatch… ([#134](https://github.com/hiperhealth/hiperhealth/issues/134)) ([75e6007](https://github.com/hiperhealth/hiperhealth/commit/75e60072ac3325e89c19bf78c2037dd7216886cd)), closes [#133](https://github.com/hiperhealth/hiperhealth/issues/133)
+* pin setuptools<82 and align mkdocs dependencies with best practices ([#158](https://github.com/hiperhealth/hiperhealth/issues/158)) ([3d95220](https://github.com/hiperhealth/hiperhealth/commit/3d95220695e468fdc5ac1ce44a898bd34dc29ecf))
+* privacy module typo deidenitfier to deidentifier ([#102](https://github.com/hiperhealth/hiperhealth/issues/102)) ([a66fc84](https://github.com/hiperhealth/hiperhealth/commit/a66fc84c049788a5abb727e6c2bc7a63a2e62b16))
+* remove duplicate ConsultationProvider ([#143](https://github.com/hiperhealth/hiperhealth/issues/143)) ([c996532](https://github.com/hiperhealth/hiperhealth/commit/c9965321c8fec19e59f5beb4f28b9cf1ff4b9edc))
+* **research-frontend:** correct file size calculation in upload steps ([#178](https://github.com/hiperhealth/hiperhealth/issues/178)) ([5038fb8](https://github.com/hiperhealth/hiperhealth/commit/5038fb80bf7da2552ca581e8d00632492d9111ab))
+
+
+### Features
+
+* add FastAPI backend and wire with frontend ([#84](https://github.com/hiperhealth/hiperhealth/issues/84)) ([4e300ca](https://github.com/hiperhealth/hiperhealth/commit/4e300cac91c41074a0db876b283d4657e1de96ab))
+* **security:** add ASGI body size middleware to reject oversized requests ([#179](https://github.com/hiperhealth/hiperhealth/issues/179)) ([8d790e5](https://github.com/hiperhealth/hiperhealth/commit/8d790e529835c12cd47e557c9b1b7663cbc12b24))
+
 ## [0.3.1](https://github.com/hiperhealth/hiperhealth/compare/0.3.0...0.3.1) (2025-11-30)
 
 

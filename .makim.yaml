@@ -35,26 +35,6 @@ groups:
         run: |
           mkdocs serve --watch docs --config-file mkdocs.yaml
 
-  research:
-    tasks:
-      cli:
-        help: Run the Research CLI
-        dir: research/backend
-        run: python cli.py
-      backend:
-        help: Run the Research backend (FastAPI)
-        dir: research/backend
-        run: uvicorn app.main:app --reload
-      frontend:
-        help: Run the Research frontend (React/Vite)
-        dir: research/frontend
-        run: npm run dev
-      seed:
-        help: Run the script to migrate legacy patient data to the DB
-        dir: scripts
-        run: |
-          python migrate_json_to_db.py
-
   tests:
     tasks:
       linter:
@@ -78,7 +58,7 @@ groups:
         run: |
           pytest \
             --cov=hiperhealth \
-            --cov-fail-under=85 \
+            --cov-fail-under=92 \
             --cov-report term-missing \
             --no-cov-on-fail ${{ args.path }} ${{ args.params }}
 
@@ -125,22 +105,3 @@ groups:
         help: Auto-generate the FHIR models
         run: |
           python scripts/gen_models/gen_sqla.py
-          python scripts/gen_models/gen_sqlmodel.py
-
-  db:
-    help: Database related tasks
-    tasks:
-      setup:
-        help: Creates and migrates the database to the latest version
-        run: |
-           mkdir -p research/backend/data
-           alembic upgrade head
-      revision:
-        help: Autogenerates a new database revision script
-        args:
-          m:
-            help: The message for the revision
-            type: string
-            required: true
-        run: |
-          alembic revision --autogenerate -m "{{ args.m }}"

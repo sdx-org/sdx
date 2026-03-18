@@ -30,7 +30,7 @@ jobs:
           miniforge-version: latest
           environment-file: conda/dev.yaml
           channels: nodefaults,conda-forge
-          activate-environment: hiperhealth
+          activate-environment: hiperhealthlib
           auto-update-conda: true
           conda-solver: libmamba
 

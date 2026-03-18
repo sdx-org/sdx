@@ -1,4 +1,6 @@
-"""Schema package."""
+"""
+title: Schema package.
+"""
 
 from .clinical_outputs import LLMDiagnosis
 

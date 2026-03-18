@@ -1,7 +1,9 @@
-"""Test the extraction of medical report data."""
+"""
+title: Test the extraction of medical report data.
+"""
 
 import io
-import os
+import shutil
 
 from pathlib import Path
 
@@ -18,16 +20,24 @@ PDF_FILE = TEST_DATA_PATH / 'pdf_reports' / 'report-1.pdf'
 IMAGE_FILE = TEST_DATA_PATH / 'image_reports' / 'image-1.png'
 UNSUPPORTED_FILE = TEST_DATA_PATH / 'pdf_reports' / 'unsupported_file.txt'
 CORRUPT_PDF_FILE = TEST_DATA_PATH / 'pdf_reports' / 'corrupt_report.txt'
+HAS_TESSERACT = shutil.which('tesseract') is not None
 
 
 @pytest.fixture
 def extractor():
-    """Return a MedicalReportFileExtractor instance for testing."""
+    """
+    title: Return a MedicalReportFileExtractor instance for testing.
+    """
     return MedicalReportFileExtractor()
 
 
 def test_only_supported_files_can_be_extracted(extractor):
-    """Test that only supported files can be validated successfully."""
+    """
+    title: Test that only supported files can be validated successfully.
+    parameters:
+      extractor:
+        description: Value for extractor.
+    """
     extractor._validate_or_raise(PDF_FILE)
     extractor._validate_or_raise(IMAGE_FILE)
     with pytest.raises(MedicalReportExtractorError):
@@ -35,59 +45,90 @@ def test_only_supported_files_can_be_extracted(extractor):
 
 
 def test_extract_text_from_pdf_file(extractor):
-    """Test text extraction from PDF files returns valid string."""
+    """
+    title: Test text extraction from PDF files returns valid string.
+    parameters:
+      extractor:
+        description: Value for extractor.
+    """
     text = extractor._extract_text_from_pdf(PDF_FILE)
     assert isinstance(text, str)
     assert len(text) > 0
 
 
+@pytest.mark.skipif(not HAS_TESSERACT, reason='tesseract is not installed')
 def test_extract_text_from_image_file(extractor):
-    """Test text extraction from image files using OCR."""
+    """
+    title: Test text extraction from image files using OCR.
+    parameters:
+      extractor:
+        description: Value for extractor.
+    """
     text = extractor._extract_text_from_image(IMAGE_FILE)
     assert isinstance(text, str)
     assert len(text) > 0
 
 
 def test_extract_unsupported_file_raises(extractor):
-    """Test that unsupported file types raise appropriate errors."""
+    """
+    title: Test that unsupported file types raise appropriate errors.
+    parameters:
+      extractor:
+        description: Value for extractor.
+    """
     with pytest.raises(MedicalReportExtractorError):
         extractor._validate_or_raise(UNSUPPORTED_FILE)
 
 
 def test_extract_corrupt_pdf_raises(extractor):
-    """Test that corrupt PDF files raise TextExtractionError."""
+    """
+    title: Test that corrupt PDF files raise TextExtractionError.
+    parameters:
+      extractor:
+        description: Value for extractor.
+    """
     with pytest.raises(TextExtractionError):
         extractor._extract_text_from_pdf(CORRUPT_PDF_FILE)
 
 
-@pytest.mark.skipif(
-    not os.environ.get('OPENAI_API_KEY'), reason='OpenAI API key not available'
-)
 def test_extract_report_data_from_pdf_file(extractor):
-    """Test FHIR data extraction from PDF files."""
-    api_key = os.environ.get('OPENAI_API_KEY')  # use environment key
-    fhir_data = extractor.extract_report_data(PDF_FILE, api_key)
-    assert isinstance(fhir_data, dict)
-    assert len(fhir_data) > 0
-    expected_keys = {'Patient', 'Condition', 'Observation', 'DiagnosticReport'}
-    assert any(key in fhir_data for key in expected_keys)
+    """
+    title: Test structured text extraction payload from PDF files.
+    parameters:
+      extractor:
+        description: Value for extractor.
+    """
+    report = extractor.extract_report_data(PDF_FILE)
+    assert report['source_name'] == PDF_FILE.name
+    assert report['source_type'] == 'pdf'
+    assert report['mime_type'] == 'application/pdf'
+    assert isinstance(report['text'], str)
+    assert len(report['text']) > 0
 
 
-@pytest.mark.skipif(
-    not os.environ.get('OPENAI_API_KEY'), reason='OpenAI API key not available'
-)
+@pytest.mark.skipif(not HAS_TESSERACT, reason='tesseract is not installed')
 def test_extract_report_data_from_image_file(extractor):
-    """Test FHIR data extraction from image files."""
-    api_key = os.environ.get('OPENAI_API_KEY')  # use environment key
-    fhir_data = extractor.extract_report_data(IMAGE_FILE, api_key)
-    assert isinstance(fhir_data, dict)
-    assert len(fhir_data) > 0
-    expected_keys = {'Patient', 'Condition', 'Observation', 'DiagnosticReport'}
-    assert any(key in fhir_data for key in expected_keys)
+    """
+    title: Test structured text extraction payload from image files.
+    parameters:
+      extractor:
+        description: Value for extractor.
+    """
+    report = extractor.extract_report_data(IMAGE_FILE)
+    assert report['source_name'] == IMAGE_FILE.name
+    assert report['source_type'] == 'image'
+    assert report['mime_type'] == 'image/png'
+    assert isinstance(report['text'], str)
+    assert len(report['text']) > 0
 
 
 def test_support_inmemory_pdf(extractor):
-    """Test text extraction from in-memory PDF BytesIO objects."""
+    """
+    title: Test text extraction from in-memory PDF BytesIO objects.
+    parameters:
+      extractor:
+        description: Value for extractor.
+    """
     with open(PDF_FILE, 'rb') as f:
         pdf_bytes = io.BytesIO(f.read())
     text = extractor._extract_text_from_pdf(pdf_bytes)
@@ -95,8 +136,14 @@ def test_support_inmemory_pdf(extractor):
     assert len(text) > 0
 
 
+@pytest.mark.skipif(not HAS_TESSERACT, reason='tesseract is not installed')
 def test_support_inmemory_image(extractor):
-    """Test text extraction from in-memory image BytesIO objects."""
+    """
+    title: Test text extraction from in-memory image BytesIO objects.
+    parameters:
+      extractor:
+        description: Value for extractor.
+    """
     with open(IMAGE_FILE, 'rb') as f:
         image_bytes = io.BytesIO(f.read())
     text = extractor._extract_text_from_image(image_bytes)
@@ -105,7 +152,24 @@ def test_support_inmemory_image(extractor):
 
 
 def test_empty_inmemory_file_raises(extractor):
-    """Test that empty in-memory streams raise FileNotFoundError."""
+    """
+    title: Test that empty in-memory streams raise FileNotFoundError.
+    parameters:
+      extractor:
+        description: Value for extractor.
+    """
     empty_stream = io.BytesIO(b'')
     with pytest.raises(FileNotFoundError):
         extractor._validate_or_raise(empty_stream)
+
+
+def test_extract_text_public_helper_matches_payload_text(extractor):
+    """
+    title: Public raw-text helper should match the structured payload content.
+    parameters:
+      extractor:
+        description: Value for extractor.
+    """
+    text = extractor.extract_text(PDF_FILE)
+    report = extractor.extract_report_data(PDF_FILE)
+    assert text == report['text']

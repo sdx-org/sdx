@@ -1,1 +1,3 @@
-"""Models package."""
+"""
+title: Models package.
+"""

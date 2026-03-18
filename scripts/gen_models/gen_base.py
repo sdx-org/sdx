@@ -1,4 +1,6 @@
-"""Base script for generating models."""
+"""
+title: Base script for generating models.
+"""
 
 from __future__ import annotations
 
@@ -6,7 +8,6 @@ import inspect
 import pkgutil
 
 from types import ModuleType
-from typing import Dict, Type
 
 from hiperhealth.schema.fhirx import BaseLanguage
 from pydantic import BaseModel
@@ -19,13 +20,16 @@ PACKAGE_PATHS = [
 IGNORED_CLASSES = [BaseLanguage, BaseModel]
 
 
-def iter_pydantic_models() -> Dict[str, Type[BaseModel]]:
+def iter_pydantic_models() -> dict[str, type[BaseModel]]:
     """
-    Yield (qualified_name, model_cls).
-
-    Yield values for every subclass of BaseModel found in PACKAGE_PATHS.
+    title: Yield (qualified_name, model_cls).
+    summary: >-
+      Yield values for every subclass of BaseModel found in PACKAGE_PATHS.
+    returns:
+      type: dict[str, type[BaseModel]]
+      description: Return value.
     """
-    discovered: dict[str, Type[BaseModel]] = {}
+    discovered: dict[str, type[BaseModel]] = {}
     for module_path in PACKAGE_PATHS:
         module: ModuleType = __import__(module_path, fromlist=['*'])
         # Walk submodules in case of package
@@ -41,15 +45,22 @@ def iter_pydantic_models() -> Dict[str, Type[BaseModel]]:
     return discovered
 
 
-def is_concrete_model(model_cls: Type[BaseModel]) -> bool:
+def is_concrete_model(model_cls: type[BaseModel]) -> bool:
     """
-    Return True if `model_cls` should be mapped to a table.
-
-    Heuristics
-    ----------
-    1. The class advertises itself as abstract via `__abstract__ = True`.
-    2. Inner `Config` / `model_config` sets `table_abstract = True`.
-    3. No own fields ➜ skip (helper alias such as BaseLanguage).
+    title: Return True if `model_cls` should be mapped to a table.
+    summary: |-
+      Heuristics
+      ----------
+      1. The class advertises itself as abstract via `__abstract__ = True`.
+      2. Inner `Config` / `model_config` sets `table_abstract = True`.
+      3. No own fields ➜ skip (helper alias such as BaseLanguage).
+    parameters:
+      model_cls:
+        type: type[BaseModel]
+        description: Value for model_cls.
+    returns:
+      type: bool
+      description: Return value.
     """
     # Rule 1: explicit marker
     if getattr(model_cls, '__abstract__', False):

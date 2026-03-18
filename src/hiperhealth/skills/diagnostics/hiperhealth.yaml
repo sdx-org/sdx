@@ -1,0 +1,11 @@
+name: hiperhealth.diagnostics
+version: 0.4.0
+entry_point: "core:DiagnosticsSkill"
+stages:
+  - diagnosis
+  - exam
+description: >-
+  Core differential diagnosis and exam suggestion powered by LLM.
+author: "HiperHealth Team"
+license: "BSD-3-Clause"
+homepage: "https://github.com/hiperhealth/hiperhealth"

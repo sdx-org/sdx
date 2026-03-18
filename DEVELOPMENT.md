@@ -55,9 +55,19 @@ dependencies, virtual environments, and package versions. Uv/Setuptools also
 includes features such as dependency resolution, lock files, and publishing to
 PyPI.
 
+### Tech Stack Overview
+
+As the core clinical AI engine, this repository relies on:
+
+- **Python 3.10+** for core logic.
+- **LiteLLM** for flexible, provider-agnostic AI model integration.
+- **Pydantic / FHIR** for strict medical data validation.
+- **Douki** for docstring and documentation generation.
+- **Makim** as the task runner.
+
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.10+
 - [Conda](https://github.com/conda-forge/miniforge?tab=readme-ov-file#download)
   installed on your system.
 
@@ -94,21 +104,16 @@ PyPI.
     ./scripts/install-dev.sh
     ```
 
-4.  **Set Up the Database:** Our `makim` task runner simplifies database setup.
-    This command runs Alembic to create the `db.sqlite` file and applies all
-    migrations.
+4.  **(Optional) Set Up API Keys:** Note: The core `hiperhealth` library is
+    designed to be functional without external dependencies. However, specific
+    modules (such as certain AI Agents or evaluation scripts) may optionally
+    require API keys (e.g., `OPENAI_API_KEY`).
 
-    ```bash
-    makim db.setup
-    ```
+    If you are working on a module that requires external services:
 
-5.  **(Optional) Set Up API Keys:** Certain tests and features that interact
-    with external services (e.g., OpenAI) require API keys. Create a `.env` file
-    at `.envs/.env` and add your keys there.
-    ```dotenv
-    # In .envs/.env
-    OPENAI_API_KEY="your-key-here"
-    ```
+    1. Create a .env file at the root or within .envs/.env.
+
+    2. Add the required keys as environment variables.
 
 ---
 
@@ -117,54 +122,17 @@ PyPI.
 All common development tasks are managed via `makim` commands defined in
 `.makim.yaml`.
 
-### Running the Applications
-
-- **To run the Research Frontend:**
-
-  ```bash
-  makim research.frontend
-  ```
-
-  The app will be available at `http://127.0.0.1:5173`.
-
-- **To run the Research Backend:**
-
-  ```bash
-  makim research.backend
-  ```
-
-  The server will listen at `http://127.0.0.1:8000`
-
-- **To run the Research CLI:**
-  ```bash
-  makim research.cli
-  ```
-
-### Database Migrations
-
-The database schema is managed with Alembic. The schema's source of truth is the
-set of Pydantic models in `src/hiperhealth/schema/`, which are used to
-auto-generate the SQLAlchemy ORM models.
+The core of the `hiperhealth` library is its set of Pydantic models in
+`src/hiperhealth/schema/`. These serve as the source of truth for all medical
+data structures.
 
 If you modify a Pydantic schema that requires a database change:
 
-1.  **Regenerate the SQLAlchemy Models:**
+- **Regenerate the SQLAlchemy Models:**
 
-    ```bash
-    makim models.sqla
-    ```
-
-2.  **Generate a New Migration Script:** Provide a descriptive message for the
-    change.
-
-    ```bash
-    makim db.revision -m "A short description of the schema change"
-    ```
-
-3.  **Apply the Migration to Your Local Database:**
-    ```bash
-    makim db.setup
-    ```
+  ```bash
+  makim gen.fhir-models
+  ```
 
 ### Code Style & Linting
 
@@ -190,7 +158,7 @@ configured in `.pre-commit-config.yaml`.
 
 - **Run Hooks Manually:** To run the checks on all files at any time:
   ```bash
-  makim test.pre-commit
+  makim tests.ci
   ```
 
 ### Running Tests
@@ -200,12 +168,12 @@ Our test suite uses `pytest`.
 - **Run All Tests:**
 
   ```bash
-  makim tests.run
+  makim tests.unit
   ```
 
 - **Run Tests with Coverage Report:**
   ```bash
-  makim tests.coverage
+  makim tests.ci
   ```
 
 ---
@@ -256,21 +224,64 @@ If you are proposing a feature:
 
 ## 3. Architectural Overview
 
-The `hiperhealth` library follows a "schema-first" approach for its database
-models.
+### Pipeline and Skills
+
+The library is built around a **skill-based pipeline** architecture:
+
+```
+StageRunner (executes any stage independently)
+    |
+    +-- Registered Skills (run in registration order per stage)
+    |   +-- PrivacySkill        -> screening, intake
+    |   +-- ExtractionSkill     -> intake
+    |   +-- DiagnosticsSkill    -> diagnosis, exam
+    |   +-- (custom skills)     -> any combination of stages
+    |
+    +-- Usage patterns:
+        +-- runner.run("screening", ctx)     # Monday, nurse
+        +-- runner.run("diagnosis", ctx)     # Wednesday, physician A
+        +-- runner.run("treatment", ctx)     # Friday, physician B
+        +-- runner.run_many([...], ctx)      # batch
+```
+
+Key concepts:
+
+- **Stages** are independently executable clinical phases (screening, intake,
+  diagnosis, exam, treatment, prescription)
+- **Skills** are composable plugins (`BaseSkill` subclasses) that declare which
+  stages they affect via `SkillMetadata`
+- **PipelineContext** is a Pydantic model that carries all data between stages
+  and serializes to JSON for persistence between invocations
+- **StageRunner** orchestrates skill execution: for each stage, it runs all
+  matching skills' `pre()` -> `execute()` -> `post()` hooks in registration
+  order
+- **SkillRegistry** manages skill installation (from local paths or Git URLs)
+  and loading. Skills are stored in `~/.hiperhealth/skills/` and activated via
+  `runner.register("skill-name")`
+- **hiperhealth.yaml** is a metadata file every skill project must include,
+  declaring name, version, entry point, and stages
+
+Source layout:
+
+- `src/hiperhealth/pipeline/` — core engine (stages, context, skill base
+  classes, runner, registry, discovery)
+- `src/hiperhealth/skills/` — built-in skills (diagnostics, extraction, privacy)
+- `src/hiperhealth/agents/` — shared utilities (e.g. `client.py`) and
+  backward-compatible re-exports from `skills/`
+
+See [Creating Skills](docs/skills.md) for a guide on writing custom skills.
+
+### Schema-First Data Layer
+
+The library follows a "schema-first" approach for its database models.
 
 1.  **Pydantic Schemas (`src/hiperhealth/schema/`)**: These are the primary
     source of truth. They define the data structures and validation rules for
     our application.
 2.  **SQLAlchemy Models (`src/hiperhealth/models/sqla/`)**: These ORM models are
     **auto-generated** from the Pydantic schemas using the
-    `scripts/gen_models/gen_sqla.py` script (`makim models.sqla`). **Do not edit
-    these files manually.**
-3.  **Alembic Migrations (`migrations/`)**: Alembic uses the generated
-    SQLAlchemy models to automatically create database migration scripts.
-
-This ensures our application's data layer and database schema are always
-perfectly synchronized.
+    `scripts/gen_models/gen_sqla.py` script (`makim gen.fhir-models`). **Do not
+    edit these files manually.**
 
 ---
 

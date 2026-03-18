@@ -1,4 +1,4 @@
-name: hiperhealth
+name: hiperhealthlib
 channels:
   - conda-forge
   - defaults
@@ -6,9 +6,10 @@ channels:
 dependencies:
   - python >=3.10,<=3.13
   - pip
-  - nodejs  # used by semantic-release
+  - nodejs # used by semantic-release
   - tesseract
   - libmagic
   - uv
+  - compilers # conda-forge meta-package: selects the right C/C++ toolchain per platform
   - pip:
-      - paginate==0.5.6  # distlib issue
+      - paginate==0.5.6 # distlib issue
