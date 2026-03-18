@@ -268,9 +268,7 @@ export const consultationAPI={
      * Upload wearable data
      * POST /api/consultations/{patient_id}/wearable-data/upload
      */
-    async uploadWearableData(patientId,file){
-        const formData=new FormData();
-        formData.append('file',file);
+    async uploadWearableData(patientId,formData){
         // TODO: add multiple file upload
         const response= await fetch(
             api(`/api/consultations/${patientId}/wearable-data/upload`),
