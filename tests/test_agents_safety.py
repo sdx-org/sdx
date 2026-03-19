@@ -12,9 +12,8 @@ import os
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 import hiperhealth.agents.client as client_mod
+import pytest
 
 from hiperhealth.agents.safety.topic_guard import (
     DEFAULT_BANNED_TOPICS,
