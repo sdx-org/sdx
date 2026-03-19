@@ -3,12 +3,14 @@ title: Shared structured-LLM helper used by all agents.
 summary: |-
   * ``chat_structured`` validates against any Pydantic model.
   * ``chat`` is a convenience wrapper that validates with ``LLMDiagnosis``.
+  * Runs optional safety guard (set HIPERHEALTH_SAFETY_ENABLED=1).
   * Persists every normalized reply under ``data/llm_raw/<sid>_<UTC>.json``.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 import uuid
 
 from datetime import datetime, timezone
@@ -37,6 +39,8 @@ TModel = TypeVar('TModel', bound=BaseModel)
 _log = logging.getLogger(__name__)
 _RAW_DIR = Path('data') / 'llm_raw'
 
+_SAFETY_ENABLED_VALUES = frozenset({'1', 'true', 'yes', 'on'})
+
 
 class LLMResponseValidationError(ValueError):
     """
@@ -60,6 +64,35 @@ def dump_llm_json(text: str, sid: str | None) -> None:
     ts = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     suffix = sid or uuid.uuid4().hex[:8]
     (_RAW_DIR / f'{ts}_{suffix}.json').write_text(text, encoding='utf-8')
+
+
+def _check_safety(result: LLMDiagnosis) -> None:
+    """
+    title: Run topic-guard when HIPERHEALTH_SAFETY_ENABLED is set.
+    summary: |-
+      Imports are lazy so that ``transformers`` remains an optional dependency.
+      Set HIPERHEALTH_SAFETY_ENABLED=1 and install hiperhealth[safety] to
+      activate the guardrail.
+    parameters:
+      result:
+        type: LLMDiagnosis
+        description: Validated LLM output to inspect.
+    raises:
+      ImportError: When safety is enabled but transformers is not installed.
+      UnsafeOutputError: When a banned topic is detected in the output.
+    """
+    if os.getenv('HIPERHEALTH_SAFETY_ENABLED', '').strip().lower() not in (
+        _SAFETY_ENABLED_VALUES
+    ):
+        return
+    try:
+        from hiperhealth.agents.safety.topic_guard import check_output_safety
+    except ImportError as exc:
+        raise ImportError(
+            "HIPERHEALTH_SAFETY_ENABLED is set but 'transformers' is not "
+            "installed. Run: pip install 'hiperhealth[safety]'"
+        ) from exc
+    check_output_safety(result)
 
 
 @retry(
@@ -154,6 +187,9 @@ def chat(
 ) -> LLMDiagnosis:
     """
     title: Send system / user prompts and return a validated ``LLMDiagnosis``.
+    summary: |-
+      Runs the safety guard (if HIPERHEALTH_SAFETY_ENABLED=1) before
+      persisting the response to disk.
     parameters:
       system:
         type: str
@@ -174,14 +210,22 @@ def chat(
       type: LLMDiagnosis
       description: Return value.
     """
-    return chat_structured(
-        system,
-        user,
-        LLMDiagnosis,
-        session_id=session_id,
-        llm=llm,
-        llm_settings=llm_settings,
-    )
+    effective_llm = llm or _get_llm(llm_settings)
+
+    try:
+        result = _call_llm_structured(effective_llm, system, user, LLMDiagnosis)
+    except (ValidationError, TypeError) as exc:
+        raise LLMResponseValidationError(
+            f'LLM response is not valid LLMDiagnosis: {exc}'
+        ) from exc
+
+    # Safety check runs before persistence — unsafe content is never saved.
+    _check_safety(result)
+
+    effective_settings = llm_settings or load_diagnostics_llm_settings()
+    if effective_settings.persist_raw:
+        dump_llm_json(result.model_dump_json(), session_id)
+    return result
 
 
 def _get_llm(llm_settings: LLMSettings | None) -> StructuredLLM:

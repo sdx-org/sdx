@@ -88,6 +88,9 @@ dev = [
   "makim ==1.27.0",
   "python-multipart >=0.0.20",
 ]
+safety = [
+  "transformers >=4.40,<5",
+]
 
 [tool.bandit]
 exclude_dirs = ["tests"]
