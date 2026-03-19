@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
     
     
       
@@ -291,6 +291,114 @@
   
   
     <li class="md-nav__item">
+      <a href="../llm_configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Creating Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../informed_consent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informed Consent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../changelog/" class="md-nav__link">
         
   
@@ -423,6 +531,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#tech-stack-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tech Stack Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -460,28 +579,6 @@
   
     <nav class="md-nav" aria-label="2. Development Workflow">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#running-the-applications" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running the Applications
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#database-migrations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Migrations
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#code-style-linting" class="md-nav__link">
@@ -591,6 +688,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="3. Architectural Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-and-skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline and Skills
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema-first-data-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema-First Data Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -670,10 +795,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -691,8 +816,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -727,6 +852,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -735,7 +864,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -757,14 +886,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_9_1" id="__nav_9_1_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_1">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -805,7 +934,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_2" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -827,14 +956,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5_1_2" id="__nav_5_1_2_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_9_1_2" id="__nav_9_1_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_1_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_1_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -897,7 +1026,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_2_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_2_3" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -919,14 +1048,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5_1_2_3" id="__nav_5_1_2_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_9_1_2_3" id="__nav_9_1_2_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_5_1_2_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_1_2_3">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_2_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -999,7 +1128,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_2_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_2_4" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1021,14 +1150,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5_1_2_4" id="__nav_5_1_2_4_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_9_1_2_4" id="__nav_9_1_2_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_5_1_2_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_1_2_4">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_2_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1146,6 +1275,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../api/llm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> llm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
       
@@ -1163,7 +1320,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_4" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1185,14 +1342,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5_1_3" id="__nav_5_1_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_9_1_4" id="__nav_9_1_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_1_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_1_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1227,7 +1384,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_3_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_4_2" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1249,14 +1406,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5_1_3_2" id="__nav_5_1_3_2_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_9_1_4_2" id="__nav_9_1_4_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_5_1_3_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_1_3_2">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_4_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1327,6 +1484,18 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1335,7 +1504,275 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../api/pipeline/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> pipeline
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_9_1_5" id="__nav_9_1_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> pipeline
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/pipeline/context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/pipeline/discovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> discovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/pipeline/registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/pipeline/runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> runner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/pipeline/session/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> session
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/pipeline/skill/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> skill
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/pipeline/stages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> stages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_6" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1357,14 +1794,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5_1_4" id="__nav_5_1_4_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_9_1_6" id="__nav_9_1_6_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_1_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_1_4">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1439,7 +1876,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_7" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1461,14 +1898,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5_1_5" id="__nav_5_1_5_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_9_1_7" id="__nav_9_1_7_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_1_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_1_5">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1578,15 +2015,147 @@
   
   
   
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../api/skills/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> skills
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_9_1_8" id="__nav_9_1_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> skills
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_8_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../api/skills/diagnostics/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> diagnostics
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_9_1_8_2" id="__nav_9_1_8_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_8_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_8_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> diagnostics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../api/sdx/" class="md-nav__link">
+      <a href="../api/skills/diagnostics/core/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> sdx
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> core
   
 
     
@@ -1595,6 +2164,282 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_8_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../api/skills/extraction/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> extraction
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_9_1_8_3" id="__nav_9_1_8_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_8_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_8_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> extraction
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/skills/extraction/medical_reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> medical_reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/skills/extraction/skill/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> skill
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/skills/extraction/wearable/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> wearable
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_8_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../api/skills/privacy/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> privacy
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_9_1_8_4" id="__nav_9_1_8_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_8_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> privacy
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/skills/privacy/deidentifier/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> deidentifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1650,14 +2495,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../example/" class="md-nav__link">
+      <a href="../example.ipynb" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    hiperhealth
+    Notebook page
   
 
     
@@ -1742,6 +2587,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#tech-stack-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tech Stack Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1779,28 +2635,6 @@
   
     <nav class="md-nav" aria-label="2. Development Workflow">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#running-the-applications" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running the Applications
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#database-migrations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Migrations
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#code-style-linting" class="md-nav__link">
@@ -1909,6 +2743,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="3. Architectural Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-and-skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline and Skills
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema-first-data-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema-First Data Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2026,17 +2888,20 @@ building and publishing Python packages. It allows us to easily manage
 dependencies, virtual environments, and package versions. Uv/Setuptools also
 includes features such as dependency resolution, lock files, and publishing to
 PyPI.</p>
+<h3 id="tech-stack-overview">Tech Stack Overview</h3>
+<p>As the core clinical AI engine, this repository relies on:</p>
+<ul>
+<li><strong>Python 3.10+</strong> for core logic.</li>
+<li><strong>LiteLLM</strong> for flexible, provider-agnostic AI model integration.</li>
+<li><strong>Pydantic / FHIR</strong> for strict medical data validation.</li>
+<li><strong>Douki</strong> for docstring and documentation generation.</li>
+<li><strong>Makim</strong> as the task runner.</li>
+</ul>
 <h3 id="prerequisites">Prerequisites</h3>
 <ul>
-<li>Python 3.11+</li>
+<li>Python 3.10+</li>
 <li><a href="https://github.com/conda-forge/miniforge?tab=readme-ov-file#download">Conda</a>
   installed on your system.</li>
-<li><strong>Linux only</strong>: C compiler toolchain and Python headers, required to compile C
-  extensions used by some pre-commit hooks (e.g. <code class="language-python highlight"><span class="n">djlint</span></code> depends on the <code class="language-python highlight"><span class="n">regex</span></code>
-  package):
-  <div class="language-bash highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>build-essential<span class="w"> </span>python3-dev<span class="w">   </span><span class="c1"># Debian/Ubuntu</span>
-<span class="c1"># or: sudo dnf install gcc gcc-c++ make python3-devel   # Fedora/RHEL</span>
-</code></pre></div></li>
 </ul>
 <h3 id="installation">Installation</h3>
 <ol>
@@ -2066,66 +2931,34 @@ mamba<span class="w"> </span>activate<span class="w"> </span>hiperhealth
 </code></pre></div>
 </li>
 <li>
-<p><strong>Set Up the Database:</strong> Our <code class="language-python highlight"><span class="n">makim</span></code> task runner simplifies database setup.
-    This command runs Alembic to create the <code class="language-python highlight"><span class="n">db</span><span class="o">.</span><span class="n">sqlite</span></code> file and applies all
-    migrations.</p>
-<div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>db.setup
-</code></pre></div>
+<p><strong>(Optional) Set Up API Keys:</strong> Note: The core <code class="language-python highlight"><span class="n">hiperhealth</span></code> library is
+    designed to be functional without external dependencies. However, specific
+    modules (such as certain AI Agents or evaluation scripts) may optionally
+    require API keys (e.g., <code class="language-python highlight"><span class="n">OPENAI_API_KEY</span></code>).</p>
+<p>If you are working on a module that requires external services:</p>
+<ol>
+<li>
+<p>Create a .env file at the root or within .envs/.env.</p>
 </li>
 <li>
-<p><strong>(Optional) Set Up API Keys:</strong> Certain tests and features that interact
-    with external services (e.g., OpenAI) require API keys. Create a <code class="language-python highlight"><span class="o">.</span><span class="n">env</span></code> file
-    at <code class="language-python highlight"><span class="o">.</span><span class="n">envs</span><span class="o">/.</span><span class="n">env</span></code> and add your keys there.
-    <div class="language-text highlight"><pre><span></span><code># In .envs/.env
-OPENAI_API_KEY=&quot;your-key-here&quot;
-</code></pre></div></p>
+<p>Add the required keys as environment variables.</p>
+</li>
+</ol>
 </li>
 </ol>
 <hr />
 <h2 id="2-development-workflow">2. Development Workflow</h2>
 <p>All common development tasks are managed via <code class="language-python highlight"><span class="n">makim</span></code> commands defined in
 <code class="language-python highlight"><span class="o">.</span><span class="n">makim</span><span class="o">.</span><span class="n">yaml</span></code>.</p>
-<h3 id="running-the-applications">Running the Applications</h3>
-<ul>
-<li><strong>To run the Research Frontend:</strong></li>
-</ul>
-<div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>research.frontend
-</code></pre></div>
-<p>The app will be available at <code class="language-python highlight"><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">5173</span></code>.</p>
-<ul>
-<li><strong>To run the Research Backend:</strong></li>
-</ul>
-<div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>research.backend
-</code></pre></div>
-<p>The server will listen at <code class="language-python highlight"><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">8000</span></code></p>
-<ul>
-<li><strong>To run the Research CLI:</strong>
-  <div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>research.cli
-</code></pre></div></li>
-</ul>
-<h3 id="database-migrations">Database Migrations</h3>
-<p>The database schema is managed with Alembic. The schema's source of truth is the
-set of Pydantic models in <code class="language-python highlight"><span class="n">src</span><span class="o">/</span><span class="n">hiperhealth</span><span class="o">/</span><span class="n">schema</span><span class="o">/</span></code>, which are used to
-auto-generate the SQLAlchemy ORM models.</p>
+<p>The core of the <code class="language-python highlight"><span class="n">hiperhealth</span></code> library is its set of Pydantic models in
+<code class="language-python highlight"><span class="n">src</span><span class="o">/</span><span class="n">hiperhealth</span><span class="o">/</span><span class="n">schema</span><span class="o">/</span></code>. These serve as the source of truth for all medical
+data structures.</p>
 <p>If you modify a Pydantic schema that requires a database change:</p>
-<ol>
-<li>
-<p><strong>Regenerate the SQLAlchemy Models:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>models.sqla
+<ul>
+<li><strong>Regenerate the SQLAlchemy Models:</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>gen.fhir-models
 </code></pre></div>
-</li>
-<li>
-<p><strong>Generate a New Migration Script:</strong> Provide a descriptive message for the
-    change.</p>
-<div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>db.revision<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;A short description of the schema change&quot;</span>
-</code></pre></div>
-</li>
-<li>
-<p><strong>Apply the Migration to Your Local Database:</strong>
-    <div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>db.setup
-</code></pre></div></p>
-</li>
-</ol>
 <h3 id="code-style-linting">Code Style &amp; Linting</h3>
 <p>We enforce code quality and a consistent style using <code class="language-python highlight"><span class="n">pre</span><span class="o">-</span><span class="n">commit</span></code> hooks,
 configured in <code class="language-python highlight"><span class="o">.</span><span class="n">pre</span><span class="o">-</span><span class="n">commit</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">yaml</span></code>.</p>
@@ -2143,7 +2976,7 @@ configured in <code class="language-python highlight"><span class="o">.</span><s
   discussion, use the <code class="language-python highlight"><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">verify</span></code> option with <code class="language-python highlight"><span class="n">git</span> <span class="n">commit</span></code>.</p>
 <ul>
 <li><strong>Run Hooks Manually:</strong> To run the checks on all files at any time:
-  <div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>test.pre-commit
+  <div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>tests.ci
 </code></pre></div></li>
 </ul>
 <h3 id="running-tests">Running Tests</h3>
@@ -2151,11 +2984,11 @@ configured in <code class="language-python highlight"><span class="o">.</span><s
 <ul>
 <li><strong>Run All Tests:</strong></li>
 </ul>
-<div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>tests.run
+<div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>tests.unit
 </code></pre></div>
 <ul>
 <li><strong>Run Tests with Coverage Report:</strong>
-  <div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>tests.coverage
+  <div class="language-bash highlight"><pre><span></span><code>makim<span class="w"> </span>tests.ci
 </code></pre></div></li>
 </ul>
 <hr />
@@ -2191,21 +3024,59 @@ such.</p>
 </ul>
 <hr />
 <h2 id="3-architectural-overview">3. Architectural Overview</h2>
-<p>The <code class="language-python highlight"><span class="n">hiperhealth</span></code> library follows a "schema-first" approach for its database
-models.</p>
+<h3 id="pipeline-and-skills">Pipeline and Skills</h3>
+<p>The library is built around a <strong>skill-based pipeline</strong> architecture:</p>
+<div class="language-text highlight"><pre><span></span><code>StageRunner (executes any stage independently)
+    |
+    +-- Registered Skills (run in registration order per stage)
+    |   +-- PrivacySkill        -&gt; screening, intake
+    |   +-- ExtractionSkill     -&gt; intake
+    |   +-- DiagnosticsSkill    -&gt; diagnosis, exam
+    |   +-- (custom skills)     -&gt; any combination of stages
+    |
+    +-- Usage patterns:
+        +-- runner.run(&quot;screening&quot;, ctx)     # Monday, nurse
+        +-- runner.run(&quot;diagnosis&quot;, ctx)     # Wednesday, physician A
+        +-- runner.run(&quot;treatment&quot;, ctx)     # Friday, physician B
+        +-- runner.run_many([...], ctx)      # batch
+</code></pre></div>
+<p>Key concepts:</p>
+<ul>
+<li><strong>Stages</strong> are independently executable clinical phases (screening, intake,
+  diagnosis, exam, treatment, prescription)</li>
+<li><strong>Skills</strong> are composable plugins (<code class="language-python highlight"><span class="n">BaseSkill</span></code> subclasses) that declare which
+  stages they affect via <code class="language-python highlight"><span class="n">SkillMetadata</span></code></li>
+<li><strong>PipelineContext</strong> is a Pydantic model that carries all data between stages
+  and serializes to JSON for persistence between invocations</li>
+<li><strong>StageRunner</strong> orchestrates skill execution: for each stage, it runs all
+  matching skills' <code class="language-python highlight"><span class="n">pre</span><span class="p">()</span></code> -&gt; <code class="language-python highlight"><span class="n">execute</span><span class="p">()</span></code> -&gt; <code class="language-python highlight"><span class="n">post</span><span class="p">()</span></code> hooks in registration
+  order</li>
+<li><strong>SkillRegistry</strong> manages skill installation (from local paths or Git URLs)
+  and loading. Skills are stored in <code class="language-python highlight"><span class="o">~/.</span><span class="n">hiperhealth</span><span class="o">/</span><span class="n">skills</span><span class="o">/</span></code> and activated via
+  <code class="language-python highlight"><span class="n">runner</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;skill-name&quot;</span><span class="p">)</span></code></li>
+<li><strong>hiperhealth.yaml</strong> is a metadata file every skill project must include,
+  declaring name, version, entry point, and stages</li>
+</ul>
+<p>Source layout:</p>
+<ul>
+<li><code class="language-python highlight"><span class="n">src</span><span class="o">/</span><span class="n">hiperhealth</span><span class="o">/</span><span class="n">pipeline</span><span class="o">/</span></code> — core engine (stages, context, skill base
+  classes, runner, registry, discovery)</li>
+<li><code class="language-python highlight"><span class="n">src</span><span class="o">/</span><span class="n">hiperhealth</span><span class="o">/</span><span class="n">skills</span><span class="o">/</span></code> — built-in skills (diagnostics, extraction, privacy)</li>
+<li><code class="language-python highlight"><span class="n">src</span><span class="o">/</span><span class="n">hiperhealth</span><span class="o">/</span><span class="n">agents</span><span class="o">/</span></code> — shared utilities (e.g. <code class="language-python highlight"><span class="n">client</span><span class="o">.</span><span class="n">py</span></code>) and
+  backward-compatible re-exports from <code class="language-python highlight"><span class="n">skills</span><span class="o">/</span></code></li>
+</ul>
+<p>See <a href="docs/skills.md">Creating Skills</a> for a guide on writing custom skills.</p>
+<h3 id="schema-first-data-layer">Schema-First Data Layer</h3>
+<p>The library follows a "schema-first" approach for its database models.</p>
 <ol>
 <li><strong>Pydantic Schemas (<code class="language-python highlight"><span class="n">src</span><span class="o">/</span><span class="n">hiperhealth</span><span class="o">/</span><span class="n">schema</span><span class="o">/</span></code>)</strong>: These are the primary
     source of truth. They define the data structures and validation rules for
     our application.</li>
 <li><strong>SQLAlchemy Models (<code class="language-python highlight"><span class="n">src</span><span class="o">/</span><span class="n">hiperhealth</span><span class="o">/</span><span class="n">models</span><span class="o">/</span><span class="n">sqla</span><span class="o">/</span></code>)</strong>: These ORM models are
     <strong>auto-generated</strong> from the Pydantic schemas using the
-    <code class="language-python highlight"><span class="n">scripts</span><span class="o">/</span><span class="n">gen_models</span><span class="o">/</span><span class="n">gen_sqla</span><span class="o">.</span><span class="n">py</span></code> script (<code class="language-python highlight"><span class="n">makim</span> <span class="n">models</span><span class="o">.</span><span class="n">sqla</span></code>). <strong>Do not edit
-    these files manually.</strong></li>
-<li><strong>Alembic Migrations (<code class="language-python highlight"><span class="n">migrations</span><span class="o">/</span></code>)</strong>: Alembic uses the generated
-    SQLAlchemy models to automatically create database migration scripts.</li>
+    <code class="language-python highlight"><span class="n">scripts</span><span class="o">/</span><span class="n">gen_models</span><span class="o">/</span><span class="n">gen_sqla</span><span class="o">.</span><span class="n">py</span></code> script (<code class="language-python highlight"><span class="n">makim</span> <span class="n">gen</span><span class="o">.</span><span class="n">fhir</span><span class="o">-</span><span class="n">models</span></code>). <strong>Do not
+    edit these files manually.</strong></li>
 </ol>
-<p>This ensures our application's data layer and database schema are always
-perfectly synchronized.</p>
 <hr />
 <h2 id="pull-request-guidelines">Pull Request Guidelines</h2>
 <p>Before you submit a pull request, check that it meets these guidelines:</p>

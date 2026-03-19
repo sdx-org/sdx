@@ -2,110 +2,190 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://hiperhealth.com/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/changelog/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/contributing/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/example/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/informed_consent/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/installation/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/llm_configuration/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/skills/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/usage/</loc>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/SUMMARY/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
-         <loc>https://hiperhealth.com/api/sdx/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <loc>https://hiperhealth.com/api/llm/</loc>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/utils/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/agents/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/agents/client/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/agents/diagnostics/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/agents/diagnostics/core/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/agents/extraction/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/agents/extraction/medical_reports/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/agents/extraction/wearable/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/agents/treatments/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/models/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/models/sqla/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/models/sqla/fhirx/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/pipeline/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/pipeline/context/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/pipeline/discovery/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/pipeline/registry/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/pipeline/runner/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/pipeline/session/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/pipeline/skill/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/pipeline/stages/</loc>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/privacy/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/privacy/deidentifier/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/schema/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/schema/clinical_outputs/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/schema/fhirx/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
     </url>
     <url>
          <loc>https://hiperhealth.com/api/schema/human_evaluations/</loc>
-         <lastmod>2026-03-08</lastmod>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/skills/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/skills/diagnostics/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/skills/diagnostics/core/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/skills/extraction/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/skills/extraction/medical_reports/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/skills/extraction/skill/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/skills/extraction/wearable/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/skills/privacy/</loc>
+         <lastmod>2026-03-19</lastmod>
+    </url>
+    <url>
+         <loc>https://hiperhealth.com/api/skills/privacy/deidentifier/</loc>
+         <lastmod>2026-03-19</lastmod>
     </url>
 </urlset>
