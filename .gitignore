@@ -151,3 +151,11 @@ research/backend/data
 research-poc/backend/backend.db
 uvicorn.log
 uvicorn.pid
+
+
+.quarto/
+*.quarto_ipynb
+docs/data
+
+# AI
+PLAN.md

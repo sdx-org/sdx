@@ -7,12 +7,20 @@ summary: |-
 
 from __future__ import annotations
 
+import logging
 import uuid
 
 from datetime import datetime, timezone
 from pathlib import Path
 
 from pydantic import ValidationError
+from tenacity import (
+    before_sleep_log,
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from hiperhealth.llm import (
     LLMSettings,
@@ -22,6 +30,7 @@ from hiperhealth.llm import (
 )
 from hiperhealth.schema.clinical_outputs import LLMDiagnosis
 
+_log = logging.getLogger(__name__)
 _RAW_DIR = Path('data') / 'llm_raw'
 
 
@@ -47,6 +56,36 @@ def dump_llm_json(text: str, sid: str | None) -> None:
     ts = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     suffix = sid or uuid.uuid4().hex[:8]
     (_RAW_DIR / f'{ts}_{suffix}.json').write_text(text, encoding='utf-8')
+
+
+@retry(
+    retry=retry_if_exception_type((ValidationError, TypeError)),
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=1, max=4),
+    before_sleep=before_sleep_log(_log, logging.WARNING),
+    reraise=True,
+)
+def _call_llm(
+    llm: StructuredLLM,
+    system: str,
+    user: str,
+) -> LLMDiagnosis:
+    """
+    title: Call the LLM and return a validated LLMDiagnosis.
+    summary: |-
+      Retries up to 3 attempts on transient validation failures
+      (empty responses, malformed JSON).
+    parameters:
+      llm:
+        type: StructuredLLM
+      system:
+        type: str
+      user:
+        type: str
+    returns:
+      type: LLMDiagnosis
+    """
+    return llm.generate(system, user, LLMDiagnosis)
 
 
 def chat(
@@ -82,8 +121,8 @@ def chat(
     effective_llm = llm or _get_llm(llm_settings)
 
     try:
-        result = effective_llm.generate(system, user, LLMDiagnosis)
-    except ValidationError as exc:
+        result = _call_llm(effective_llm, system, user)
+    except (ValidationError, TypeError) as exc:
         raise LLMResponseValidationError(
             f'LLM response is not valid LLMDiagnosis: {exc}'
         ) from exc

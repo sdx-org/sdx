@@ -98,6 +98,153 @@ runner.register('traditional-chinese-medicine')  # append at end
 
 See [Creating Skills](skills.md) for details on writing skill projects.
 
+## Session-based workflow
+
+For multi-visit clinical scenarios, sessions provide a parquet-backed event log
+that persists the full interaction history. The calling system manages the
+session file lifecycle (storage, deletion, retention).
+
+### Creating and loading sessions
+
+```python
+from hiperhealth.pipeline import Session
+
+# Create a new session
+session = Session.create('/data/sessions/patient-visit.parquet', language='en')
+
+# Provide clinical data (no PII — only clinical information)
+session.set_clinical_data({
+    'symptoms': 'chronic bloating, fatigue',
+    'age': 34,
+    'biological_sex': 'female',
+})
+
+# Load an existing session (e.g., days later)
+session = Session.load('/data/sessions/patient-visit.parquet')
+```
+
+### Checking requirements before execution
+
+Skills declare what information they need before a stage can run. Use
+`check_requirements()` to gather inquiries from all relevant skills:
+
+```python
+from hiperhealth.pipeline import Session, Stage, create_default_runner
+
+runner = create_default_runner()
+session = Session.load('/data/sessions/patient-visit.parquet')
+
+inquiries = runner.check_requirements(Stage.DIAGNOSIS, session)
+for inq in inquiries:
+    print(f'[{inq.priority}] {inq.field}: {inq.label}')
+```
+
+Inquiries have three priority levels reflecting clinical data availability:
+
+| Priority        | Meaning                                     | Example                          |
+| --------------- | ------------------------------------------- | -------------------------------- |
+| `required`      | Must have before this stage can run         | Basic symptoms for diagnosis     |
+| `supplementary` | Would improve results, available now        | Dietary history, medication list |
+| `deferred`      | Only available after a future pipeline step | Lab results (after exam stage)   |
+
+### Providing answers and running stages
+
+```python
+# Patient provides answers
+session.provide_answers({'dietary_history': 'High carb, low fiber...'})
+
+# Re-check — are required fields satisfied?
+inquiries = runner.check_requirements(Stage.DIAGNOSIS, session)
+required = [i for i in inquiries if i.priority == 'required']
+
+if not required:
+    runner.run_session(Stage.DIAGNOSIS, session, llm=my_llm)
+```
+
+### Multi-visit workflow
+
+Not all data is available at the same time. A typical multi-visit flow:
+
+```python
+# Visit 1: Preliminary diagnosis with available data
+runner.run_session(Stage.DIAGNOSIS, session, llm=my_llm)
+runner.run_session(Stage.EXAM, session, llm=my_llm)  # requests lab work
+
+# Visit 2: Lab results arrive, re-run with enriched data
+session = Session.load('/data/sessions/patient-visit.parquet')
+session.provide_answers({'stool_analysis': lab_results})
+runner.run_session(Stage.DIAGNOSIS, session, llm=my_llm)  # complete diagnosis
+
+# Visit 3: Treatment plan
+runner.check_requirements(Stage.TREATMENT, session)
+runner.run_session(Stage.TREATMENT, session, llm=my_llm)
+```
+
+### Inspecting session state
+
+```python
+session.clinical_data       # all patient data (merged from events)
+session.results             # stage results keyed by stage name
+session.pending_inquiries   # unanswered inquiries
+session.stages_completed    # which stages have run
+session.events              # raw event log
+```
+
+## Interactive analysis in Jupyter notebooks
+
+hiperhealth is designed to work as a data science framework for clinical
+analysis. Physicians can use it directly from Jupyter notebooks to study patient
+cases:
+
+```python
+from hiperhealth.pipeline import Session, Stage, create_default_runner
+
+runner = create_default_runner()
+
+session = Session.create('/tmp/case-study.parquet')
+session.set_clinical_data({
+    'symptoms': 'chronic fatigue, joint pain, morning stiffness',
+    'age': 52,
+    'biological_sex': 'female',
+    'family_history': 'rheumatoid arthritis (mother)',
+})
+
+# Check what information skills need
+inquiries = runner.check_requirements(Stage.DIAGNOSIS, session)
+for inq in inquiries:
+    print(f'  [{inq.priority}] {inq.label}')
+
+# Provide supplementary data interactively
+session.provide_answers({
+    'rheumatoid_factor': 'positive, 45 IU/mL',
+    'anti_ccp': 'positive, 120 U/mL',
+    'esr': '38 mm/hr',
+})
+
+# Run diagnosis
+runner.run_session(Stage.DIAGNOSIS, session, llm=my_llm)
+print(session.results[Stage.DIAGNOSIS])
+```
+
+### Analyzing session data with pandas or polars
+
+The session parquet file is a standard parquet that can be queried directly:
+
+```python
+import polars as pl
+
+df = pl.read_parquet('/tmp/case-study.parquet')
+
+# See all events
+df
+
+# Filter to specific event types
+df.filter(pl.col('event_type') == 'inquiries_raised')
+
+# See what stages have been completed
+df.filter(pl.col('event_type') == 'stage_completed').select('stage', 'timestamp')
+```
+
 ## Diagnostics
 
 The diagnostics helpers return `LLMDiagnosis` objects with:

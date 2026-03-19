@@ -6,13 +6,16 @@ from hiperhealth.pipeline.context import AuditEntry, PipelineContext
 from hiperhealth.pipeline.discovery import discover_skills
 from hiperhealth.pipeline.registry import SkillManifest, SkillRegistry
 from hiperhealth.pipeline.runner import StageRunner
+from hiperhealth.pipeline.session import Inquiry, Session
 from hiperhealth.pipeline.skill import BaseSkill, Skill, SkillMetadata
 from hiperhealth.pipeline.stages import Stage
 
 __all__ = [
     'AuditEntry',
     'BaseSkill',
+    'Inquiry',
     'PipelineContext',
+    'Session',
     'Skill',
     'SkillManifest',
     'SkillMetadata',

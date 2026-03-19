@@ -214,10 +214,17 @@ class DiagnosticsSkill(BaseSkill):
             diagnosis = ctx.results.get(Stage.DIAGNOSIS)
             if not diagnosis:
                 return ctx
-            selected = (
+            options = (
                 diagnosis.options
-                if isinstance(diagnosis.options, list)
-                else list(diagnosis.options.keys())
+                if hasattr(diagnosis, 'options')
+                else diagnosis.get('options', [])
+            )
+            selected = (
+                options
+                if isinstance(options, list)
+                else list(options.keys())
+                if isinstance(options, dict)
+                else []
             )
 
             prompt = _EXAM_PROMPTS.get(ctx.language, _EXAM_PROMPTS['en'])

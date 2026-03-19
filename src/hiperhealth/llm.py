@@ -109,7 +109,7 @@ class LLMSettings:
     api_key: str = ''
     engine: str = ''
     temperature: float = 0.0
-    max_tokens: int = 800
+    max_tokens: int = 4096
     persist_raw: bool = True
     api_params: dict[str, Any] = field(default_factory=dict)
 
@@ -246,9 +246,10 @@ class LiteLLMStructuredLLM:
         if self._completion_fn is not None:
             return self._completion_fn
 
-        from litellm import completion
+        import litellm
 
-        return cast(_CompletionFn, completion)
+        litellm.drop_params = True
+        return cast(_CompletionFn, litellm.completion)
 
     def generate(
         self,
@@ -381,7 +382,7 @@ def load_llm_settings(
     )
     max_tokens = _read_int_env(
         _prefixed_names(prefixes, 'MAX_TOKENS'),
-        default=800,
+        default=4096,
     )
 
     api_params = _load_api_params(prefixes)
@@ -476,25 +477,37 @@ def _extract_message_content(response: Any) -> Any:
       type: Any
       description: Return value.
     """
-    if isinstance(response, (str, BaseModel, dict)):
-        if not isinstance(response, dict) or 'choices' not in response:
-            return response
+    if isinstance(response, str):
+        return response
 
     choices = _get_mapping_or_attr(response, 'choices')
-    if not choices:
-        raise TypeError('LiteLLM response did not include any choices.')
+    if choices:
+        choice = choices[0]
+        message = _get_mapping_or_attr(choice, 'message')
+        content = _get_mapping_or_attr(message, 'content')
+        if content is not None and content != '':
+            if isinstance(content, list):
+                joined = _join_content_blocks(content)
+                if joined:
+                    return joined
+            elif isinstance(content, (str, dict)):
+                return content
+            raise TypeError(
+                'LLM response message content must be a string or dict.'
+            )
+        # Some models place structured output in `parsed` instead of `content`
+        parsed = _get_mapping_or_attr(message, 'parsed')
+        if parsed is not None:
+            return parsed
+        refusal = _get_mapping_or_attr(message, 'refusal')
+        if refusal:
+            raise ValueError(f'LLM refused the request: {refusal}')
+        raise TypeError('LLM response message has no content.')
 
-    choice = choices[0]
-    message = _get_mapping_or_attr(choice, 'message')
-    content = _get_mapping_or_attr(message, 'content')
+    if isinstance(response, (BaseModel, dict)):
+        return response
 
-    if isinstance(content, list):
-        return _join_content_blocks(content)
-    if isinstance(content, (str, dict)):
-        return content
-    raise TypeError(
-        'LiteLLM response message content must be a string or dict.'
-    )
+    raise TypeError('LiteLLM response did not include any choices.')
 
 
 def _get_mapping_or_attr(value: Any, key: str) -> Any:

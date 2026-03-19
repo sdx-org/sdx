@@ -114,8 +114,60 @@ class GreetingSkill(BaseSkill):
 
 ## Hooks
 
-Each skill has three hooks that are called per stage. Override only the ones you
-need — the base class provides no-op defaults.
+Each skill has four hooks. Override only the ones you need — the base class
+provides no-op defaults.
+
+### `check_requirements(stage, ctx) -> list[Inquiry]`
+
+Called before execution to determine what information is needed. Return a list
+of `Inquiry` objects describing what data the skill needs. The default returns
+an empty list (no extra data needed).
+
+Each inquiry has a **priority** reflecting clinical data availability:
+
+| Priority        | Meaning                                     | Example                          |
+| --------------- | ------------------------------------------- | -------------------------------- |
+| `required`      | Must have before this stage can run         | Basic symptoms for diagnosis     |
+| `supplementary` | Would improve results, available now        | Dietary history, medication list |
+| `deferred`      | Only available after a future pipeline step | Lab results (after exam stage)   |
+
+Example:
+
+```python
+from hiperhealth.pipeline import BaseSkill, Inquiry, SkillMetadata, Stage
+from hiperhealth.pipeline.context import PipelineContext
+
+
+class GutMicrobiomeSkill(BaseSkill):
+    def __init__(self):
+        super().__init__(SkillMetadata(
+            name='gut_microbiome',
+            stages=(Stage.DIAGNOSIS, Stage.TREATMENT),
+        ))
+
+    def check_requirements(self, stage, ctx):
+        inquiries = []
+        if stage == Stage.DIAGNOSIS:
+            if 'dietary_history' not in ctx.patient:
+                inquiries.append(Inquiry(
+                    skill_name=self.metadata.name,
+                    stage=stage,
+                    field='dietary_history',
+                    label='Describe your typical daily diet',
+                    description='Dietary patterns affect microbiome composition',
+                    priority='required',
+                ))
+            if 'stool_analysis' not in ctx.patient:
+                inquiries.append(Inquiry(
+                    skill_name=self.metadata.name,
+                    stage=stage,
+                    field='stool_analysis',
+                    label='Stool analysis results (16S rRNA or shotgun)',
+                    priority='deferred',
+                    input_type='file',
+                ))
+        return inquiries
+```
 
 ### `pre(stage, ctx) -> PipelineContext`
 

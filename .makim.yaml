@@ -22,8 +22,25 @@ groups:
 
   docs:
     tasks:
+      render:
+        help: Render documentation
+        backend: bash
+        env-file: tests/.env
+        hooks:
+          pre-run:
+            - task: tests.ensure-env
+          post-run:
+            - task: docs.build
+        run: |
+          QUARTO_PYTHON=$(which python) quarto render docs/example.qmd \
+            --to md \
+            --output example.md \
+            --output-dir docs/ \
+            --no-execute-daemon
+
       build:
         help: Build documentation
+        backend: bash
         run: |
           mkdocs build --config-file mkdocs.yaml
 
@@ -37,6 +54,11 @@ groups:
 
   tests:
     tasks:
+      ensure-env:
+        help: Ensure the dotenv file
+        backend: bash
+        run: touch .env
+
       linter:
         help: Run linter tools
         run: |

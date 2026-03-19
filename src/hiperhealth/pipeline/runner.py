@@ -7,10 +7,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from hiperhealth.pipeline.context import AuditEntry, PipelineContext
+from hiperhealth.pipeline.session import Inquiry
 from hiperhealth.pipeline.skill import Skill
 
 if TYPE_CHECKING:
     from hiperhealth.pipeline.registry import SkillRegistry
+    from hiperhealth.pipeline.session import Session
 
 
 class StageRunner:
@@ -153,3 +155,88 @@ class StageRunner:
             )
 
         return ctx
+
+    # ── Session-aware methods ──────────────────────────────────────
+
+    def check_requirements(
+        self,
+        stage: str,
+        session: Session,
+        **kwargs: Any,
+    ) -> list[Inquiry]:
+        """
+        title: Ask relevant skills what information they need.
+        summary: |-
+          Builds a PipelineContext from the session, calls
+          ``skill.check_requirements()`` for every skill registered
+          on the given stage, and records events in the session file.
+          Inquiries are returned with three priority levels:
+          - required: must have before this stage can run
+          - supplementary: improves results, available now
+          - deferred: only available after a future pipeline step
+        parameters:
+          stage:
+            type: str
+          session:
+            type: Session
+          kwargs:
+            type: Any
+            variadic: keyword
+        returns:
+          type: list[Inquiry]
+        """
+        ctx = session.to_context()
+        ctx.extras['_run_kwargs'] = kwargs
+        session.record_event('check_requirements_started', stage=stage)
+
+        relevant = [s for s in self._skills if stage in s.metadata.stages]
+        all_inquiries: list[Inquiry] = []
+
+        for skill in relevant:
+            inquiries = skill.check_requirements(stage, ctx)
+            if inquiries:
+                session.record_event(
+                    'inquiries_raised',
+                    stage=stage,
+                    skill_name=skill.metadata.name,
+                    data={
+                        'inquiries': [i.model_dump() for i in inquiries],
+                    },
+                )
+                all_inquiries.extend(inquiries)
+
+        session.record_event(
+            'check_requirements_completed',
+            stage=stage,
+            data={'total_inquiries': len(all_inquiries)},
+        )
+        return all_inquiries
+
+    def run_session(
+        self,
+        stage: str,
+        session: Session,
+        **kwargs: Any,
+    ) -> Session:
+        """
+        title: Execute a stage using the session file.
+        summary: |-
+          Builds a PipelineContext from the session, runs the stage
+          with the existing ``run()`` method, then writes results
+          back to the session parquet.
+        parameters:
+          stage:
+            type: str
+          session:
+            type: Session
+          kwargs:
+            type: Any
+            variadic: keyword
+        returns:
+          type: Session
+        """
+        ctx = session.to_context()
+        session.record_event('stage_started', stage=stage)
+        ctx = self.run(stage, ctx, **kwargs)
+        session.update_from_context(stage, ctx)
+        return session

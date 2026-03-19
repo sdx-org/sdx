@@ -25,7 +25,12 @@ prescription.
 ## Features
 
 - **Skill-based pipeline** — stages run independently, at different times, by
-  different actors. Context serializes to JSON between invocations.
+  different actors
+- **Session files** — parquet-backed event logs for persistent, resumable
+  clinical workflows across multiple visits
+- **Requirement checking** — skills declare what information they need before
+  execution, enabling structured clinical data gathering with three priority
+  levels (required, supplementary, deferred)
 - **Built-in skills:**
   - **DiagnosticsSkill** — differential diagnosis and exam suggestions via LLM
   - **ExtractionSkill** — PDF/image medical report and CSV/JSON wearable data
@@ -33,6 +38,9 @@ prescription.
   - **PrivacySkill** — PII detection and de-identification
 - **Extensible** — create custom skills as Python classes, install third-party
   skills via entry points
+- **Data science friendly** — sessions are standard parquet files, queryable
+  with pandas, polars, or DuckDB. Use hiperhealth interactively from Jupyter
+  notebooks to study patient cases.
 - Provider-configurable LLM backend through LiteLLM (8+ providers)
 - Pydantic schemas and SQLAlchemy FHIR-oriented models
 
@@ -47,9 +55,15 @@ prescription.
 
 This repository is the `hiperhealth` library/SDK, not the web application.
 
-The pipeline operates through `PipelineContext`, a Pydantic model that carries
-patient data, results, and audit entries across stages. Each stage produces
-results accessible via `ctx.results[stage_name]`.
+The pipeline can operate in two modes:
+
+- **Direct mode** via `PipelineContext` — a Pydantic model that carries patient
+  data, results, and audit entries across stages
+- **Session mode** via `Session` — a parquet-backed event log for asynchronous,
+  multi-visit workflows with requirement checking
+
+Each stage produces results accessible via `ctx.results[stage_name]` or
+`session.results[stage_name]`.
 
 ## Credits
 

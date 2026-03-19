@@ -347,3 +347,20 @@ def test_litellm_api_key_in_kwargs():
     )
     kwargs = settings.to_litellm_kwargs()
     assert kwargs['api_key'] == 'sk-test-key'
+
+
+def test_to_litellm_kwargs_always_includes_temperature_and_max_tokens():
+    """
+    title: >-
+      All models get temperature and max_tokens; LiteLLM drops unsupported
+      params.
+    """
+    for model in ('o4-mini', 'gpt-4', 'llama3.2:1b'):
+        settings = LLMSettings(
+            provider='openai',
+            model=model,
+            api_key='sk-test',
+        )
+        kwargs = settings.to_litellm_kwargs()
+        assert kwargs['temperature'] == 0.0
+        assert kwargs['max_tokens'] == 4096

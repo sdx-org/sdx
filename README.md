@@ -15,13 +15,19 @@ application.
   - Stages (screening, intake, diagnosis, exam, treatment, prescription) that
     can be executed independently at different times by different actors
   - Skills are composable plugins that affect one or more stages
-  - Serializable context for persistence between invocations
+  - **Session files** (parquet) for persistent, resumable interactions — assess
+    requirements, collect patient answers, and execute stages asynchronously
+  - **Requirement checking** — skills declare what information they need before
+    execution, enabling structured clinical data gathering
 - **Built-in skills:**
   - **DiagnosticsSkill** — LLM-powered differential diagnosis and exam
     suggestions
   - **ExtractionSkill** — medical reports (PDF/image) and wearable data
     (CSV/JSON) extraction
   - **PrivacySkill** — PII detection and de-identification
+- **Data science friendly** — sessions are parquet files that can be loaded
+  directly into pandas, polars, or DuckDB for analysis. Physicians can use
+  hiperhealth interactively from Jupyter notebooks to study patient cases.
 - Domain schemas and models:
   - Pydantic schemas
   - SQLAlchemy FHIR model definitions
@@ -145,7 +151,64 @@ ctx = runner.run(Stage.DIAGNOSIS, ctx)
 print(ctx.results["diagnosis"].summary)
 ```
 
-### 2. Standalone diagnostic functions
+### 2. Session-based workflow (recommended for multi-visit scenarios)
+
+Sessions use parquet files to persist the full interaction history. This
+supports asynchronous workflows where data arrives over days (e.g., patient
+answers, lab results):
+
+```python
+from hiperhealth.pipeline import Session, Stage, create_default_runner
+
+runner = create_default_runner()
+
+# Day 1: Patient reports symptoms
+session = Session.create('/data/sessions/abc123.parquet')
+session.set_clinical_data({
+    'symptoms': 'chronic bloating, fatigue',
+    'age': 34,
+    'biological_sex': 'female',
+})
+
+# Check what information skills need before running diagnosis
+inquiries = runner.check_requirements(Stage.DIAGNOSIS, session)
+# -> [Inquiry(field='dietary_history', priority='required', ...)]
+# Show required/supplementary inquiries to the patient
+
+# Day 3: Patient responds
+session = Session.load('/data/sessions/abc123.parquet')
+session.provide_answers({'dietary_history': 'High carb, low fiber...'})
+
+# Re-check requirements, then run
+inquiries = runner.check_requirements(Stage.DIAGNOSIS, session)
+required = [i for i in inquiries if i.priority == 'required']
+if not required:
+    runner.run_session(Stage.DIAGNOSIS, session, llm=my_llm)
+```
+
+### 3. Interactive analysis in Jupyter notebooks
+
+Physicians can use hiperhealth directly from notebooks to study patient cases:
+
+```python
+from hiperhealth.pipeline import Session, Stage, create_default_runner
+import polars as pl
+
+runner = create_default_runner()
+session = Session.load('/data/sessions/abc123.parquet')
+
+# Inspect session state
+session.clinical_data       # all patient data
+session.results             # stage results
+session.pending_inquiries   # unanswered questions
+session.stages_completed    # which stages have run
+
+# Analyze the event log directly
+df = pl.read_parquet('/data/sessions/abc123.parquet')
+df.filter(pl.col('event_type') == 'stage_completed')
+```
+
+### 4. Standalone diagnostic functions
 
 ```python
 from hiperhealth.skills.diagnostics.core import differential, exams
@@ -162,7 +225,7 @@ print(ex.summary, ex.options)
 Supported languages: `en`, `pt`, `es`, `fr`, `it`. Unknown values fall back to
 English.
 
-### 3. Data extraction
+### 5. Data extraction
 
 ```python
 from hiperhealth.skills.extraction.medical_reports import MedicalReportFileExtractor
@@ -177,7 +240,7 @@ wearable_ext = WearableDataFileExtractor()
 data = wearable_ext.extract_wearable_data("path/to/data.csv")
 ```
 
-### 4. De-identification
+### 6. De-identification
 
 ```python
 from hiperhealth.skills.privacy.deidentifier import Deidentifier, deidentify_patient_record
@@ -190,7 +253,7 @@ record = {
 clean = deidentify_patient_record(record, engine)
 ```
 
-### 5. Installing and registering custom skills
+### 7. Installing and registering custom skills
 
 Skills are installed from local paths or Git URLs into an internal registry,
 then registered into a runner by name:
@@ -212,7 +275,7 @@ runner.register('traditional-chinese-medicine')  # append at the end
 Each skill project must include a `hiperhealth.yaml` metadata file. See
 [Creating Skills](docs/skills.md) for a full guide on writing skill projects.
 
-### 6. Custom skill class
+### 8. Custom skill class
 
 ```python
 from hiperhealth.pipeline import BaseSkill, SkillMetadata, Stage
@@ -232,8 +295,8 @@ class AyurvedaSkill(BaseSkill):
 
 ## Repository layout
 
-- `src/hiperhealth/pipeline/`: stage runner, context, skill base classes,
-  registry, discovery
+- `src/hiperhealth/pipeline/`: stage runner, context, session, skill base
+  classes, registry, discovery
 - `src/hiperhealth/skills/`: built-in skills (diagnostics, extraction, privacy)
 - `src/hiperhealth/agents/`: backward-compatible re-exports and shared utilities
 - `src/hiperhealth/schema/`: Pydantic schemas

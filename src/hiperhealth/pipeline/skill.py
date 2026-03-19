@@ -5,9 +5,12 @@ title: Skill interface and base class for pipeline plugins.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from hiperhealth.pipeline.context import PipelineContext
+
+if TYPE_CHECKING:
+    from hiperhealth.pipeline.session import Inquiry
 
 
 @dataclass(frozen=True)
@@ -42,6 +45,10 @@ class Skill(Protocol):
 
     metadata: SkillMetadata
 
+    def check_requirements(
+        self, stage: str, ctx: PipelineContext
+    ) -> list[Inquiry]: ...
+
     def pre(self, stage: str, ctx: PipelineContext) -> PipelineContext: ...
 
     def execute(self, stage: str, ctx: PipelineContext) -> PipelineContext: ...
@@ -62,6 +69,29 @@ class BaseSkill:
 
     def __init__(self, metadata: SkillMetadata) -> None:
         self.metadata = metadata
+
+    def check_requirements(
+        self, stage: str, ctx: PipelineContext
+    ) -> list[Inquiry]:
+        """
+        title: Determine what information is needed before execution.
+        summary: |-
+          Override to return a list of Inquiry objects describing
+          what additional data the skill needs.  The default
+          implementation returns an empty list (no extra data needed).
+          Inquiries use three priority levels:
+          - required: must have before this stage can run
+          - supplementary: improves results, available now
+          - deferred: only available after a future pipeline step
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: list[Inquiry]
+        """
+        return []
 
     def pre(self, stage: str, ctx: PipelineContext) -> PipelineContext:
         """
