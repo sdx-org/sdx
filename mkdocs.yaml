@@ -18,6 +18,7 @@ nav:
       - Installation: installation.md
       - LLM Configuration: llm_configuration.md
       - Usage: usage.md
+  - Example: example.md
   - Guides:
       - Creating Skills: skills.md
       - Informed Consent: informed_consent.md
