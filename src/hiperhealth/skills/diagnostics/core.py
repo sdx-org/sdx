@@ -8,12 +8,13 @@ import json
 
 from typing import Any
 
-from hiperhealth.agents.client import chat
+from hiperhealth.agents.client import chat, chat_structured
 from hiperhealth.llm import LLMSettings, StructuredLLM
 from hiperhealth.pipeline.context import PipelineContext
+from hiperhealth.pipeline.session import Inquiry
 from hiperhealth.pipeline.skill import BaseSkill, SkillMetadata
 from hiperhealth.pipeline.stages import Stage
-from hiperhealth.schema.clinical_outputs import LLMDiagnosis
+from hiperhealth.schema.clinical_outputs import LLMDiagnosis, LLMInquiryList
 
 _DIAG_PROMPTS = {
     'en': (
@@ -75,6 +76,92 @@ _EXAM_PROMPTS = {
         'Sei un assistente medico esperto. '
         'Dati i diagnosi selezionati, restituisci un JSON con le chiavi '
         "'summary' e 'options' (massimo 10 nomi di esami/procedure)."
+    ),
+}
+
+
+_REQ_PROMPT_TEMPLATE = {
+    'en': (
+        'You are an experienced physician assistant. '
+        'Given the patient data below, identify what additional clinical '
+        'information is missing or incomplete that would be important for '
+        'the "{stage}" phase of care. '
+        'Consider standard medical history elements: chief complaint, '
+        'history of present illness, past medical history, medications, '
+        'allergies, family history, social history, review of systems, '
+        'and vital signs. '
+        'Only request information that is NOT already present in the data. '
+        'For each item, assign priority: "required" (essential for safety), '
+        '"supplementary" (improves accuracy), or "deferred" (can wait '
+        'until after initial assessment). '
+        'Use input_type "select" with choices when there is a finite set '
+        'of valid answers.'
+    ),
+    'pt': (
+        'Você é um assistente médico experiente. '
+        'Dados os dados do paciente abaixo, identifique quais informações '
+        'clínicas adicionais estão faltando ou incompletas que seriam '
+        'importantes para a fase de "{stage}" do atendimento. '
+        'Considere elementos padrão do histórico médico: queixa principal, '
+        'história da doença atual, antecedentes pessoais, medicamentos, '
+        'alergias, história familiar, história social, revisão de sistemas '
+        'e sinais vitais. '
+        'Solicite apenas informações que NÃO estejam presentes nos dados. '
+        'Para cada item, atribua prioridade: "required" (essencial para '
+        'segurança), "supplementary" (melhora a precisão) ou "deferred" '
+        '(pode esperar até após a avaliação inicial). '
+        'Use input_type "select" com choices quando houver um conjunto '
+        'finito de respostas válidas.'
+    ),
+    'es': (
+        'Eres un asistente médico experimentado. '
+        'Dados los datos del paciente a continuación, identifica qué '
+        'información clínica adicional falta o está incompleta que sería '
+        'importante para la fase de "{stage}" de la atención. '
+        'Considera elementos estándar del historial médico: motivo de '
+        'consulta, historia de la enfermedad actual, antecedentes '
+        'personales, medicamentos, alergias, historia familiar, historia '
+        'social, revisión por sistemas y signos vitales. '
+        'Solo solicita información que NO esté presente en los datos. '
+        'Para cada elemento, asigna prioridad: "required" (esencial para '
+        'la seguridad), "supplementary" (mejora la precisión) o "deferred" '
+        '(puede esperar hasta después de la evaluación inicial). '
+        'Usa input_type "select" con choices cuando haya un conjunto '
+        'finito de respuestas válidas.'
+    ),
+    'fr': (
+        'Vous êtes un assistant médical expérimenté. '
+        'À partir des données du patient ci-dessous, identifiez quelles '
+        'informations cliniques supplémentaires manquent ou sont '
+        'incomplètes et seraient importantes pour la phase de "{stage}" '
+        'des soins. '
+        'Considérez les éléments standard du dossier médical : motif de '
+        'consultation, histoire de la maladie actuelle, antécédents '
+        'médicaux, médicaments, allergies, histoire familiale, histoire '
+        'sociale, revue des systèmes et signes vitaux. '
+        'Ne demandez que les informations qui ne sont PAS déjà présentes. '
+        'Pour chaque élément, attribuez une priorité : "required" '
+        '(essentiel pour la sécurité), "supplementary" (améliore la '
+        'précision) ou "deferred" (peut attendre après l\'évaluation '
+        'initiale). '
+        'Utilisez input_type "select" avec choices lorsqu\'il y a un '
+        'ensemble fini de réponses valides.'
+    ),
+    'it': (
+        'Sei un assistente medico esperto. '
+        'Dati i dati del paziente qui sotto, identifica quali informazioni '
+        'cliniche aggiuntive mancano o sono incomplete e sarebbero '
+        'importanti per la fase di "{stage}" delle cure. '
+        'Considera gli elementi standard della cartella clinica: motivo '
+        'della visita, storia della malattia attuale, anamnesi patologica, '
+        'farmaci, allergie, storia familiare, storia sociale, revisione '
+        'dei sistemi e segni vitali. '
+        'Richiedi solo informazioni che NON sono già presenti nei dati. '
+        'Per ogni elemento, assegna una priorità: "required" (essenziale '
+        'per la sicurezza), "supplementary" (migliora la precisione) o '
+        '"deferred" (può aspettare fino a dopo la valutazione iniziale). '
+        'Usa input_type "select" con choices quando c\'è un insieme '
+        'finito di risposte valide.'
     ),
 }
 
@@ -179,6 +266,64 @@ class DiagnosticsSkill(BaseSkill):
                 ),
             )
         )
+
+    def check_requirements(
+        self, stage: str, ctx: PipelineContext
+    ) -> list[Inquiry]:
+        """
+        title: Use the LLM to identify missing clinical information.
+        summary: |-
+          Sends the current patient data to the LLM and asks what
+          additional information would improve the given stage.
+          Fields already present in ctx.patient are filtered out.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: list[Inquiry]
+        """
+        run_kwargs = ctx.extras.get('_run_kwargs', {})
+        llm = run_kwargs.get('llm')
+        llm_settings = run_kwargs.get('llm_settings')
+
+        template = _REQ_PROMPT_TEMPLATE.get(
+            ctx.language, _REQ_PROMPT_TEMPLATE['en']
+        )
+        stage_label = stage.value if hasattr(stage, 'value') else stage
+        system_prompt = template.format(stage=stage_label)
+
+        extra = ctx.extras.get('prompt_fragments', {}).get(
+            f'{stage}_requirements', ''
+        )
+        if extra:
+            system_prompt = f'{system_prompt}\n\n{extra}'
+
+        result = chat_structured(
+            system_prompt,
+            json.dumps(ctx.patient, ensure_ascii=False),
+            LLMInquiryList,
+            session_id=ctx.session_id,
+            llm=llm,
+            llm_settings=llm_settings,
+        )
+
+        existing_fields = set(ctx.patient.keys())
+        return [
+            Inquiry(
+                skill_name=self.metadata.name,
+                stage=stage,
+                field=item.field,
+                label=item.label,
+                description=item.description,
+                priority=item.priority,
+                input_type=item.input_type,
+                choices=item.choices,
+            )
+            for item in result.inquiries
+            if item.field not in existing_fields
+        ]
 
     def execute(self, stage: str, ctx: PipelineContext) -> PipelineContext:
         """

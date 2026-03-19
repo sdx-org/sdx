@@ -20,7 +20,11 @@ from hiperhealth.pipeline import (
     create_default_runner,
     discover_skills,
 )
-from hiperhealth.schema.clinical_outputs import LLMDiagnosis
+from hiperhealth.schema.clinical_outputs import (
+    LLMDiagnosis,
+    LLMInquiryItem,
+    LLMInquiryList,
+)
 from hiperhealth.skills.diagnostics import DiagnosticsSkill
 from hiperhealth.skills.extraction import ExtractionSkill
 
@@ -284,6 +288,130 @@ class TestDiagnosticsSkill:
 
         parsed = json.loads(calls[0]['user'])
         assert set(parsed) == {'Flu', 'Cold'}
+
+    def test_check_requirements_returns_inquiries(
+        self, monkeypatch: Any
+    ) -> None:
+        """
+        title: check_requirements should return LLM-generated inquiries.
+        parameters:
+          monkeypatch:
+            type: Any
+            description: Value for monkeypatch.
+        """
+        fake_result = LLMInquiryList(
+            inquiries=[
+                LLMInquiryItem(
+                    field='smoking_history',
+                    label='Smoking History',
+                    description='Important for respiratory diagnosis',
+                    priority='required',
+                ),
+                LLMInquiryItem(
+                    field='family_history',
+                    label='Family History',
+                    priority='supplementary',
+                ),
+            ]
+        )
+
+        def _fake_chat_structured(
+            system: str,
+            user: str,
+            output_type: type,
+            **kw: Any,
+        ) -> LLMInquiryList:
+            return fake_result
+
+        monkeypatch.setattr(
+            diag_skill_mod, 'chat_structured', _fake_chat_structured
+        )
+
+        skill = DiagnosticsSkill()
+        ctx = PipelineContext(
+            patient={'symptoms': 'cough'},
+            language='en',
+            session_id='sess-1',
+        )
+
+        inquiries = skill.check_requirements(Stage.DIAGNOSIS, ctx)
+
+        assert len(inquiries) == 2
+        assert inquiries[0].field == 'smoking_history'
+        assert inquiries[0].priority == 'required'
+        assert inquiries[0].skill_name == 'hiperhealth.diagnostics'
+        assert inquiries[0].stage == Stage.DIAGNOSIS
+        assert inquiries[1].field == 'family_history'
+
+    def test_check_requirements_filters_existing_fields(
+        self, monkeypatch: Any
+    ) -> None:
+        """
+        title: >-
+          check_requirements should exclude fields already in patient data.
+        parameters:
+          monkeypatch:
+            type: Any
+            description: Value for monkeypatch.
+        """
+        fake_result = LLMInquiryList(
+            inquiries=[
+                LLMInquiryItem(field='age', label='Age'),
+                LLMInquiryItem(field='smoking_history', label='Smoking'),
+                LLMInquiryItem(field='symptoms', label='Symptoms'),
+            ]
+        )
+
+        monkeypatch.setattr(
+            diag_skill_mod,
+            'chat_structured',
+            lambda *a, **kw: fake_result,
+        )
+
+        skill = DiagnosticsSkill()
+        ctx = PipelineContext(
+            patient={'age': 38, 'symptoms': 'headache'},
+        )
+
+        inquiries = skill.check_requirements(Stage.DIAGNOSIS, ctx)
+
+        fields = [i.field for i in inquiries]
+        assert 'smoking_history' in fields
+        assert 'age' not in fields
+        assert 'symptoms' not in fields
+
+    def test_check_requirements_uses_language_prompt(
+        self, monkeypatch: Any
+    ) -> None:
+        """
+        title: check_requirements should use the correct language template.
+        parameters:
+          monkeypatch:
+            type: Any
+            description: Value for monkeypatch.
+        """
+        calls: list[dict[str, Any]] = []
+
+        def _fake_chat_structured(
+            system: str,
+            user: str,
+            output_type: type,
+            **kw: Any,
+        ) -> LLMInquiryList:
+            calls.append({'system': system})
+            return LLMInquiryList(inquiries=[])
+
+        monkeypatch.setattr(
+            diag_skill_mod, 'chat_structured', _fake_chat_structured
+        )
+
+        skill = DiagnosticsSkill()
+        ctx = PipelineContext(patient={'age': 30}, language='pt')
+
+        skill.check_requirements(Stage.DIAGNOSIS, ctx)
+
+        assert 'assistente médico' in calls[0]['system']
+        assert 'diagnosis' in calls[0]['system']
 
 
 class TestExtractionSkill:

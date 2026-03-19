@@ -4,6 +4,8 @@ title: Pydantic models for medical-LLM responses.
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 from hiperhealth.llm import _clean_json_text
@@ -39,4 +41,51 @@ class LLMDiagnosis(BaseModel):
         return cls.model_validate_json(_clean_json_text(text))
 
 
-__all__ = ['LLMDiagnosis']
+class LLMInquiryItem(BaseModel):
+    """
+    title: A single piece of information the LLM identifies as missing.
+    summary: |-
+      Does not include skill_name or stage — those are added by the
+      calling skill after filtering.
+    attributes:
+      field:
+        type: str
+        description: Machine-readable key, e.g. "smoking_history".
+      label:
+        type: str
+        description: Human-readable label, e.g. "Smoking History".
+      description:
+        type: str
+        description: Why this information is needed.
+      priority:
+        type: Literal[required, supplementary, deferred]
+      input_type:
+        type: str
+        description: Expected input widget (text, select, number, boolean).
+      choices:
+        type: list[str] | None
+        description: Valid options when input_type is "select".
+    """
+
+    field: str
+    label: str
+    description: str = ''
+    priority: Literal['required', 'supplementary', 'deferred'] = (
+        'supplementary'
+    )
+    input_type: str = 'text'
+    choices: list[str] | None = None
+
+
+class LLMInquiryList(BaseModel):
+    """
+    title: LLM response listing missing clinical information.
+    attributes:
+      inquiries:
+        type: list[LLMInquiryItem]
+    """
+
+    inquiries: list[LLMInquiryItem]
+
+
+__all__ = ['LLMDiagnosis', 'LLMInquiryItem', 'LLMInquiryList']

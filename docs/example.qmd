@@ -115,14 +115,19 @@ for inq in inquiries:
         print(f"    → {inq.description}")
 ```
 
-### Provide answers to required and supplementary inquiries
+### Provide answers to the inquiries
 
 The clinical system collects answers from the patient or provider and feeds
-them back into the session. Deferred inquiries (like lab results not yet
-ordered) are skipped for now.
+them back into the session. We define an **answer bank** — a comprehensive
+dictionary of all clinical information available for this patient — and
+provide only the fields that were actually requested. Deferred inquiries
+(like lab results not yet ordered) are skipped for now.
 
 ```{python}
-session.provide_answers({
+# All clinical data available for this patient at this point.
+# In a real system this comes from the EHR or clinician input.
+ANSWER_BANK = {
+    "chief_complaint": "Chronic bloating and abdominal discomfort for 6 months",
     "dietary_history": (
         "High carbohydrate diet, frequent processed foods, low fiber intake. "
         "Symptoms worsen significantly after gluten-containing meals and dairy. "
@@ -132,20 +137,45 @@ session.provide_answers({
         "2-4 loose stools daily, occasional mucus. Bristol stool scale type 5-6. "
         "Urgency after meals, especially breakfast."
     ),
+    "family_history": (
+        "Mother: celiac disease, hypothyroidism. "
+        "Father: type 2 diabetes, hypertension. "
+        "Sibling: no significant conditions."
+    ),
+    "social_history": (
+        "Non-smoker, occasional alcohol (1-2 drinks/week). "
+        "Office worker, sedentary lifestyle."
+    ),
     "stress_level": "High — work-related stress, poor sleep quality (5-6 hours/night)",
     "supplement_history": "Probiotics (generic, 1 month, no improvement), multivitamin",
-})
-```
+    "vital_signs": "BP 118/72, HR 74, Temp 36.8°C, BMI 24.1",
+    "review_of_systems": (
+        "Fatigue, brain fog, occasional joint pain (hands). "
+        "No fever, no weight loss, no blood in stool."
+    ),
+    "sleep_quality": "5-6 hours/night, difficulty falling asleep, non-restorative",
+    "exercise_habits": "Minimal — walks 2x/week, 20 minutes",
+    "onset_timeline": "Gradual onset ~6 months ago, progressively worsening",
+    "weight_changes": "Unintentional loss of 3 kg over 6 months",
+    "travel_history": "No recent travel",
+    "occupation": "Software engineer, desk-based",
+}
 
-### Re-check requirements — are we ready?
+# Provide answers only for the fields the LLM identified as missing
+answers = {
+    inq.field: ANSWER_BANK[inq.field]
+    for inq in inquiries
+    if inq.priority != "deferred" and inq.field in ANSWER_BANK
+}
+unanswered = [
+    inq.field for inq in inquiries
+    if inq.priority != "deferred" and inq.field not in ANSWER_BANK
+]
 
-```{python}
-inquiries = runner.check_requirements(Stage.DIAGNOSIS, session)
-required = [i for i in inquiries if i.priority == "required"]
-
-print(f"Remaining required: {len(required)}")
-if not required:
-    print("All required information is available — ready to run diagnosis.")
+session.provide_answers(answers)
+print(f"Answered {len(answers)} inquiries: {list(answers.keys())}")
+if unanswered:
+    print(f"Not in answer bank (skipped): {unanswered}")
 ```
 
 ### Run preliminary diagnosis
@@ -250,14 +280,26 @@ inquiries = runner.check_requirements(Stage.TREATMENT, session)
 for inq in inquiries:
     print(f"  [{inq.priority}] {inq.field}: {inq.label}")
 
-# Provide any additional treatment-relevant answers
-session.provide_answers({
+# Treatment-specific answer bank
+TREATMENT_ANSWERS = {
     "treatment_preferences": (
         "Patient prefers integrative approach. Open to dietary changes "
         "and supplements. Wants to minimize pharmaceutical interventions."
     ),
     "budget_constraints": "Standard insurance coverage, willing to pay OOP for supplements",
-})
+    "lifestyle_goals": "Improve energy, reduce bloating, better sleep",
+    "dietary_restrictions": "Willing to eliminate gluten and dairy long-term",
+    "exercise_tolerance": "Can tolerate light to moderate exercise",
+    "compliance_history": "Good compliance with previous IBS dietary recommendations",
+}
+
+answers = {
+    inq.field: TREATMENT_ANSWERS[inq.field]
+    for inq in inquiries
+    if inq.priority != "deferred" and inq.field in TREATMENT_ANSWERS
+}
+session.provide_answers(answers)
+print(f"\nAnswered {len(answers)} treatment inquiries: {list(answers.keys())}")
 
 runner.run_session(Stage.TREATMENT, session)
 

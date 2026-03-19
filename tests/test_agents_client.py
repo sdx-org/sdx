@@ -9,7 +9,11 @@ from types import SimpleNamespace
 import hiperhealth.agents.client as client_mod
 import pytest
 
-from hiperhealth.schema.clinical_outputs import LLMDiagnosis
+from hiperhealth.schema.clinical_outputs import (
+    LLMDiagnosis,
+    LLMInquiryItem,
+    LLMInquiryList,
+)
 
 
 class _FakeLLM:
@@ -135,3 +139,48 @@ def test_chat_raises_library_exception_on_invalid_llm_json(monkeypatch):
         client_mod.chat('system', 'user', llm=_InvalidLLM())
 
     assert 'LLM response is not valid LLMDiagnosis' in str(exc.value)
+
+
+def test_chat_structured_returns_arbitrary_pydantic_model(monkeypatch):
+    """
+    title: chat_structured() should validate against any Pydantic model.
+    parameters:
+      monkeypatch:
+        description: Value for monkeypatch.
+    """
+    fake_result = LLMInquiryList(
+        inquiries=[
+            LLMInquiryItem(
+                field='smoking_history',
+                label='Smoking History',
+                priority='supplementary',
+            ),
+        ]
+    )
+    fake_llm = _FakeLLM(fake_result)
+    monkeypatch.setattr(client_mod, 'dump_llm_json', lambda *_: None)
+
+    out = client_mod.chat_structured(
+        'sys', 'usr', LLMInquiryList, llm=fake_llm
+    )
+
+    assert isinstance(out, LLMInquiryList)
+    assert len(out.inquiries) == 1
+    assert out.inquiries[0].field == 'smoking_history'
+    assert fake_llm.calls[0]['output_type'] is LLMInquiryList
+
+
+def test_chat_delegates_to_chat_structured(monkeypatch):
+    """
+    title: chat() should delegate to chat_structured with LLMDiagnosis.
+    parameters:
+      monkeypatch:
+        description: Value for monkeypatch.
+    """
+    fake_llm = _FakeLLM(LLMDiagnosis(summary='ok', options=['a']))
+    monkeypatch.setattr(client_mod, 'dump_llm_json', lambda *_: None)
+
+    out = client_mod.chat('sys', 'usr', llm=fake_llm)
+
+    assert isinstance(out, LLMDiagnosis)
+    assert out.summary == 'ok'

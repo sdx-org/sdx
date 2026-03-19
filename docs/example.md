@@ -114,16 +114,46 @@ for inq in inquiries:
         print(f"    → {inq.description}")
 ```
 
-    Total inquiries: 0
+    Total inquiries: 12
 
-### Provide answers to required and supplementary inquiries
+      [required] vital_signs: Vital Signs (BP, HR, RR, Temperature)
+        → Baseline vital signs needed to assess current status and inflammation
+      [required] height: Height
+        → Needed to calculate BMI
+      [required] weight: Weight
+        → Current weight for BMI calculation
+      [required] stool_characteristics: Stool Characteristics
+        → Frequency, consistency, presence of blood or mucus to characterize diarrhea
+      [supplementary] weight_change: Weight Change
+        → Recent weight loss or gain associated with symptoms
+      [supplementary] medication_supplements: Over-the-Counter Medications & Supplements
+        → Identify any additional medications or supplements that may contribute to symptoms
+      [supplementary] smoking_history: Smoking History
+        → Assess risk factors related to smoking
+      [supplementary] alcohol_use: Alcohol Use
+        → Quantity and frequency of alcohol intake
+      [supplementary] family_history_gi: Family History of Gastrointestinal/Autoimmune Disease
+        → Assess genetic predisposition to conditions like celiac disease or IBD
+      [supplementary] constitutional_symptoms: Constitutional Symptoms
+        → Presence of fever, night sweats, or other systemic symptoms
+      [deferred] travel_history: Travel History
+        → Recent travel to areas with risk of infectious causes of diarrhea
+      [deferred] menstrual_history: Menstrual and Reproductive History
+        → Evaluate hormonal factors or correlation with symptoms
+
+### Provide answers to the inquiries
 
 The clinical system collects answers from the patient or provider and feeds them
-back into the session. Deferred inquiries (like lab results not yet ordered) are
-skipped for now.
+back into the session. We define an **answer bank** — a comprehensive dictionary
+of all clinical information available for this patient — and provide only the
+fields that were actually requested. Deferred inquiries (like lab results not
+yet ordered) are skipped for now.
 
 ```python
-session.provide_answers({
+# All clinical data available for this patient at this point.
+# In a real system this comes from the EHR or clinician input.
+ANSWER_BANK = {
+    "chief_complaint": "Chronic bloating and abdominal discomfort for 6 months",
     "dietary_history": (
         "High carbohydrate diet, frequent processed foods, low fiber intake. "
         "Symptoms worsen significantly after gluten-containing meals and dairy. "
@@ -133,24 +163,49 @@ session.provide_answers({
         "2-4 loose stools daily, occasional mucus. Bristol stool scale type 5-6. "
         "Urgency after meals, especially breakfast."
     ),
+    "family_history": (
+        "Mother: celiac disease, hypothyroidism. "
+        "Father: type 2 diabetes, hypertension. "
+        "Sibling: no significant conditions."
+    ),
+    "social_history": (
+        "Non-smoker, occasional alcohol (1-2 drinks/week). "
+        "Office worker, sedentary lifestyle."
+    ),
     "stress_level": "High — work-related stress, poor sleep quality (5-6 hours/night)",
     "supplement_history": "Probiotics (generic, 1 month, no improvement), multivitamin",
-})
+    "vital_signs": "BP 118/72, HR 74, Temp 36.8°C, BMI 24.1",
+    "review_of_systems": (
+        "Fatigue, brain fog, occasional joint pain (hands). "
+        "No fever, no weight loss, no blood in stool."
+    ),
+    "sleep_quality": "5-6 hours/night, difficulty falling asleep, non-restorative",
+    "exercise_habits": "Minimal — walks 2x/week, 20 minutes",
+    "onset_timeline": "Gradual onset ~6 months ago, progressively worsening",
+    "weight_changes": "Unintentional loss of 3 kg over 6 months",
+    "travel_history": "No recent travel",
+    "occupation": "Software engineer, desk-based",
+}
+
+# Provide answers only for the fields the LLM identified as missing
+answers = {
+    inq.field: ANSWER_BANK[inq.field]
+    for inq in inquiries
+    if inq.priority != "deferred" and inq.field in ANSWER_BANK
+}
+unanswered = [
+    inq.field for inq in inquiries
+    if inq.priority != "deferred" and inq.field not in ANSWER_BANK
+]
+
+session.provide_answers(answers)
+print(f"Answered {len(answers)} inquiries: {list(answers.keys())}")
+if unanswered:
+    print(f"Not in answer bank (skipped): {unanswered}")
 ```
 
-### Re-check requirements — are we ready?
-
-```python
-inquiries = runner.check_requirements(Stage.DIAGNOSIS, session)
-required = [i for i in inquiries if i.priority == "required"]
-
-print(f"Remaining required: {len(required)}")
-if not required:
-    print("All required information is available — ready to run diagnosis.")
-```
-
-    Remaining required: 0
-    All required information is available — ready to run diagnosis.
+    Answered 1 inquiries: ['vital_signs']
+    Not in answer bank (skipped): ['height', 'weight', 'stool_characteristics', 'weight_change', 'medication_supplements', 'smoking_history', 'alcohol_use', 'family_history_gi', 'constitutional_symptoms']
 
 ### Run preliminary diagnosis
 
@@ -171,7 +226,7 @@ else:
 
     Preliminary diagnosis complete.
 
-    Results: {'summary': 'A 38-year-old female with a history of IBS presents with six months of chronic bloating, postprandial abdominal discomfort, loose stools, fatigue, and brain fog that worsen with gluten and dairy intake and have partially improved with gluten elimination. Laboratory evaluation shows low vitamin D and ferritin with mildly elevated CRP, raising concern for both functional and organic etiologies.', 'options': ['Celiac disease', 'Non-celiac gluten sensitivity', 'Lactose intolerance', 'Irritable bowel syndrome–diarrhea predominant', 'Small intestinal bacterial overgrowth', 'Inflammatory bowel disease', 'Microscopic colitis']}
+    Results: {'summary': 'A 38-year-old female with a history of IBS presents with 6 months of postprandial bloating, abdominal discomfort, intermittent diarrhea, fatigue, and brain fog exacerbated by gluten and dairy. Laboratory findings of mild inflammation and iron and vitamin D deficiencies raise concern for underlying malabsorption.', 'options': ['Celiac disease', 'Lactose intolerance', 'Non-celiac gluten sensitivity', 'Small intestinal bacterial overgrowth', 'Exocrine pancreatic insufficiency', 'Irritable bowel syndrome exacerbation', 'Inflammatory bowel disease']}
 
 ## Stage 4 — Exam
 
@@ -192,7 +247,7 @@ else:
 
     Exam suggestions complete.
 
-    Results: {'summary': 'The differential for chronic diarrhea includes celiac disease, non-celiac gluten sensitivity, lactose intolerance, IBS-D, small intestinal bacterial overgrowth (SIBO), inflammatory bowel disease, and microscopic colitis. Initial evaluation should target celiac serology and duodenal histology, lactose and SIBO breath testing, colonoscopy with random biopsies plus stool inflammatory markers, and imaging if IBD is suspected. Trial of dietary modifications may also aid in diagnosis.', 'options': ['Serum tissue transglutaminase IgA and total IgA', 'Anti-endomysial antibody testing', 'Upper endoscopy with duodenal biopsy', 'Lactose hydrogen breath test', 'Glucose or lactulose hydrogen breath test for SIBO', 'Colonoscopy with random colonic biopsies', 'Stool calprotectin and lactoferrin', 'CT or MR enterography', 'Fecal ova and parasite examination', 'Trial of gluten-free diet under dietitian supervision']}
+    Results: {'summary': 'The differential includes immune‐mediated mucosal injury (celiac disease, non‐celiac gluten sensitivity), enzyme deficiencies (lactase, pancreatic), microbial overgrowth (SIBO), functional disorder (IBS), and organic inflammation (IBD). Targeted serologies, breath tests, stool assays, and endoscopic evaluation can distinguish these etiologies and guide management.', 'options': ['Serologic testing for tissue transglutaminase IgA and total IgA', 'Anti‐endomysial antibody assay', 'Upper endoscopy with duodenal biopsy', 'Lactose hydrogen breath test', 'Glucose or lactulose breath test for SIBO', 'Fecal elastase level', 'Stool calprotectin', 'Colonoscopy with ileal and colonic biopsies', 'CRP and ESR inflammatory markers', 'Gluten‐free and lactose elimination diet trial']}
 
 ## Multi-visit gap — Lab results arrive
 
@@ -230,7 +285,7 @@ print(f"Total events in session: {len(session.events)}")
 ```
 
     Lab results recorded in session.
-    Total events in session: 16
+    Total events in session: 15
 
 ## Stage 3 (re-run) — Enriched diagnosis
 
@@ -255,11 +310,11 @@ else:
     print(f"\nResults: {diagnosis}")
 ```
 
-    Remaining deferred inquiries: 0
+    Remaining deferred inquiries: 1
 
     Enriched diagnosis complete (with lab results).
 
-    Results: {'summary': 'A 38-year-old female presents with chronic postprandial bloating, abdominal discomfort, intermittent diarrhea, fatigue, and brain fog aggravated by gluten and dairy. Laboratory findings of elevated zonulin, calprotectin, lactulose-mannitol ratio, low secretory IgA, and mild nutrient deficiencies point toward an organic disorder beyond functional IBS.', 'options': ['Celiac disease', 'Non-celiac gluten sensitivity', 'Irritable bowel syndrome with dysbiosis', 'Small intestinal bacterial overgrowth (SIBO)', 'Lactose and casein intolerance', 'Microscopic colitis', 'Leaky gut syndrome (increased intestinal permeability)']}
+    Results: {'summary': 'A 38-year-old woman with a history of IBS presents with six months of postprandial bloating, abdominal discomfort, fatigue, brain fog, and intermittent diarrhea exacerbated by gluten and dairy. Laboratory and stool analyses reveal elevated intestinal permeability, increased zonulin and calprotectin, low secretory IgA, and vitamin D deficiency, suggesting an immune-mediated gut barrier dysfunction.', 'options': ['Celiac disease', 'Non-celiac gluten sensitivity', 'Lactose intolerance', 'Irritable bowel syndrome exacerbation', 'Small intestinal bacterial overgrowth']}
 
 ## Stage 5 — Treatment
 
@@ -271,14 +326,26 @@ inquiries = runner.check_requirements(Stage.TREATMENT, session)
 for inq in inquiries:
     print(f"  [{inq.priority}] {inq.field}: {inq.label}")
 
-# Provide any additional treatment-relevant answers
-session.provide_answers({
+# Treatment-specific answer bank
+TREATMENT_ANSWERS = {
     "treatment_preferences": (
         "Patient prefers integrative approach. Open to dietary changes "
         "and supplements. Wants to minimize pharmaceutical interventions."
     ),
     "budget_constraints": "Standard insurance coverage, willing to pay OOP for supplements",
-})
+    "lifestyle_goals": "Improve energy, reduce bloating, better sleep",
+    "dietary_restrictions": "Willing to eliminate gluten and dairy long-term",
+    "exercise_tolerance": "Can tolerate light to moderate exercise",
+    "compliance_history": "Good compliance with previous IBS dietary recommendations",
+}
+
+answers = {
+    inq.field: TREATMENT_ANSWERS[inq.field]
+    for inq in inquiries
+    if inq.priority != "deferred" and inq.field in TREATMENT_ANSWERS
+}
+session.provide_answers(answers)
+print(f"\nAnswered {len(answers)} treatment inquiries: {list(answers.keys())}")
 
 runner.run_session(Stage.TREATMENT, session)
 
@@ -288,6 +355,7 @@ if isinstance(treatment, dict):
     print(f"\nResults: {treatment}")
 ```
 
+    Answered 0 treatment inquiries: []
     Treatment plan complete.
 
     Results: {}
@@ -324,11 +392,11 @@ print(f"Total events: {len(session.events)}")
 print(f"Pending inquiries: {len(session.pending_inquiries)}")
 ```
 
-    Session file: /tmp/tmppjix08r9/gut-leak-visit.parquet
+    Session file: /tmp/tmp1dwe6i9k/gut-leak-visit.parquet
     Language: en
     Stages completed: ['screening', 'intake', 'diagnosis', 'exam', <Stage.DIAGNOSIS: 'diagnosis'>, <Stage.TREATMENT: 'treatment'>, <Stage.PRESCRIPTION: 'prescription'>]
     Total events: 27
-    Pending inquiries: 0
+    Pending inquiries: 23
 
 ### Clinical data accumulated
 
@@ -350,12 +418,7 @@ print(json.dumps({k: v for k, v in clinical.items()
       "medical_history": "Irritable bowel syndrome diagnosed 3 years ago",
       "medications": "Omeprazole 20mg daily",
       "allergies": "None known",
-      "dietary_history": "High carbohydrate diet, frequent processed foods, low fiber intake. Symptoms worsen significantly after gluten-containing meals and dairy. Patient has tried eliminating gluten for 2 weeks with partial improvement.",
-      "bowel_habits": "2-4 loose stools daily, occasional mucus. Bristol stool scale type 5-6. Urgency after meals, especially breakfast.",
-      "stress_level": "High \u2014 work-related stress, poor sleep quality (5-6 hours/night)",
-      "supplement_history": "Probiotics (generic, 1 month, no improvement), multivitamin",
-      "treatment_preferences": "Patient prefers integrative approach. Open to dietary changes and supplements. Wants to minimize pharmaceutical interventions.",
-      "budget_constraints": "Standard insurance coverage, willing to pay OOP for supplements"
+      "vital_signs": "BP 118/72, HR 74, Temp 36.8\u00b0C, BMI 24.1"
     }
 
 ### Event log with polars
