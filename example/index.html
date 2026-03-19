@@ -6,6 +6,8 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
+        <meta name="description" content="A Python library for clinical AI workflows with skill-based pipelines">
+      
       
       
         <link rel="canonical" href="https://hiperhealth.com/example/">
@@ -21,7 +23,7 @@
     
     
       
-        <title>Gut Leak Patient — Full Pipeline Example - hiperhealth</title>
+        <title>Gut Leak Patient — Full Pipeline Example - HiPerHealth</title>
       
     
     
@@ -42,12 +44,14 @@
         
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Roboto Mono"}</style>
       
     
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -60,10 +64,12 @@
   
     
     
+      
     
     
     
-    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="white" data-md-color-accent="lime">
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-purple">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -86,9 +92,9 @@
 
   
 
-<header class="md-header md-header--shadow" data-md-component="header">
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="hiperhealth" class="md-header__button md-logo" aria-label="hiperhealth" data-md-component="logo">
+    <a href=".." title="HiPerHealth" class="md-header__button md-logo" aria-label="HiPerHealth" data-md-component="logo">
       
   <img src="../images/logo.png" alt="logo">
 
@@ -101,7 +107,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            hiperhealth
+            HiPerHealth
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -115,7 +121,33 @@
     </div>
     
       
+        <form class="md-header__option" data-md-component="palette">
+  
     
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
     
@@ -174,20 +206,156 @@
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
   </div>
   <div class="md-source__repository">
-    GitHub
+    hiperhealth/hiperhealth
   </div>
 </a>
       </div>
     
   </nav>
   
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../skills/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../contributing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Community
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
 </header>
     
     <div class="md-container" data-md-component="container">
       
       
-        
-          
         
       
       <main class="md-main" data-md-component="main">
@@ -201,15 +369,17 @@
                     
 
 
+  
 
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="hiperhealth" class="md-nav__button md-logo" aria-label="hiperhealth" data-md-component="logo">
+    <a href=".." title="HiPerHealth" class="md-nav__button md-logo" aria-label="HiPerHealth" data-md-component="logo">
       
   <img src="../images/logo.png" alt="logo">
 
     </a>
-    hiperhealth
+    HiPerHealth
   </label>
   
     <div class="md-nav__source">
@@ -219,7 +389,7 @@
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
   </div>
   <div class="md-source__repository">
-    GitHub
+    hiperhealth/hiperhealth
   </div>
 </a>
     </div>
@@ -259,6 +429,68 @@
   
   
   
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../installation/" class="md-nav__link">
         
@@ -279,9 +511,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -306,9 +539,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -333,9 +567,77 @@
     </li>
   
 
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -360,9 +662,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -387,57 +690,11 @@
     </li>
   
 
-    
+              
+            
+          </ul>
+        </nav>
       
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../changelog/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Changelog
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../contributing/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Contributing
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -453,18 +710,85 @@
       
         
       
+        
+      
     
     
+    
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
             
   
   
@@ -482,8 +806,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -525,12 +849,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -552,14 +883,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1" id="__nav_9_1_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1" id="__nav_4_1_1_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_1_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -595,12 +926,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_2" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_2" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -622,14 +960,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_2" id="__nav_9_1_2_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_2" id="__nav_4_1_1_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_2">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_1_1_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -687,12 +1025,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_2_3" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_2_3" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -714,14 +1059,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_2_3" id="__nav_9_1_2_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_2_3" id="__nav_4_1_1_2_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_2_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_2_3">
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_4_1_1_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_2_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -789,12 +1134,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_2_4" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_2_4" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -816,14 +1168,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_2_4" id="__nav_9_1_2_4_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_2_4" id="__nav_4_1_1_2_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_2_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_2_4">
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_4_1_1_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_2_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -981,12 +1333,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_4" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_4" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1008,14 +1367,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_4" id="__nav_9_1_4_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_4" id="__nav_4_1_1_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_4">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_1_1_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1045,12 +1404,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_4_2" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_4_2" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1072,14 +1438,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_4_2" id="__nav_9_1_4_2_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_4_2" id="__nav_4_1_1_4_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_4_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_4_2">
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_4_1_1_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_4_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1165,12 +1531,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_5" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_5" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1192,14 +1565,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_5" id="__nav_9_1_5_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_5" id="__nav_4_1_1_5_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_5">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_1_1_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1433,12 +1806,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_6" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_6" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1460,14 +1840,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_6" id="__nav_9_1_6_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_6" id="__nav_4_1_1_6_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_6">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_1_1_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1537,12 +1917,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_7" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_7" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1564,14 +1951,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_7" id="__nav_9_1_7_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_7" id="__nav_4_1_1_7_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_7">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_1_1_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1697,12 +2084,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_8" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_8" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1724,14 +2118,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_8" id="__nav_9_1_8_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_8" id="__nav_4_1_1_8_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_8">
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_1_1_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1761,12 +2155,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_8_2" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_8_2" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1788,14 +2189,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_8_2" id="__nav_9_1_8_2_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_8_2" id="__nav_4_1_1_8_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_8_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_8_2">
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_4_1_1_8_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_8_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1865,12 +2266,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_8_3" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_8_3" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1892,14 +2300,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_8_3" id="__nav_9_1_8_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_8_3" id="__nav_4_1_1_8_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_8_3">
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_4_1_1_8_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_8_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2021,12 +2429,19 @@
     
     
     
+      
+      
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_8_4" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1_1_8_4" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -2048,14 +2463,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_9_1_8_4" id="__nav_9_1_8_4_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4_1_1_8_4" id="__nav_4_1_1_8_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_9_1_8_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9_1_8_4">
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_4_1_1_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2153,22 +2568,23 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
   
     <li class="md-nav__item">
-      <a href="../example.ipynb" class="md-nav__link">
+      <a href="../changelog/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Notebook page
+    Changelog
   
 
     
@@ -2177,6 +2593,107 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Community
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2219,369 +2736,358 @@
   
 
 
-<h1 id="gut-leak-patient-full-pipeline-example">Gut Leak Patient — Full Pipeline Example</h1>
-<h1 id="gut-leak-patient-end-to-end-pipeline-example">Gut Leak Patient: End-to-End Pipeline Example</h1>
+<h1 id="gut-leak-patient-full-pipeline-example">Gut Leak Patient — Full Pipeline Example<a class="headerlink" href="#gut-leak-patient-full-pipeline-example" title="Permanent link">&para;</a></h1>
+<h1 id="gut-leak-patient-end-to-end-pipeline-example">Gut Leak Patient: End-to-End Pipeline Example<a class="headerlink" href="#gut-leak-patient-end-to-end-pipeline-example" title="Permanent link">&para;</a></h1>
 <p>This example walks through a complete clinical workflow for a patient presenting
 with gut leak symptoms. It demonstrates all six pipeline stages, the
 session-based workflow with requirement checking, and the multi-visit pattern
 where deferred data (lab results) arrives later.</p>
-<h2 id="setup">Setup</h2>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
-
-<span class="c1"># Load env vars — try both project root and docs/ as possible working dirs</span>
-<span class="n">load_dotenv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tests/.env&quot;</span><span class="p">))</span> <span class="ow">or</span> <span class="n">load_dotenv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../tests/.env&quot;</span><span class="p">))</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">hiperhealth.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Session</span><span class="p">,</span>
-    <span class="n">Stage</span><span class="p">,</span>
-    <span class="n">create_default_runner</span><span class="p">,</span>
-<span class="p">)</span>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Load env vars — try both project root and docs/ as possible working dirs</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">load_dotenv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tests/.env&quot;</span><span class="p">))</span> <span class="ow">or</span> <span class="n">load_dotenv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../tests/.env&quot;</span><span class="p">))</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">hiperhealth.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">Session</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">Stage</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">create_default_runner</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">)</span>
 </code></pre></div>
-<h2 id="create-a-session-and-runner">Create a session and runner</h2>
+<h2 id="create-a-session-and-runner">Create a session and runner<a class="headerlink" href="#create-a-session-and-runner" title="Permanent link">&para;</a></h2>
 <p>The session file is the single source of truth for all interactions. It is a
 parquet-backed event log — every action is recorded as a row.</p>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
-<span class="n">session_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span>
-<span class="n">session_path</span> <span class="o">=</span> <span class="n">session_dir</span> <span class="o">/</span> <span class="s2">&quot;gut-leak-visit.parquet&quot;</span>
-
-<span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">session_path</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>
-<span class="n">runner</span> <span class="o">=</span> <span class="n">create_default_runner</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">session_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">session_path</span> <span class="o">=</span> <span class="n">session_dir</span> <span class="o">/</span> <span class="s2">&quot;gut-leak-visit.parquet&quot;</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">session_path</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">runner</span> <span class="o">=</span> <span class="n">create_default_runner</span><span class="p">()</span>
 </code></pre></div>
-<h2 id="stage-1-screening">Stage 1 — Screening</h2>
+<h2 id="stage-1-screening">Stage 1 — Screening<a class="headerlink" href="#stage-1-screening" title="Permanent link">&para;</a></h2>
 <p>The screening stage performs initial triage and de-identifies any PII in the
 patient record. The clinical system provides data without personally
 identifiable information — only clinical content.</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">session</span><span class="o">.</span><span class="n">set_clinical_data</span><span class="p">({</span>
-    <span class="s2">&quot;symptoms&quot;</span><span class="p">:</span> <span class="p">(</span>
-        <span class="s2">&quot;Patient reports chronic bloating, abdominal discomfort after meals, &quot;</span>
-        <span class="s2">&quot;fatigue, brain fog, and intermittent diarrhea for the past 6 months. &quot;</span>
-        <span class="s2">&quot;Symptoms worsen with gluten and dairy intake.&quot;</span>
-    <span class="p">),</span>
-    <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">38</span><span class="p">,</span>
-    <span class="s2">&quot;biological_sex&quot;</span><span class="p">:</span> <span class="s2">&quot;female&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;medical_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Irritable bowel syndrome diagnosed 3 years ago&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;medications&quot;</span><span class="p">:</span> <span class="s2">&quot;Omeprazole 20mg daily&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;allergies&quot;</span><span class="p">:</span> <span class="s2">&quot;None known&quot;</span><span class="p">,</span>
-<span class="p">})</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">session</span><span class="o">.</span><span class="n">set_clinical_data</span><span class="p">({</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="s2">&quot;symptoms&quot;</span><span class="p">:</span> <span class="p">(</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        <span class="s2">&quot;Patient reports chronic bloating, abdominal discomfort after meals, &quot;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>        <span class="s2">&quot;fatigue, brain fog, and intermittent diarrhea for the past 6 months. &quot;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="s2">&quot;Symptoms worsen with gluten and dairy intake.&quot;</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="p">),</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">38</span><span class="p">,</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="s2">&quot;biological_sex&quot;</span><span class="p">:</span> <span class="s2">&quot;female&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="s2">&quot;medical_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Irritable bowel syndrome diagnosed 3 years ago&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="s2">&quot;medications&quot;</span><span class="p">:</span> <span class="s2">&quot;Omeprazole 20mg daily&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="s2">&quot;allergies&quot;</span><span class="p">:</span> <span class="s2">&quot;None known&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">})</span>
 </code></pre></div>
 <p>Run screening to de-identify any PII that may have been inadvertently included:</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">SCREENING</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Screening complete.&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stages completed:&quot;</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">stages_completed</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">SCREENING</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Screening complete.&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stages completed:&quot;</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">stages_completed</span><span class="p">)</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>Screening complete.
+<div class="language-text highlight"><pre><span></span><code>Screening complete.
 Stages completed: [&lt;Stage.SCREENING: &#39;screening&#39;&gt;]
 </code></pre></div>
-
-<h2 id="stage-2-intake">Stage 2 — Intake</h2>
+<h2 id="stage-2-intake">Stage 2 — Intake<a class="headerlink" href="#stage-2-intake" title="Permanent link">&para;</a></h2>
 <p>The intake stage extracts structured data from medical reports and wearable
 files. In this example we simulate providing a previous lab report.</p>
-<div class="language-python highlight"><pre><span></span><code><span class="c1"># In a real workflow, you would provide file paths:</span>
-<span class="c1"># session.provide_answers({&quot;lab_report&quot;: &quot;/path/to/previous_labs.pdf&quot;})</span>
-
-<span class="c1"># For this example, we provide the extracted data directly</span>
-<span class="n">session</span><span class="o">.</span><span class="n">provide_answers</span><span class="p">({</span>
-    <span class="s2">&quot;previous_labs&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;CBC&quot;</span><span class="p">:</span> <span class="s2">&quot;within normal limits&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;CRP&quot;</span><span class="p">:</span> <span class="s2">&quot;slightly elevated (5.2 mg/L)&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;vitamin_D&quot;</span><span class="p">:</span> <span class="s2">&quot;low (18 ng/mL)&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;iron&quot;</span><span class="p">:</span> <span class="s2">&quot;low-normal (45 mcg/dL)&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ferritin&quot;</span><span class="p">:</span> <span class="s2">&quot;low (15 ng/mL)&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">})</span>
-
-<span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">INTAKE</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Intake complete.&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># In a real workflow, you would provide file paths:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="c1"># session.provide_answers({&quot;lab_report&quot;: &quot;/path/to/previous_labs.pdf&quot;})</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># For this example, we provide the extracted data directly</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">session</span><span class="o">.</span><span class="n">provide_answers</span><span class="p">({</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="s2">&quot;previous_labs&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="s2">&quot;CBC&quot;</span><span class="p">:</span> <span class="s2">&quot;within normal limits&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="s2">&quot;CRP&quot;</span><span class="p">:</span> <span class="s2">&quot;slightly elevated (5.2 mg/L)&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>        <span class="s2">&quot;vitamin_D&quot;</span><span class="p">:</span> <span class="s2">&quot;low (18 ng/mL)&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="s2">&quot;iron&quot;</span><span class="p">:</span> <span class="s2">&quot;low-normal (45 mcg/dL)&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        <span class="s2">&quot;ferritin&quot;</span><span class="p">:</span> <span class="s2">&quot;low (15 ng/mL)&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="p">},</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="p">})</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">INTAKE</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Intake complete.&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>Intake complete.
+<div class="language-text highlight"><pre><span></span><code>Intake complete.
 </code></pre></div>
-
-<h2 id="stage-3-diagnosis-first-pass">Stage 3 — Diagnosis (first pass)</h2>
+<h2 id="stage-3-diagnosis-first-pass">Stage 3 — Diagnosis (first pass)<a class="headerlink" href="#stage-3-diagnosis-first-pass" title="Permanent link">&para;</a></h2>
 <p>Before running diagnosis, check what information the skills need. This is the
 requirement checking cycle: assess → provide → execute.</p>
-<h3 id="check-requirements">Check requirements</h3>
-<div class="language-python highlight"><pre><span></span><code><span class="n">inquiries</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">check_requirements</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total inquiries: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">inquiries</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">inq</span> <span class="ow">in</span> <span class="n">inquiries</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  [</span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">priority</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">inq</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    → </span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<h3 id="check-requirements">Check requirements<a class="headerlink" href="#check-requirements" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">inquiries</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">check_requirements</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total inquiries: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">inquiries</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">for</span> <span class="n">inq</span> <span class="ow">in</span> <span class="n">inquiries</span><span class="p">:</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  [</span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">priority</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="k">if</span> <span class="n">inq</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    → </span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">Total</span><span class="w"> </span><span class="nl">inquiries</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span>
+<div class="language-text highlight"><pre><span></span><code>Total inquiries: 12
 
-<span class="w">  </span><span class="o">[</span><span class="n">required</span><span class="o">]</span><span class="w"> </span><span class="nl">vital_signs</span><span class="p">:</span><span class="w"> </span><span class="n">Vital</span><span class="w"> </span><span class="n">Signs</span><span class="w"> </span><span class="p">(</span><span class="n">BP</span><span class="p">,</span><span class="w"> </span><span class="n">HR</span><span class="p">,</span><span class="w"> </span><span class="n">RR</span><span class="p">,</span><span class="w"> </span><span class="n">Temperature</span><span class="p">)</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">Baseline</span><span class="w"> </span><span class="n">vital</span><span class="w"> </span><span class="n">signs</span><span class="w"> </span><span class="n">needed</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">assess</span><span class="w"> </span><span class="k">current</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">inflammation</span>
-<span class="w">  </span><span class="o">[</span><span class="n">required</span><span class="o">]</span><span class="w"> </span><span class="nl">height</span><span class="p">:</span><span class="w"> </span><span class="n">Height</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">Needed</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">calculate</span><span class="w"> </span><span class="n">BMI</span>
-<span class="w">  </span><span class="o">[</span><span class="n">required</span><span class="o">]</span><span class="w"> </span><span class="nl">weight</span><span class="p">:</span><span class="w"> </span><span class="n">Weight</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="k">Current</span><span class="w"> </span><span class="n">weight</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">BMI</span><span class="w"> </span><span class="n">calculation</span>
-<span class="w">  </span><span class="o">[</span><span class="n">required</span><span class="o">]</span><span class="w"> </span><span class="nl">stool_characteristics</span><span class="p">:</span><span class="w"> </span><span class="n">Stool</span><span class="w"> </span><span class="n">Characteristics</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">Frequency</span><span class="p">,</span><span class="w"> </span><span class="n">consistency</span><span class="p">,</span><span class="w"> </span><span class="n">presence</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">blood</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">mucus</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">characterize</span><span class="w"> </span><span class="n">diarrhea</span>
-<span class="w">  </span><span class="o">[</span><span class="n">supplementary</span><span class="o">]</span><span class="w"> </span><span class="nl">weight_change</span><span class="p">:</span><span class="w"> </span><span class="n">Weight</span><span class="w"> </span><span class="n">Change</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">Recent</span><span class="w"> </span><span class="n">weight</span><span class="w"> </span><span class="n">loss</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">gain</span><span class="w"> </span><span class="n">associated</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">symptoms</span>
-<span class="w">  </span><span class="o">[</span><span class="n">supplementary</span><span class="o">]</span><span class="w"> </span><span class="nl">medication_supplements</span><span class="p">:</span><span class="w"> </span><span class="k">Over</span><span class="o">-</span><span class="n">the</span><span class="o">-</span><span class="n">Counter</span><span class="w"> </span><span class="n">Medications</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">Supplements</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">Identify</span><span class="w"> </span><span class="ow">any</span><span class="w"> </span><span class="n">additional</span><span class="w"> </span><span class="n">medications</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">supplements</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">contribute</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">symptoms</span>
-<span class="w">  </span><span class="o">[</span><span class="n">supplementary</span><span class="o">]</span><span class="w"> </span><span class="nl">smoking_history</span><span class="p">:</span><span class="w"> </span><span class="n">Smoking</span><span class="w"> </span><span class="n">History</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">Assess</span><span class="w"> </span><span class="n">risk</span><span class="w"> </span><span class="n">factors</span><span class="w"> </span><span class="n">related</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">smoking</span>
-<span class="w">  </span><span class="o">[</span><span class="n">supplementary</span><span class="o">]</span><span class="w"> </span><span class="nl">alcohol_use</span><span class="p">:</span><span class="w"> </span><span class="n">Alcohol</span><span class="w"> </span><span class="k">Use</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">Quantity</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">frequency</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">alcohol</span><span class="w"> </span><span class="n">intake</span>
-<span class="w">  </span><span class="o">[</span><span class="n">supplementary</span><span class="o">]</span><span class="w"> </span><span class="nl">family_history_gi</span><span class="p">:</span><span class="w"> </span><span class="n">Family</span><span class="w"> </span><span class="n">History</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">Gastrointestinal</span><span class="o">/</span><span class="n">Autoimmune</span><span class="w"> </span><span class="n">Disease</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">Assess</span><span class="w"> </span><span class="n">genetic</span><span class="w"> </span><span class="n">predisposition</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">conditions</span><span class="w"> </span><span class="ow">like</span><span class="w"> </span><span class="n">celiac</span><span class="w"> </span><span class="n">disease</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">IBD</span>
-<span class="w">  </span><span class="o">[</span><span class="n">supplementary</span><span class="o">]</span><span class="w"> </span><span class="nl">constitutional_symptoms</span><span class="p">:</span><span class="w"> </span><span class="n">Constitutional</span><span class="w"> </span><span class="n">Symptoms</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">Presence</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">fever</span><span class="p">,</span><span class="w"> </span><span class="n">night</span><span class="w"> </span><span class="n">sweats</span><span class="p">,</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">other</span><span class="w"> </span><span class="n">systemic</span><span class="w"> </span><span class="n">symptoms</span>
-<span class="w">  </span><span class="o">[</span><span class="n">deferred</span><span class="o">]</span><span class="w"> </span><span class="nl">travel_history</span><span class="p">:</span><span class="w"> </span><span class="n">Travel</span><span class="w"> </span><span class="n">History</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">Recent</span><span class="w"> </span><span class="n">travel</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">areas</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">risk</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">infectious</span><span class="w"> </span><span class="n">causes</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">diarrhea</span>
-<span class="w">  </span><span class="o">[</span><span class="n">deferred</span><span class="o">]</span><span class="w"> </span><span class="nl">menstrual_history</span><span class="p">:</span><span class="w"> </span><span class="n">Menstrual</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">Reproductive</span><span class="w"> </span><span class="n">History</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">Evaluate</span><span class="w"> </span><span class="n">hormonal</span><span class="w"> </span><span class="n">factors</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">correlation</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">symptoms</span>
+  [required] vital_signs: Vital Signs (BP, HR, RR, Temperature)
+    → Baseline vital signs needed to assess current status and inflammation
+  [required] height: Height
+    → Needed to calculate BMI
+  [required] weight: Weight
+    → Current weight for BMI calculation
+  [required] stool_characteristics: Stool Characteristics
+    → Frequency, consistency, presence of blood or mucus to characterize diarrhea
+  [supplementary] weight_change: Weight Change
+    → Recent weight loss or gain associated with symptoms
+  [supplementary] medication_supplements: Over-the-Counter Medications &amp; Supplements
+    → Identify any additional medications or supplements that may contribute to symptoms
+  [supplementary] smoking_history: Smoking History
+    → Assess risk factors related to smoking
+  [supplementary] alcohol_use: Alcohol Use
+    → Quantity and frequency of alcohol intake
+  [supplementary] family_history_gi: Family History of Gastrointestinal/Autoimmune Disease
+    → Assess genetic predisposition to conditions like celiac disease or IBD
+  [supplementary] constitutional_symptoms: Constitutional Symptoms
+    → Presence of fever, night sweats, or other systemic symptoms
+  [deferred] travel_history: Travel History
+    → Recent travel to areas with risk of infectious causes of diarrhea
+  [deferred] menstrual_history: Menstrual and Reproductive History
+    → Evaluate hormonal factors or correlation with symptoms
 </code></pre></div>
-
-<h3 id="provide-answers-to-the-inquiries">Provide answers to the inquiries</h3>
+<h3 id="provide-answers-to-the-inquiries">Provide answers to the inquiries<a class="headerlink" href="#provide-answers-to-the-inquiries" title="Permanent link">&para;</a></h3>
 <p>The clinical system collects answers from the patient or provider and feeds them
 back into the session. We define an <strong>answer bank</strong> — a comprehensive dictionary
 of all clinical information available for this patient — and provide only the
 fields that were actually requested. Deferred inquiries (like lab results not
 yet ordered) are skipped for now.</p>
-<div class="language-python highlight"><pre><span></span><code><span class="c1"># All clinical data available for this patient at this point.</span>
-<span class="c1"># In a real system this comes from the EHR or clinician input.</span>
-<span class="n">ANSWER_BANK</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;chief_complaint&quot;</span><span class="p">:</span> <span class="s2">&quot;Chronic bloating and abdominal discomfort for 6 months&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;dietary_history&quot;</span><span class="p">:</span> <span class="p">(</span>
-        <span class="s2">&quot;High carbohydrate diet, frequent processed foods, low fiber intake. &quot;</span>
-        <span class="s2">&quot;Symptoms worsen significantly after gluten-containing meals and dairy. &quot;</span>
-        <span class="s2">&quot;Patient has tried eliminating gluten for 2 weeks with partial improvement.&quot;</span>
-    <span class="p">),</span>
-    <span class="s2">&quot;bowel_habits&quot;</span><span class="p">:</span> <span class="p">(</span>
-        <span class="s2">&quot;2-4 loose stools daily, occasional mucus. Bristol stool scale type 5-6. &quot;</span>
-        <span class="s2">&quot;Urgency after meals, especially breakfast.&quot;</span>
-    <span class="p">),</span>
-    <span class="s2">&quot;family_history&quot;</span><span class="p">:</span> <span class="p">(</span>
-        <span class="s2">&quot;Mother: celiac disease, hypothyroidism. &quot;</span>
-        <span class="s2">&quot;Father: type 2 diabetes, hypertension. &quot;</span>
-        <span class="s2">&quot;Sibling: no significant conditions.&quot;</span>
-    <span class="p">),</span>
-    <span class="s2">&quot;social_history&quot;</span><span class="p">:</span> <span class="p">(</span>
-        <span class="s2">&quot;Non-smoker, occasional alcohol (1-2 drinks/week). &quot;</span>
-        <span class="s2">&quot;Office worker, sedentary lifestyle.&quot;</span>
-    <span class="p">),</span>
-    <span class="s2">&quot;stress_level&quot;</span><span class="p">:</span> <span class="s2">&quot;High — work-related stress, poor sleep quality (5-6 hours/night)&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;supplement_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Probiotics (generic, 1 month, no improvement), multivitamin&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;vital_signs&quot;</span><span class="p">:</span> <span class="s2">&quot;BP 118/72, HR 74, Temp 36.8°C, BMI 24.1&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;review_of_systems&quot;</span><span class="p">:</span> <span class="p">(</span>
-        <span class="s2">&quot;Fatigue, brain fog, occasional joint pain (hands). &quot;</span>
-        <span class="s2">&quot;No fever, no weight loss, no blood in stool.&quot;</span>
-    <span class="p">),</span>
-    <span class="s2">&quot;sleep_quality&quot;</span><span class="p">:</span> <span class="s2">&quot;5-6 hours/night, difficulty falling asleep, non-restorative&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;exercise_habits&quot;</span><span class="p">:</span> <span class="s2">&quot;Minimal — walks 2x/week, 20 minutes&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;onset_timeline&quot;</span><span class="p">:</span> <span class="s2">&quot;Gradual onset ~6 months ago, progressively worsening&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;weight_changes&quot;</span><span class="p">:</span> <span class="s2">&quot;Unintentional loss of 3 kg over 6 months&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;travel_history&quot;</span><span class="p">:</span> <span class="s2">&quot;No recent travel&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;occupation&quot;</span><span class="p">:</span> <span class="s2">&quot;Software engineer, desk-based&quot;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="c1"># Provide answers only for the fields the LLM identified as missing</span>
-<span class="n">answers</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="p">:</span> <span class="n">ANSWER_BANK</span><span class="p">[</span><span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">inq</span> <span class="ow">in</span> <span class="n">inquiries</span>
-    <span class="k">if</span> <span class="n">inq</span><span class="o">.</span><span class="n">priority</span> <span class="o">!=</span> <span class="s2">&quot;deferred&quot;</span> <span class="ow">and</span> <span class="n">inq</span><span class="o">.</span><span class="n">field</span> <span class="ow">in</span> <span class="n">ANSWER_BANK</span>
-<span class="p">}</span>
-<span class="n">unanswered</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">inq</span><span class="o">.</span><span class="n">field</span> <span class="k">for</span> <span class="n">inq</span> <span class="ow">in</span> <span class="n">inquiries</span>
-    <span class="k">if</span> <span class="n">inq</span><span class="o">.</span><span class="n">priority</span> <span class="o">!=</span> <span class="s2">&quot;deferred&quot;</span> <span class="ow">and</span> <span class="n">inq</span><span class="o">.</span><span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ANSWER_BANK</span>
-<span class="p">]</span>
-
-<span class="n">session</span><span class="o">.</span><span class="n">provide_answers</span><span class="p">(</span><span class="n">answers</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Answered </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">answers</span><span class="p">)</span><span class="si">}</span><span class="s2"> inquiries: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">answers</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">if</span> <span class="n">unanswered</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not in answer bank (skipped): </span><span class="si">{</span><span class="n">unanswered</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># All clinical data available for this patient at this point.</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># In a real system this comes from the EHR or clinician input.</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">ANSWER_BANK</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="s2">&quot;chief_complaint&quot;</span><span class="p">:</span> <span class="s2">&quot;Chronic bloating and abdominal discomfort for 6 months&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="s2">&quot;dietary_history&quot;</span><span class="p">:</span> <span class="p">(</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>        <span class="s2">&quot;High carbohydrate diet, frequent processed foods, low fiber intake. &quot;</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>        <span class="s2">&quot;Symptoms worsen significantly after gluten-containing meals and dairy. &quot;</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>        <span class="s2">&quot;Patient has tried eliminating gluten for 2 weeks with partial improvement.&quot;</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    <span class="p">),</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="s2">&quot;bowel_habits&quot;</span><span class="p">:</span> <span class="p">(</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>        <span class="s2">&quot;2-4 loose stools daily, occasional mucus. Bristol stool scale type 5-6. &quot;</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>        <span class="s2">&quot;Urgency after meals, especially breakfast.&quot;</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>    <span class="p">),</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>    <span class="s2">&quot;family_history&quot;</span><span class="p">:</span> <span class="p">(</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>        <span class="s2">&quot;Mother: celiac disease, hypothyroidism. &quot;</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>        <span class="s2">&quot;Father: type 2 diabetes, hypertension. &quot;</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>        <span class="s2">&quot;Sibling: no significant conditions.&quot;</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>    <span class="p">),</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>    <span class="s2">&quot;social_history&quot;</span><span class="p">:</span> <span class="p">(</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>        <span class="s2">&quot;Non-smoker, occasional alcohol (1-2 drinks/week). &quot;</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>        <span class="s2">&quot;Office worker, sedentary lifestyle.&quot;</span>
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>    <span class="p">),</span>
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>    <span class="s2">&quot;stress_level&quot;</span><span class="p">:</span> <span class="s2">&quot;High — work-related stress, poor sleep quality (5-6 hours/night)&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>    <span class="s2">&quot;supplement_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Probiotics (generic, 1 month, no improvement), multivitamin&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a>    <span class="s2">&quot;vital_signs&quot;</span><span class="p">:</span> <span class="s2">&quot;BP 118/72, HR 74, Temp 36.8°C, BMI 24.1&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a>    <span class="s2">&quot;review_of_systems&quot;</span><span class="p">:</span> <span class="p">(</span>
+<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a>        <span class="s2">&quot;Fatigue, brain fog, occasional joint pain (hands). &quot;</span>
+<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a>        <span class="s2">&quot;No fever, no weight loss, no blood in stool.&quot;</span>
+<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a>    <span class="p">),</span>
+<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a>    <span class="s2">&quot;sleep_quality&quot;</span><span class="p">:</span> <span class="s2">&quot;5-6 hours/night, difficulty falling asleep, non-restorative&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a>    <span class="s2">&quot;exercise_habits&quot;</span><span class="p">:</span> <span class="s2">&quot;Minimal — walks 2x/week, 20 minutes&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a>    <span class="s2">&quot;onset_timeline&quot;</span><span class="p">:</span> <span class="s2">&quot;Gradual onset ~6 months ago, progressively worsening&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a>    <span class="s2">&quot;weight_changes&quot;</span><span class="p">:</span> <span class="s2">&quot;Unintentional loss of 3 kg over 6 months&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a>    <span class="s2">&quot;travel_history&quot;</span><span class="p">:</span> <span class="s2">&quot;No recent travel&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-35" name="__codelineno-6-35" href="#__codelineno-6-35"></a>    <span class="s2">&quot;occupation&quot;</span><span class="p">:</span> <span class="s2">&quot;Software engineer, desk-based&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-36" name="__codelineno-6-36" href="#__codelineno-6-36"></a><span class="p">}</span>
+<a id="__codelineno-6-37" name="__codelineno-6-37" href="#__codelineno-6-37"></a>
+<a id="__codelineno-6-38" name="__codelineno-6-38" href="#__codelineno-6-38"></a><span class="c1"># Provide answers only for the fields the LLM identified as missing</span>
+<a id="__codelineno-6-39" name="__codelineno-6-39" href="#__codelineno-6-39"></a><span class="n">answers</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-6-40" name="__codelineno-6-40" href="#__codelineno-6-40"></a>    <span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="p">:</span> <span class="n">ANSWER_BANK</span><span class="p">[</span><span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="p">]</span>
+<a id="__codelineno-6-41" name="__codelineno-6-41" href="#__codelineno-6-41"></a>    <span class="k">for</span> <span class="n">inq</span> <span class="ow">in</span> <span class="n">inquiries</span>
+<a id="__codelineno-6-42" name="__codelineno-6-42" href="#__codelineno-6-42"></a>    <span class="k">if</span> <span class="n">inq</span><span class="o">.</span><span class="n">priority</span> <span class="o">!=</span> <span class="s2">&quot;deferred&quot;</span> <span class="ow">and</span> <span class="n">inq</span><span class="o">.</span><span class="n">field</span> <span class="ow">in</span> <span class="n">ANSWER_BANK</span>
+<a id="__codelineno-6-43" name="__codelineno-6-43" href="#__codelineno-6-43"></a><span class="p">}</span>
+<a id="__codelineno-6-44" name="__codelineno-6-44" href="#__codelineno-6-44"></a><span class="n">unanswered</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-6-45" name="__codelineno-6-45" href="#__codelineno-6-45"></a>    <span class="n">inq</span><span class="o">.</span><span class="n">field</span> <span class="k">for</span> <span class="n">inq</span> <span class="ow">in</span> <span class="n">inquiries</span>
+<a id="__codelineno-6-46" name="__codelineno-6-46" href="#__codelineno-6-46"></a>    <span class="k">if</span> <span class="n">inq</span><span class="o">.</span><span class="n">priority</span> <span class="o">!=</span> <span class="s2">&quot;deferred&quot;</span> <span class="ow">and</span> <span class="n">inq</span><span class="o">.</span><span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ANSWER_BANK</span>
+<a id="__codelineno-6-47" name="__codelineno-6-47" href="#__codelineno-6-47"></a><span class="p">]</span>
+<a id="__codelineno-6-48" name="__codelineno-6-48" href="#__codelineno-6-48"></a>
+<a id="__codelineno-6-49" name="__codelineno-6-49" href="#__codelineno-6-49"></a><span class="n">session</span><span class="o">.</span><span class="n">provide_answers</span><span class="p">(</span><span class="n">answers</span><span class="p">)</span>
+<a id="__codelineno-6-50" name="__codelineno-6-50" href="#__codelineno-6-50"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Answered </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">answers</span><span class="p">)</span><span class="si">}</span><span class="s2"> inquiries: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">answers</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-6-51" name="__codelineno-6-51" href="#__codelineno-6-51"></a><span class="k">if</span> <span class="n">unanswered</span><span class="p">:</span>
+<a id="__codelineno-6-52" name="__codelineno-6-52" href="#__codelineno-6-52"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not in answer bank (skipped): </span><span class="si">{</span><span class="n">unanswered</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">Answered</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">inquiries</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;vital_signs&#39;</span><span class="p">]</span>
-<span class="n">Not</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">answer</span><span class="w"> </span><span class="n">bank</span><span class="w"> </span><span class="p">(</span><span class="n">skipped</span><span class="p">):</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;weight&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;stool_characteristics&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;weight_change&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;medication_supplements&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;smoking_history&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;alcohol_use&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;family_history_gi&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;constitutional_symptoms&#39;</span><span class="p">]</span>
+<div class="language-text highlight"><pre><span></span><code>Answered 1 inquiries: [&#39;vital_signs&#39;]
+Not in answer bank (skipped): [&#39;height&#39;, &#39;weight&#39;, &#39;stool_characteristics&#39;, &#39;weight_change&#39;, &#39;medication_supplements&#39;, &#39;smoking_history&#39;, &#39;alcohol_use&#39;, &#39;family_history_gi&#39;, &#39;constitutional_symptoms&#39;]
 </code></pre></div>
-
-<h3 id="run-preliminary-diagnosis">Run preliminary diagnosis</h3>
+<h3 id="run-preliminary-diagnosis">Run preliminary diagnosis<a class="headerlink" href="#run-preliminary-diagnosis" title="Permanent link">&para;</a></h3>
 <p>This is a first-pass diagnosis with available data. Deferred information (like
 stool analysis or zonulin levels) is not yet available.</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
-
-<span class="n">diagnosis</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="p">{})</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Preliminary diagnosis complete.&quot;</span><span class="p">)</span>
-<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">diagnosis</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Summary: </span><span class="si">{</span><span class="n">diagnosis</span><span class="o">.</span><span class="n">summary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Differential:</span><span class="se">\n</span><span class="si">{</span><span class="n">diagnosis</span><span class="o">.</span><span class="n">options</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Results: </span><span class="si">{</span><span class="n">diagnosis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">diagnosis</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="p">{})</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Preliminary diagnosis complete.&quot;</span><span class="p">)</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">diagnosis</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">):</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Summary: </span><span class="si">{</span><span class="n">diagnosis</span><span class="o">.</span><span class="n">summary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Differential:</span><span class="se">\n</span><span class="si">{</span><span class="n">diagnosis</span><span class="o">.</span><span class="n">options</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Results: </span><span class="si">{</span><span class="n">diagnosis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="nv">Preliminary</span><span class="w"> </span><span class="nv">diagnosis</span><span class="w"> </span><span class="nv">complete</span>.
+<div class="language-text highlight"><pre><span></span><code>Preliminary diagnosis complete.
 
-<span class="nv">Results</span>:<span class="w"> </span>{<span class="s1">&#39;summary&#39;</span>:<span class="w"> </span><span class="s1">&#39;A 38-year-old female with a history of IBS presents with 6 months of postprandial bloating, abdominal discomfort, intermittent diarrhea, fatigue, and brain fog exacerbated by gluten and dairy. Laboratory findings of mild inflammation and iron and vitamin D deficiencies raise concern for underlying malabsorption.&#39;</span>,<span class="w"> </span><span class="s1">&#39;options&#39;</span>:<span class="w"> </span>[<span class="s1">&#39;Celiac disease&#39;</span>,<span class="w"> </span><span class="s1">&#39;Lactose intolerance&#39;</span>,<span class="w"> </span><span class="s1">&#39;Non-celiac gluten sensitivity&#39;</span>,<span class="w"> </span><span class="s1">&#39;Small intestinal bacterial overgrowth&#39;</span>,<span class="w"> </span><span class="s1">&#39;Exocrine pancreatic insufficiency&#39;</span>,<span class="w"> </span><span class="s1">&#39;Irritable bowel syndrome exacerbation&#39;</span>,<span class="w"> </span><span class="s1">&#39;Inflammatory bowel disease&#39;</span>]}
+Results: {&#39;summary&#39;: &#39;A 38-year-old female with a history of IBS presents with 6 months of postprandial bloating, abdominal discomfort, intermittent diarrhea, fatigue, and brain fog exacerbated by gluten and dairy. Laboratory findings of mild inflammation and iron and vitamin D deficiencies raise concern for underlying malabsorption.&#39;, &#39;options&#39;: [&#39;Celiac disease&#39;, &#39;Lactose intolerance&#39;, &#39;Non-celiac gluten sensitivity&#39;, &#39;Small intestinal bacterial overgrowth&#39;, &#39;Exocrine pancreatic insufficiency&#39;, &#39;Irritable bowel syndrome exacerbation&#39;, &#39;Inflammatory bowel disease&#39;]}
 </code></pre></div>
-
-<h2 id="stage-4-exam">Stage 4 — Exam</h2>
+<h2 id="stage-4-exam">Stage 4 — Exam<a class="headerlink" href="#stage-4-exam" title="Permanent link">&para;</a></h2>
 <p>The exam stage suggests laboratory tests and procedures based on the preliminary
 diagnosis. This is where the system requests the deferred data.</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">EXAM</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
-
-<span class="n">exam_results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">EXAM</span><span class="p">,</span> <span class="p">{})</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exam suggestions complete.&quot;</span><span class="p">)</span>
-<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">exam_results</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Suggested exams: </span><span class="si">{</span><span class="n">exam_results</span><span class="o">.</span><span class="n">summary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Details:</span><span class="se">\n</span><span class="si">{</span><span class="n">exam_results</span><span class="o">.</span><span class="n">options</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Results: </span><span class="si">{</span><span class="n">exam_results</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">EXAM</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">exam_results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">EXAM</span><span class="p">,</span> <span class="p">{})</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exam suggestions complete.&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">exam_results</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">):</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Suggested exams: </span><span class="si">{</span><span class="n">exam_results</span><span class="o">.</span><span class="n">summary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Details:</span><span class="se">\n</span><span class="si">{</span><span class="n">exam_results</span><span class="o">.</span><span class="n">options</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Results: </span><span class="si">{</span><span class="n">exam_results</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">Exam</span><span class="w"> </span><span class="n">suggestions</span><span class="w"> </span><span class="n">complete</span><span class="o">.</span>
+<div class="language-text highlight"><pre><span></span><code>Exam suggestions complete.
 
-<span class="n">Results</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s1">&#39;summary&#39;</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;The differential includes immune‐mediated mucosal injury (celiac disease, non‐celiac gluten sensitivity), enzyme deficiencies (lactase, pancreatic), microbial overgrowth (SIBO), functional disorder (IBS), and organic inflammation (IBD). Targeted serologies, breath tests, stool assays, and endoscopic evaluation can distinguish these etiologies and guide management.&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;options&#39;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;Serologic testing for tissue transglutaminase IgA and total IgA&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Anti‐endomysial antibody assay&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Upper endoscopy with duodenal biopsy&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Lactose hydrogen breath test&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Glucose or lactulose breath test for SIBO&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Fecal elastase level&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Stool calprotectin&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Colonoscopy with ileal and colonic biopsies&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;CRP and ESR inflammatory markers&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Gluten‐free and lactose elimination diet trial&#39;</span><span class="p">]}</span>
+Results: {&#39;summary&#39;: &#39;The differential includes immune‐mediated mucosal injury (celiac disease, non‐celiac gluten sensitivity), enzyme deficiencies (lactase, pancreatic), microbial overgrowth (SIBO), functional disorder (IBS), and organic inflammation (IBD). Targeted serologies, breath tests, stool assays, and endoscopic evaluation can distinguish these etiologies and guide management.&#39;, &#39;options&#39;: [&#39;Serologic testing for tissue transglutaminase IgA and total IgA&#39;, &#39;Anti‐endomysial antibody assay&#39;, &#39;Upper endoscopy with duodenal biopsy&#39;, &#39;Lactose hydrogen breath test&#39;, &#39;Glucose or lactulose breath test for SIBO&#39;, &#39;Fecal elastase level&#39;, &#39;Stool calprotectin&#39;, &#39;Colonoscopy with ileal and colonic biopsies&#39;, &#39;CRP and ESR inflammatory markers&#39;, &#39;Gluten‐free and lactose elimination diet trial&#39;]}
 </code></pre></div>
-
-<h2 id="multi-visit-gap-lab-results-arrive">Multi-visit gap — Lab results arrive</h2>
+<h2 id="multi-visit-gap-lab-results-arrive">Multi-visit gap — Lab results arrive<a class="headerlink" href="#multi-visit-gap-lab-results-arrive" title="Permanent link">&para;</a></h2>
 <p>In a real clinical workflow, days or weeks may pass while lab work is performed.
 The session file persists on disk, and the system reloads it when new data
 arrives.</p>
-<div class="language-python highlight"><pre><span></span><code><span class="c1"># Simulate reloading the session (as would happen days later)</span>
-<span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">session_path</span><span class="p">)</span>
-
-<span class="c1"># Lab results arrive from the laboratory</span>
-<span class="n">session</span><span class="o">.</span><span class="n">provide_answers</span><span class="p">({</span>
-    <span class="s2">&quot;stool_analysis&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;zonulin&quot;</span><span class="p">:</span> <span class="s2">&quot;elevated (78 ng/mL, ref: &lt;30)&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;calprotectin&quot;</span><span class="p">:</span> <span class="s2">&quot;mildly elevated (95 mcg/g, ref: &lt;50)&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;secretory_IgA&quot;</span><span class="p">:</span> <span class="s2">&quot;low (42 mg/dL, ref: 70-400)&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;parasitology&quot;</span><span class="p">:</span> <span class="s2">&quot;negative&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;occult_blood&quot;</span><span class="p">:</span> <span class="s2">&quot;negative&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;food_sensitivity_panel&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;IgG_gluten&quot;</span><span class="p">:</span> <span class="s2">&quot;highly reactive&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;IgG_casein&quot;</span><span class="p">:</span> <span class="s2">&quot;moderately reactive&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;IgG_soy&quot;</span><span class="p">:</span> <span class="s2">&quot;mildly reactive&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;IgG_eggs&quot;</span><span class="p">:</span> <span class="s2">&quot;non-reactive&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;intestinal_permeability_test&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;lactulose_mannitol_ratio&quot;</span><span class="p">:</span> <span class="s2">&quot;elevated (0.09, ref: &lt;0.03)&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;interpretation&quot;</span><span class="p">:</span> <span class="s2">&quot;consistent with increased intestinal permeability&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">})</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Lab results recorded in session.&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total events in session: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Simulate reloading the session (as would happen days later)</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">session_path</span><span class="p">)</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Lab results arrive from the laboratory</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="n">session</span><span class="o">.</span><span class="n">provide_answers</span><span class="p">({</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="s2">&quot;stool_analysis&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>        <span class="s2">&quot;zonulin&quot;</span><span class="p">:</span> <span class="s2">&quot;elevated (78 ng/mL, ref: &lt;30)&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        <span class="s2">&quot;calprotectin&quot;</span><span class="p">:</span> <span class="s2">&quot;mildly elevated (95 mcg/g, ref: &lt;50)&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>        <span class="s2">&quot;secretory_IgA&quot;</span><span class="p">:</span> <span class="s2">&quot;low (42 mg/dL, ref: 70-400)&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>        <span class="s2">&quot;parasitology&quot;</span><span class="p">:</span> <span class="s2">&quot;negative&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>        <span class="s2">&quot;occult_blood&quot;</span><span class="p">:</span> <span class="s2">&quot;negative&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>    <span class="p">},</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>    <span class="s2">&quot;food_sensitivity_panel&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>        <span class="s2">&quot;IgG_gluten&quot;</span><span class="p">:</span> <span class="s2">&quot;highly reactive&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>        <span class="s2">&quot;IgG_casein&quot;</span><span class="p">:</span> <span class="s2">&quot;moderately reactive&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>        <span class="s2">&quot;IgG_soy&quot;</span><span class="p">:</span> <span class="s2">&quot;mildly reactive&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>        <span class="s2">&quot;IgG_eggs&quot;</span><span class="p">:</span> <span class="s2">&quot;non-reactive&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>    <span class="p">},</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>    <span class="s2">&quot;intestinal_permeability_test&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>        <span class="s2">&quot;lactulose_mannitol_ratio&quot;</span><span class="p">:</span> <span class="s2">&quot;elevated (0.09, ref: &lt;0.03)&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>        <span class="s2">&quot;interpretation&quot;</span><span class="p">:</span> <span class="s2">&quot;consistent with increased intestinal permeability&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>    <span class="p">},</span>
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="p">})</span>
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a>
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Lab results recorded in session.&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total events in session: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>Lab results recorded in session.
+<div class="language-text highlight"><pre><span></span><code>Lab results recorded in session.
 Total events in session: 15
 </code></pre></div>
-
-<h2 id="stage-3-re-run-enriched-diagnosis">Stage 3 (re-run) — Enriched diagnosis</h2>
+<h2 id="stage-3-re-run-enriched-diagnosis">Stage 3 (re-run) — Enriched diagnosis<a class="headerlink" href="#stage-3-re-run-enriched-diagnosis" title="Permanent link">&para;</a></h2>
 <p>With lab results now available, re-run the diagnosis stage for a complete
 clinical picture. The runner uses all accumulated data.</p>
-<div class="language-python highlight"><pre><span></span><code><span class="c1"># Check if any requirements are still pending</span>
-<span class="n">inquiries</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">check_requirements</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
-<span class="n">deferred</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inquiries</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">priority</span> <span class="o">==</span> <span class="s2">&quot;deferred&quot;</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Remaining deferred inquiries: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">deferred</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="c1"># Run enriched diagnosis</span>
-<span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
-
-<span class="n">diagnosis</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="p">{})</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enriched diagnosis complete (with lab results).&quot;</span><span class="p">)</span>
-<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">diagnosis</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Summary: </span><span class="si">{</span><span class="n">diagnosis</span><span class="o">.</span><span class="n">summary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Differential:</span><span class="se">\n</span><span class="si">{</span><span class="n">diagnosis</span><span class="o">.</span><span class="n">options</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Results: </span><span class="si">{</span><span class="n">diagnosis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Check if any requirements are still pending</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">inquiries</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">check_requirements</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">deferred</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inquiries</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">priority</span> <span class="o">==</span> <span class="s2">&quot;deferred&quot;</span><span class="p">]</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Remaining deferred inquiries: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">deferred</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1"># Run enriched diagnosis</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="n">diagnosis</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">DIAGNOSIS</span><span class="p">,</span> <span class="p">{})</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enriched diagnosis complete (with lab results).&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">diagnosis</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">):</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Summary: </span><span class="si">{</span><span class="n">diagnosis</span><span class="o">.</span><span class="n">summary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Differential:</span><span class="se">\n</span><span class="si">{</span><span class="n">diagnosis</span><span class="o">.</span><span class="n">options</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Results: </span><span class="si">{</span><span class="n">diagnosis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">Remaining</span><span class="w"> </span><span class="n">deferred</span><span class="w"> </span><span class="n">inquiries</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<div class="language-text highlight"><pre><span></span><code>Remaining deferred inquiries: 1
 
-<span class="n">Enriched</span><span class="w"> </span><span class="n">diagnosis</span><span class="w"> </span><span class="n">complete</span><span class="w"> </span><span class="p">(</span><span class="n">with</span><span class="w"> </span><span class="n">lab</span><span class="w"> </span><span class="n">results</span><span class="p">)</span><span class="o">.</span>
+Enriched diagnosis complete (with lab results).
 
-<span class="n">Results</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s1">&#39;summary&#39;</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;A 38-year-old woman with a history of IBS presents with six months of postprandial bloating, abdominal discomfort, fatigue, brain fog, and intermittent diarrhea exacerbated by gluten and dairy. Laboratory and stool analyses reveal elevated intestinal permeability, increased zonulin and calprotectin, low secretory IgA, and vitamin D deficiency, suggesting an immune-mediated gut barrier dysfunction.&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;options&#39;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;Celiac disease&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Non-celiac gluten sensitivity&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Lactose intolerance&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Irritable bowel syndrome exacerbation&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Small intestinal bacterial overgrowth&#39;</span><span class="p">]}</span>
+Results: {&#39;summary&#39;: &#39;A 38-year-old woman with a history of IBS presents with six months of postprandial bloating, abdominal discomfort, fatigue, brain fog, and intermittent diarrhea exacerbated by gluten and dairy. Laboratory and stool analyses reveal elevated intestinal permeability, increased zonulin and calprotectin, low secretory IgA, and vitamin D deficiency, suggesting an immune-mediated gut barrier dysfunction.&#39;, &#39;options&#39;: [&#39;Celiac disease&#39;, &#39;Non-celiac gluten sensitivity&#39;, &#39;Lactose intolerance&#39;, &#39;Irritable bowel syndrome exacerbation&#39;, &#39;Small intestinal bacterial overgrowth&#39;]}
 </code></pre></div>
-
-<h2 id="stage-5-treatment">Stage 5 — Treatment</h2>
+<h2 id="stage-5-treatment">Stage 5 — Treatment<a class="headerlink" href="#stage-5-treatment" title="Permanent link">&para;</a></h2>
 <p>The treatment stage generates a plan based on the enriched diagnosis.</p>
-<div class="language-python highlight"><pre><span></span><code><span class="c1"># Check treatment requirements</span>
-<span class="n">inquiries</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">check_requirements</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">TREATMENT</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">inq</span> <span class="ow">in</span> <span class="n">inquiries</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  [</span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">priority</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="c1"># Treatment-specific answer bank</span>
-<span class="n">TREATMENT_ANSWERS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;treatment_preferences&quot;</span><span class="p">:</span> <span class="p">(</span>
-        <span class="s2">&quot;Patient prefers integrative approach. Open to dietary changes &quot;</span>
-        <span class="s2">&quot;and supplements. Wants to minimize pharmaceutical interventions.&quot;</span>
-    <span class="p">),</span>
-    <span class="s2">&quot;budget_constraints&quot;</span><span class="p">:</span> <span class="s2">&quot;Standard insurance coverage, willing to pay OOP for supplements&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;lifestyle_goals&quot;</span><span class="p">:</span> <span class="s2">&quot;Improve energy, reduce bloating, better sleep&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;dietary_restrictions&quot;</span><span class="p">:</span> <span class="s2">&quot;Willing to eliminate gluten and dairy long-term&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;exercise_tolerance&quot;</span><span class="p">:</span> <span class="s2">&quot;Can tolerate light to moderate exercise&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;compliance_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Good compliance with previous IBS dietary recommendations&quot;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">answers</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="p">:</span> <span class="n">TREATMENT_ANSWERS</span><span class="p">[</span><span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">inq</span> <span class="ow">in</span> <span class="n">inquiries</span>
-    <span class="k">if</span> <span class="n">inq</span><span class="o">.</span><span class="n">priority</span> <span class="o">!=</span> <span class="s2">&quot;deferred&quot;</span> <span class="ow">and</span> <span class="n">inq</span><span class="o">.</span><span class="n">field</span> <span class="ow">in</span> <span class="n">TREATMENT_ANSWERS</span>
-<span class="p">}</span>
-<span class="n">session</span><span class="o">.</span><span class="n">provide_answers</span><span class="p">(</span><span class="n">answers</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Answered </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">answers</span><span class="p">)</span><span class="si">}</span><span class="s2"> treatment inquiries: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">answers</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">TREATMENT</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
-
-<span class="n">treatment</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">TREATMENT</span><span class="p">,</span> <span class="p">{})</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Treatment plan complete.&quot;</span><span class="p">)</span>
-<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">treatment</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Results: </span><span class="si">{</span><span class="n">treatment</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Check treatment requirements</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">inquiries</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">check_requirements</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">TREATMENT</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="k">for</span> <span class="n">inq</span> <span class="ow">in</span> <span class="n">inquiries</span><span class="p">:</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  [</span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">priority</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="c1"># Treatment-specific answer bank</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="n">TREATMENT_ANSWERS</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>    <span class="s2">&quot;treatment_preferences&quot;</span><span class="p">:</span> <span class="p">(</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>        <span class="s2">&quot;Patient prefers integrative approach. Open to dietary changes &quot;</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>        <span class="s2">&quot;and supplements. Wants to minimize pharmaceutical interventions.&quot;</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    <span class="p">),</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="s2">&quot;budget_constraints&quot;</span><span class="p">:</span> <span class="s2">&quot;Standard insurance coverage, willing to pay OOP for supplements&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>    <span class="s2">&quot;lifestyle_goals&quot;</span><span class="p">:</span> <span class="s2">&quot;Improve energy, reduce bloating, better sleep&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>    <span class="s2">&quot;dietary_restrictions&quot;</span><span class="p">:</span> <span class="s2">&quot;Willing to eliminate gluten and dairy long-term&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>    <span class="s2">&quot;exercise_tolerance&quot;</span><span class="p">:</span> <span class="s2">&quot;Can tolerate light to moderate exercise&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>    <span class="s2">&quot;compliance_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Good compliance with previous IBS dietary recommendations&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="p">}</span>
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a><span class="n">answers</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>    <span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="p">:</span> <span class="n">TREATMENT_ANSWERS</span><span class="p">[</span><span class="n">inq</span><span class="o">.</span><span class="n">field</span><span class="p">]</span>
+<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>    <span class="k">for</span> <span class="n">inq</span> <span class="ow">in</span> <span class="n">inquiries</span>
+<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>    <span class="k">if</span> <span class="n">inq</span><span class="o">.</span><span class="n">priority</span> <span class="o">!=</span> <span class="s2">&quot;deferred&quot;</span> <span class="ow">and</span> <span class="n">inq</span><span class="o">.</span><span class="n">field</span> <span class="ow">in</span> <span class="n">TREATMENT_ANSWERS</span>
+<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a><span class="p">}</span>
+<a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a><span class="n">session</span><span class="o">.</span><span class="n">provide_answers</span><span class="p">(</span><span class="n">answers</span><span class="p">)</span>
+<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Answered </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">answers</span><span class="p">)</span><span class="si">}</span><span class="s2"> treatment inquiries: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">answers</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>
+<a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a><span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">TREATMENT</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+<a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>
+<a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a><span class="n">treatment</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">TREATMENT</span><span class="p">,</span> <span class="p">{})</span>
+<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Treatment plan complete.&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a><span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">treatment</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+<a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Results: </span><span class="si">{</span><span class="n">treatment</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>Answered 0 treatment inquiries: []
+<div class="language-text highlight"><pre><span></span><code>Answered 0 treatment inquiries: []
 Treatment plan complete.
 
 Results: {}
 </code></pre></div>
-
-<h2 id="stage-6-prescription">Stage 6 — Prescription</h2>
+<h2 id="stage-6-prescription">Stage 6 — Prescription<a class="headerlink" href="#stage-6-prescription" title="Permanent link">&para;</a></h2>
 <p>The prescription stage generates specific prescriptions or supplement
 recommendations based on the treatment plan.</p>
-<div class="language-python highlight"><pre><span></span><code><span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">PRESCRIPTION</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
-
-<span class="n">prescription</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">PRESCRIPTION</span><span class="p">,</span> <span class="p">{})</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Prescription complete.&quot;</span><span class="p">)</span>
-<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prescription</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Results: </span><span class="si">{</span><span class="n">prescription</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">runner</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">PRESCRIPTION</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="n">prescription</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">PRESCRIPTION</span><span class="p">,</span> <span class="p">{})</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Prescription complete.&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prescription</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Results: </span><span class="si">{</span><span class="n">prescription</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>Prescription complete.
+<div class="language-text highlight"><pre><span></span><code>Prescription complete.
 
 Results: {}
 </code></pre></div>
-
-<h2 id="inspect-the-full-session">Inspect the full session</h2>
+<h2 id="inspect-the-full-session">Inspect the full session<a class="headerlink" href="#inspect-the-full-session" title="Permanent link">&para;</a></h2>
 <p>The session parquet is a standard file that can be analyzed with any data tool.</p>
-<h3 id="session-summary">Session summary</h3>
-<div class="language-python highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Session file: </span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Language: </span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">language</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stages completed: </span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">stages_completed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pending inquiries: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">pending_inquiries</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<h3 id="session-summary">Session summary<a class="headerlink" href="#session-summary" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Session file: </span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Language: </span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">language</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stages completed: </span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">stages_completed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pending inquiries: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">pending_inquiries</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>Session file: /tmp/tmp1dwe6i9k/gut-leak-visit.parquet
+<div class="language-text highlight"><pre><span></span><code>Session file: /tmp/tmp1dwe6i9k/gut-leak-visit.parquet
 Language: en
 Stages completed: [&#39;screening&#39;, &#39;intake&#39;, &#39;diagnosis&#39;, &#39;exam&#39;, &lt;Stage.DIAGNOSIS: &#39;diagnosis&#39;&gt;, &lt;Stage.TREATMENT: &#39;treatment&#39;&gt;, &lt;Stage.PRESCRIPTION: &#39;prescription&#39;&gt;]
 Total events: 27
 Pending inquiries: 23
 </code></pre></div>
-
-<h3 id="clinical-data-accumulated">Clinical data accumulated</h3>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-
-<span class="n">clinical</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">clinical_data</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">clinical</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                   <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;previous_labs&quot;</span><span class="p">,</span> <span class="s2">&quot;stool_analysis&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;food_sensitivity_panel&quot;</span><span class="p">,</span>
-                                <span class="s2">&quot;intestinal_permeability_test&quot;</span><span class="p">)},</span>
-                  <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<h3 id="clinical-data-accumulated">Clinical data accumulated<a class="headerlink" href="#clinical-data-accumulated" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">clinical</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">clinical_data</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">clinical</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>                   <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;previous_labs&quot;</span><span class="p">,</span> <span class="s2">&quot;stool_analysis&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>                                <span class="s2">&quot;food_sensitivity_panel&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>                                <span class="s2">&quot;intestinal_permeability_test&quot;</span><span class="p">)},</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>                  <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>{
+<div class="language-text highlight"><pre><span></span><code>{
   &quot;symptoms&quot;: &quot;Patient reports chronic bloating, abdominal discomfort after meals, fatigue, brain fog, and intermittent diarrhea for the past 6 months. Symptoms worsen with gluten and dairy intake.&quot;,
   &quot;age&quot;: 38,
   &quot;biological_sex&quot;: &quot;female&quot;,
@@ -2591,34 +3097,33 @@ Pending inquiries: 23
   &quot;vital_signs&quot;: &quot;BP 118/72, HR 74, Temp 36.8\u00b0C, BMI 24.1&quot;
 }
 </code></pre></div>
-
-<h3 id="event-log-with-polars">Event log with polars</h3>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
-
-<span class="n">df</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">session_path</span><span class="p">)</span>
-
-<span class="c1"># All events</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;event_id&quot;</span><span class="p">,</span> <span class="s2">&quot;event_type&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">,</span> <span class="s2">&quot;skill_name&quot;</span><span class="p">))</span>
-
-<span class="c1"># Filter to stage completions</span>
-<span class="n">completed</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;event_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;stage_completed&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">completed</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;stage&quot;</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">))</span>
-
-<span class="c1"># Filter to inquiries</span>
-<span class="n">raised</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;event_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;inquiries_raised&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">raised</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;stage&quot;</span><span class="p">,</span> <span class="s2">&quot;skill_name&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">))</span>
+<h3 id="event-log-with-polars">Event log with polars<a class="headerlink" href="#event-log-with-polars" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="n">df</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">session_path</span><span class="p">)</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="c1"># All events</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;event_id&quot;</span><span class="p">,</span> <span class="s2">&quot;event_type&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">,</span> <span class="s2">&quot;skill_name&quot;</span><span class="p">))</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="c1"># Filter to stage completions</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="n">completed</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;event_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;stage_completed&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">completed</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;stage&quot;</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">))</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="c1"># Filter to inquiries</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="n">raised</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;event_type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;inquiries_raised&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="nb">print</span><span class="p">(</span><span class="n">raised</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;stage&quot;</span><span class="p">,</span> <span class="s2">&quot;skill_name&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">))</span>
 </code></pre></div>
-<h3 id="event-log-with-pandas">Event log with pandas</h3>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">session_path</span><span class="p">)</span>
-<span class="n">df</span><span class="p">[[</span><span class="s2">&quot;event_id&quot;</span><span class="p">,</span> <span class="s2">&quot;event_type&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">]]</span>
+<h3 id="event-log-with-pandas">Event log with pandas<a class="headerlink" href="#event-log-with-pandas" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">session_path</span><span class="p">)</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;event_id&quot;</span><span class="p">,</span> <span class="s2">&quot;event_type&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">]]</span>
 </code></pre></div>
-<h2 id="cleanup">Cleanup</h2>
-<div class="language-python highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
-<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">session_dir</span><span class="p">)</span>
+<h2 id="cleanup">Cleanup<a class="headerlink" href="#cleanup" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">session_dir</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="summary">Summary</h2>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
 <p>This example demonstrated the full hiperhealth pipeline for a gut leak patient:</p>
 <ol>
 <li><strong>Screening</strong> — PII de-identification on intake data</li>
@@ -2662,6 +3167,12 @@ Pending inquiries: 23
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
       </main>
       
         <footer class="md-footer">
@@ -2671,14 +3182,9 @@ Pending inquiries: 23
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2022, hiperhealth Team
+      Copyright &copy; 2022 – 2026, HiPerHealth Team
     </div>
   
-  
-    Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
-    </a>
   
 </div>
       
@@ -2689,21 +3195,7 @@ Pending inquiries: 23
     
     
     
-      
-      
-    
-    <a href="https://twitter.com/yorbriar" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
-    </a>
-  
-    
-    
-    
-    
-      
-      
-    
-    <a href="https://github.com/" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+    <a href="https://github.com/hiperhealth/hiperhealth" target="_blank" rel="noopener" title="HiPerHealth on GitHub" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
     </a>
   
@@ -2722,7 +3214,7 @@ Pending inquiries: 23
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.annotate", "content.tabs.link", "header.autohide", "navigation.indexes", "navigation.instant", "search.highlight", "search.share", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.annotate", "content.code.copy", "content.tabs.link", "header.autohide", "navigation.expand", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search.highlight", "search.share", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
