@@ -4,6 +4,10 @@
 can change the backend through environment variables or by passing
 `LLMSettings(...)` directly.
 
+!!! tip The quickest way to get started is to set
+`HIPERHEALTH_DIAGNOSTICS_LLM_PROVIDER` and the corresponding API key environment
+variable.
+
 ## Supported provider values
 
 These are the provider names recognized by the library configuration layer:
@@ -124,13 +128,11 @@ result = diag.differential(
 )
 ```
 
-## Structured output behavior
+## Structured Output Behavior
 
 The diagnostics adapter asks the selected model to return a JSON object and then
 validates it locally with Pydantic.
 
-That means:
-
-- Provider switching is simple
-- Validation stays inside `hiperhealth`
-- JSON reliability still depends on the selected model/provider
+!!! note - Provider switching is simple — just change the environment
+variables. - Validation stays inside `hiperhealth`. - JSON reliability still
+depends on the selected model/provider.

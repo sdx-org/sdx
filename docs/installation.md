@@ -1,34 +1,32 @@
 # Installation
 
-## Stable release
-
-Install from PyPI:
+## From PyPI
 
 ```bash
 pip install hiperhealth
 ```
 
-`hiperhealth` requires Python `>=3.10,<4`.
+!!! info "Python version" `hiperhealth` requires **Python >= 3.10, < 4**.
 
-## System dependencies
+## System Dependencies
 
 Some extraction features rely on system packages:
 
-- `tesseract` for OCR on image-based reports
-- `libmagic` for MIME type detection
+| Package     | Purpose                            |
+| ----------- | ---------------------------------- |
+| `tesseract` | OCR on image-based medical reports |
+| `libmagic`  | MIME type detection                |
 
-The conda development environment already includes them.
+!!! tip The conda development environment already includes these.
 
-## From source
+## From Source
 
-Clone the repository:
+Clone the repository and create the development environment:
 
 ```bash
 git clone https://github.com/hiperhealth/hiperhealth
 cd hiperhealth
 ```
-
-Create the development environment:
 
 ```bash
 conda env create -f conda/dev.yaml -n hiperhealth
@@ -41,7 +39,7 @@ Install the package and development tooling:
 ./scripts/install-dev.sh
 ```
 
-## Verify the installation
+## Verify the Installation
 
 Run the test suite:
 
@@ -49,7 +47,7 @@ Run the test suite:
 pytest -vv
 ```
 
-Build the docs locally:
+Build and preview the docs locally:
 
 ```bash
 mkdocs serve --watch docs --config-file mkdocs.yaml

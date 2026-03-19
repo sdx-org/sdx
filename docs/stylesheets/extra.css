@@ -1,0 +1,94 @@
+/* -- Hero section on landing page ---------------------------------------- */
+
+.md-typeset .hero {
+  text-align: center;
+  padding: 2rem 1rem 1rem;
+}
+
+.md-typeset .hero img {
+  max-width: 180px;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.md-typeset .hero h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.md-typeset .hero .hero-tagline {
+  font-size: 1.15rem;
+  opacity: 0.85;
+  margin-bottom: 1.5rem;
+}
+
+.md-typeset .hero .hero-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.md-typeset .hero .hero-buttons .md-button {
+  font-size: 0.9rem;
+  padding: 0.55rem 1.4rem;
+}
+
+/* -- Feature grid -------------------------------------------------------- */
+
+.md-typeset .feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin: 2rem 0;
+}
+
+.md-typeset .feature-card {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.md-typeset .feature-card:hover {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.md-typeset .feature-card h3 {
+  margin-top: 0;
+  font-size: 1.05rem;
+}
+
+.md-typeset .feature-card p {
+  font-size: 0.88rem;
+  opacity: 0.88;
+  margin-bottom: 0;
+}
+
+/* -- Badges row ---------------------------------------------------------- */
+
+.md-typeset .badges {
+  text-align: center;
+  margin: 1rem 0 2rem;
+}
+
+.md-typeset .badges img {
+  margin: 0.15rem;
+}
+
+/* -- Quick-start section ------------------------------------------------- */
+
+.md-typeset .quick-start {
+  max-width: 680px;
+  margin: 0 auto 2rem;
+}
+
+/* -- Hide the title on index page (hero replaces it) --------------------- */
+
+.md-typeset h1:first-child {
+  /* only index page sets hide: [toc] which removes toc but this
+     still shows — we keep it for SEO but it's replaced by the hero */
+}

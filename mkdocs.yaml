@@ -1,52 +1,85 @@
-site_name: hiperhealth
+site_name: HiPerHealth
 site_url: https://hiperhealth.com
+site_description: A Python library for clinical AI workflows with skill-based pipelines
 repo_url: https://github.com/hiperhealth/hiperhealth
+repo_name: hiperhealth/hiperhealth
 docs_dir: ./docs/
 site_dir: ./build/
-# extra_css:
-#   - stylesheets/extra.css
-# Page tree
+
+extra_css:
+  - stylesheets/extra.css
+
+# --------------------------------------------------------------------------- #
+# Navigation
+# --------------------------------------------------------------------------- #
 nav:
-  - index.md
-  - Installation: installation.md
-  - LLM Configuration: llm_configuration.md
-  - Usage: usage.md
-  - Creating Skills: skills.md
-  - Informed Consent: informed_consent.md
-  - Changelog: changelog.md
-  - Contributing: contributing.md
-  # from gen-files
-  - API: api/
-  - Notebook page: example.ipynb
+  - Home: index.md
+  - Getting Started:
+      - Installation: installation.md
+      - LLM Configuration: llm_configuration.md
+      - Usage: usage.md
+  - Guides:
+      - Creating Skills: skills.md
+      - Informed Consent: informed_consent.md
+  - Reference:
+      # from gen-files
+      - API: api/
+      - Changelog: changelog.md
+  - Community:
+      - Contributing: contributing.md
+  # - Notebook: example.ipynb
+
+# --------------------------------------------------------------------------- #
+# Theme
+# --------------------------------------------------------------------------- #
 theme:
   name: material
-
+  logo: images/logo.png
+  favicon: images/favicon.png
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: lime
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: Roboto Mono
   features:
     - content.code.annotate
+    - content.code.copy
     - content.tabs.link
     - header.autohide
+    - navigation.expand
     - navigation.indexes
     - navigation.instant
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
     - search.highlight
     - search.share
     - search.suggest
-  icon:
-    repo: fontawesome/brands/github
-  # note: the path should be investigate a bit more
-  logo: images/logo.png
-  favicon: images/favicon.png
-  palette:
-    scheme: slate
-    primary: white
-    accent: lime
-  # custom_dir: docs/overrides
+    - toc.follow
+
+# --------------------------------------------------------------------------- #
+# Plugins
+# --------------------------------------------------------------------------- #
 plugins:
   - search
   - macros
   - autorefs
-  # - exclude:
-  #     glob:
-  #       - backends/template.md
   - gen-files:
       scripts:
         - scripts/gen_ref_nav.py
@@ -57,7 +90,6 @@ plugins:
       handlers:
         python:
           paths: [./src]
-
           import:
             - https://docs.python.org/3/objects.inv
           options:
@@ -70,39 +102,37 @@ plugins:
             inherited_members: true
             merge_init_into_class: true
             separate_signature: true
-            # show_category_heading: true
-            # show_modules: true
             show_root_full_path: false
             show_root_heading: true
-            # show_root_toc_entry: true
             show_signature_annotations: true
             show_source: true
             show_symbol_type_heading: true
             show_symbol_type_toc: true
             signature_crossrefs: true
             summary: true
-  - mkdocs-jupyter:
-      execute: false
-      ignore:
-        - "*.py"
-      include_source: true
-      theme: dark
+  # - mkdocs-jupyter:
+  #     execute: false
+  #     ignore:
+  #       - "*.py"
+  #     include_source: true
+  #     theme: dark
+
+# --------------------------------------------------------------------------- #
+# Markdown extensions
+# --------------------------------------------------------------------------- #
 markdown_extensions:
   - admonition
   - attr_list
-  - codehilite
   - def_list
   - footnotes
   - md_in_html
   - meta
-  - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-      options:
-        custom_icons:
-          - docs/static/icons
   - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
+      anchor_linenums: true
       pygments_lang_class: true
   - pymdownx.inlinehilite:
       style_plain_text: python
@@ -115,30 +145,18 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
   - tables
-  - toc
+  - toc:
+      permalink: true
+
+# --------------------------------------------------------------------------- #
+# Extra
+# --------------------------------------------------------------------------- #
 extra:
   project_name: "hiperhealth"
-  team:
-    - name: "Active maintainers"
-      members:
-        - yorbriar
-    - name: "Former maintainers"
-      members:
-        - yorbriar
   social:
-    - icon: fontawesome/brands/twitter
-      link: https://twitter.com/yorbriar
     - icon: fontawesome/brands/github
-      link: https://github.com/
-  support_levels:
-    supported:
-      icon: :material-check-decagram:{ .verified }
-      description: Tested in CI. If this doesn't work for you, please [file an issue](/issues/new).
-    bug:
-      icon: :material-bug:{ .bug }
-      description: Should work but doesn't because upstream is broken. Supported on a best-effort basis.
-    unsupported:
-      icon: :material-cancel:{ .cancel }
-      description: Unlikely to ever be supported or no upstream support.
+      link: https://github.com/hiperhealth/hiperhealth
+      name: HiPerHealth on GitHub
+  generator: false
 
-copyright: "Copyright &copy; 2022, hiperhealth Team"
+copyright: "Copyright &copy; 2022 – 2026, HiPerHealth Team"

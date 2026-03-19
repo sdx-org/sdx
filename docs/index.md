@@ -1,72 +1,142 @@
-![LOGO](/images/logo.png)
+---
+hide:
+  - navigation
+  - toc
+---
 
-# hiperhealth
+<div class="hero" markdown>
 
-[![Built with Material for MkDocs](https://img.shields.io/badge/Material_for_MkDocs-526CFE?style=for-the-badge&logo=MaterialForMkDocs&logoColor=white)](https://squidfunk.github.io/mkdocs-material/)
-![Conda](https://img.shields.io/badge/Virtual%20environment-conda-brightgreen?logo=anaconda)[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+![HiPerHealth](images/logo.png){ width="180" }
+
+# HiPerHealth
+
+<p class="hero-tagline">
+A Python library for clinical AI workflows.<br>
+Composable, stage-independent pipelines for screening, diagnosis, treatment, and more.
+</p>
+
+<div class="hero-buttons">
+
+[Get Started](installation.md){ .md-button .md-button--primary }
+[View on GitHub](https://github.com/hiperhealth/hiperhealth){ .md-button }
+
+</div>
+
+</div>
+
+---
+
+<div class="feature-grid" markdown>
+
+<div class="feature-card" markdown>
+
+### :material-pipe: Skill-Based Pipeline
+
+Stages run independently, at different times, by different actors. Compose
+clinical workflows from modular skills.
+
+</div>
+
+<div class="feature-card" markdown>
+
+### :material-file-document-outline: Session Files
+
+Parquet-backed event logs for persistent, resumable clinical workflows across
+multiple patient visits.
+
+</div>
+
+<div class="feature-card" markdown>
+
+### :material-clipboard-check-outline: Requirement Checking
+
+Skills declare what information they need before execution, with three priority
+levels: required, supplementary, and deferred.
+
+</div>
+
+<div class="feature-card" markdown>
+
+### :material-stethoscope: Built-in Skills
+
+**DiagnosticsSkill** for differential diagnosis, **ExtractionSkill** for
+PDF/image reports, and **PrivacySkill** for PII de-identification.
+
+</div>
+
+<div class="feature-card" markdown>
+
+### :material-puzzle-outline: Extensible
+
+Create custom skills as Python classes, install third-party skills via entry
+points or Git URLs.
+
+</div>
+
+<div class="feature-card" markdown>
+
+### :material-flask-outline: Data Science Friendly
+
+Sessions are standard parquet files, queryable with pandas, polars, or DuckDB.
+Use from Jupyter notebooks.
+
+</div>
+
+</div>
+
+---
+
+## Quick Start
+
+<div class="quick-start" markdown>
+
+Install from PyPI:
+
+```bash
+pip install hiperhealth
+```
+
+Run a diagnosis:
+
+```python
+from hiperhealth.pipeline import PipelineContext, Stage, create_default_runner
+
+runner = create_default_runner()
+
+ctx = PipelineContext(
+    patient={"symptoms": "chest pain, shortness of breath", "age": 45},
+    language="en",
+    session_id="visit-1",
+)
+
+ctx = runner.run(Stage.DIAGNOSIS, ctx)
+print(ctx.results["diagnosis"].summary)
+```
+
+</div>
+
+---
+
+## Documentation Guide
+
+| Section                                   | Description                                             |
+| ----------------------------------------- | ------------------------------------------------------- |
+| [Installation](installation.md)           | Install hiperhealth and system dependencies             |
+| [LLM Configuration](llm_configuration.md) | Configure LLM backends (OpenAI, Ollama, Groq, and more) |
+| [Usage](usage.md)                         | End-to-end examples: pipeline, sessions, extraction     |
+| [Creating Skills](skills.md)              | Build and register custom pipeline skills               |
+| [API Reference](api/index.md)             | Auto-generated Python API documentation                 |
+| [Changelog](changelog.md)                 | Release notes and version history                       |
+| [Contributing](contributing.md)           | Development setup and contributor guide                 |
+
+---
+
+<div class="badges" markdown>
+
+[![PyPI](https://img.shields.io/pypi/v/hiperhealth)](https://pypi.org/project/hiperhealth/)
+![Python](https://img.shields.io/pypi/pyversions/hiperhealth)
+[![License](https://img.shields.io/badge/license-BSD%203--Clause-blue)](https://github.com/hiperhealth/hiperhealth/blob/main/LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-![vulture](https://img.shields.io/badge/Find%20unused%20code-vulture-blue)
-![mypy](https://img.shields.io/badge/Static%20typing-mypy-blue)
-![pytest](https://img.shields.io/badge/Testing-pytest-cyan?logo=pytest)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
-![Makim](https://img.shields.io/badge/Automation%20task-Makim-blue)
-![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI-blue?logo=githubactions)
 
-`hiperhealth` is a Python library for clinical AI workflows. It provides a
-**skill-based pipeline** for composable, stage-independent execution of clinical
-tasks — from screening and intake through diagnosis, exams, treatment, and
-prescription.
-
-- License: BSD 3 Clause
-- Documentation: https://hiperhealth.com
-- [Informed Consent Template](./informed_consent.md)
-
-## Features
-
-- **Skill-based pipeline** — stages run independently, at different times, by
-  different actors
-- **Session files** — parquet-backed event logs for persistent, resumable
-  clinical workflows across multiple visits
-- **Requirement checking** — skills declare what information they need before
-  execution, enabling structured clinical data gathering with three priority
-  levels (required, supplementary, deferred)
-- **Built-in skills:**
-  - **DiagnosticsSkill** — differential diagnosis and exam suggestions via LLM
-  - **ExtractionSkill** — PDF/image medical report and CSV/JSON wearable data
-    extraction
-  - **PrivacySkill** — PII detection and de-identification
-- **Extensible** — create custom skills as Python classes, install third-party
-  skills via entry points
-- **Data science friendly** — sessions are standard parquet files, queryable
-  with pandas, polars, or DuckDB. Use hiperhealth interactively from Jupyter
-  notebooks to study patient cases.
-- Provider-configurable LLM backend through LiteLLM (8+ providers)
-- Pydantic schemas and SQLAlchemy FHIR-oriented models
-
-## Documentation guide
-
-- Start with [Installation](./installation.md)
-- Configure LLM backends in [LLM Configuration](./llm_configuration.md)
-- See end-to-end examples in [Usage](./usage.md)
-- Learn how to build custom skills in [Creating Skills](./skills.md)
-
-## Current scope
-
-This repository is the `hiperhealth` library/SDK, not the web application.
-
-The pipeline can operate in two modes:
-
-- **Direct mode** via `PipelineContext` — a Pydantic model that carries patient
-  data, results, and audit entries across stages
-- **Session mode** via `Session` — a parquet-backed event log for asynchronous,
-  multi-visit workflows with requirement checking
-
-Each stage produces results accessible via `ctx.results[stage_name]` or
-`session.results[stage_name]`.
-
-## Credits
-
-This package was created with Cookiecutter and the
-[osl-incubator/scicookie](https://github.com/osl-incubator/scicookie) project
-template.
+</div>
