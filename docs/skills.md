@@ -137,6 +137,8 @@ In the session workflow, callers do not invoke this hook directly. They call
 
 That means skill authors should treat `ctx.patient` as the current merged
 clinical state and only return inquiries for fields that are still missing.
+`ctx.results` also contains outputs from previously completed stages. The only
+thing not passed into the hook is the raw session event log itself.
 
 Each inquiry has a **priority** reflecting clinical data availability:
 
@@ -149,8 +151,30 @@ Each inquiry has a **priority** reflecting clinical data availability:
 Example:
 
 ```python
+import json
+
+from typing import Literal
+
+from pydantic import BaseModel
+
+from hiperhealth.agents.client import chat_structured
 from hiperhealth.pipeline import BaseSkill, Inquiry, SkillMetadata, Stage
 from hiperhealth.pipeline.context import PipelineContext
+
+
+class InquiryDraft(BaseModel):
+    field: str
+    label: str
+    description: str = ''
+    priority: Literal['required', 'supplementary', 'deferred'] = (
+        'supplementary'
+    )
+    input_type: str = 'text'
+    choices: list[str] | None = None
+
+
+class InquiryDraftList(BaseModel):
+    inquiries: list[InquiryDraft]
 
 
 class GutMicrobiomeSkill(BaseSkill):
@@ -160,28 +184,55 @@ class GutMicrobiomeSkill(BaseSkill):
             stages=(Stage.DIAGNOSIS, Stage.TREATMENT),
         ))
 
-    def check_requirements(self, stage, ctx):
-        inquiries = []
-        if stage == Stage.DIAGNOSIS:
-            if 'dietary_history' not in ctx.patient:
-                inquiries.append(Inquiry(
-                    skill_name=self.metadata.name,
-                    stage=stage,
-                    field='dietary_history',
-                    label='Describe your typical daily diet',
-                    description='Dietary patterns affect microbiome composition',
-                    priority='required',
-                ))
-            if 'stool_analysis' not in ctx.patient:
-                inquiries.append(Inquiry(
-                    skill_name=self.metadata.name,
-                    stage=stage,
-                    field='stool_analysis',
-                    label='Stool analysis results (16S rRNA or shotgun)',
-                    priority='deferred',
-                    input_type='file',
-                ))
-        return inquiries
+    def check_requirements(
+        self, stage: str, ctx: PipelineContext
+    ) -> list[Inquiry]:
+        if stage != Stage.DIAGNOSIS:
+            return []
+
+        run_kwargs = ctx.extras.get('_run_kwargs', {})
+        llm = run_kwargs.get('llm')
+        llm_settings = run_kwargs.get('llm_settings')
+
+        system_prompt = (
+            'You are a clinical assistant specialized in gut microbiome care. '
+            'Review the full anamnesis and prior stage outputs. '
+            'Return only the additional information that would be most useful '
+            'for this skill and is not already present. '
+            'Prioritize safety-critical items as "required", useful but '
+            'non-blocking items as "supplementary", and items that naturally '
+            'arrive later as "deferred".'
+        )
+
+        payload = {
+            'patient': ctx.patient,
+            'results': ctx.results,
+            'stage': stage,
+        }
+        response = chat_structured(
+            system_prompt,
+            json.dumps(payload, ensure_ascii=False),
+            InquiryDraftList,
+            session_id=ctx.session_id,
+            llm=llm,
+            llm_settings=llm_settings,
+        )
+
+        existing_fields = set(ctx.patient.keys())
+        return [
+            Inquiry(
+                skill_name=self.metadata.name,
+                stage=stage,
+                field=item.field,
+                label=item.label,
+                description=item.description,
+                priority=item.priority,
+                input_type=item.input_type,
+                choices=item.choices,
+            )
+            for item in response.inquiries
+            if item.field not in existing_fields
+        ]
 ```
 
 ### Requirement / answer loop
