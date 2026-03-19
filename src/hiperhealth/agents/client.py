@@ -213,7 +213,9 @@ def chat(
     effective_llm = llm or _get_llm(llm_settings)
 
     try:
-        result = _call_llm_structured(effective_llm, system, user, LLMDiagnosis)
+        result = _call_llm_structured(
+            effective_llm, system, user, LLMDiagnosis
+        )
     except (ValidationError, TypeError) as exc:
         raise LLMResponseValidationError(
             f'LLM response is not valid LLMDiagnosis: {exc}'

@@ -50,9 +50,8 @@ class UnsafeOutputError(ValueError):
 
 
 def _get_device_id() -> int:
-    """Return GPU device id (0) when CUDA is available, else CPU (-1)."""
     try:
-        import torch  # type: ignore[import-untyped]
+        import torch
 
         return 0 if torch.cuda.is_available() else -1
     except ImportError:
@@ -60,7 +59,6 @@ def _get_device_id() -> int:
 
 
 def _env_float(name: str, default: float) -> float:
-    """Parse a float env var; fall back to *default* if missing or invalid."""
     val = os.getenv(name)
     if val is None:
         return default
@@ -71,7 +69,6 @@ def _env_float(name: str, default: float) -> float:
 
 
 def _env_banned_topics() -> tuple[str, ...]:
-    """Return banned topics from env or fall back to defaults."""
     raw = os.getenv(f'{_ENV_PREFIX}BANNED_TOPICS', '')
     if not raw.strip():
         return DEFAULT_BANNED_TOPICS
@@ -91,7 +88,7 @@ def create_topic_classifier(model_name: str) -> Any:
       type: Any
       description: transformers zero-shot-classification pipeline.
     """
-    from transformers import pipeline  # type: ignore[import-untyped]
+    from transformers import pipeline
 
     return pipeline(
         'zero-shot-classification',
@@ -125,7 +122,8 @@ def detect_banned_topics(
         description: HF model name; env HIPERHEALTH_SAFETY_MODEL.
       hypothesis_template:
         type: str | None
-        description: NLI hypothesis template; env HIPERHEALTH_SAFETY_HYP_TEMPLATE.
+        description: |-
+          NLI hypothesis template; env HIPERHEALTH_SAFETY_HYP_TEMPLATE.
     returns:
       type: list[tuple[str, float]]
       description: Detected hits above threshold.
@@ -159,7 +157,8 @@ def detect_banned_topics(
 
 def check_output_safety(obj: LLMDiagnosis) -> None:
     """
-    title: Validate *obj* against banned topics; raise UnsafeOutputError on hit.
+    title: |-
+      Validate *obj* against banned topics; raise UnsafeOutputError on hit.
     summary: |-
       Combines summary and options into a single text block, runs zero-shot
       MNLI classification, and raises UnsafeOutputError if any banned topic

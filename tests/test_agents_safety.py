@@ -32,7 +32,8 @@ from hiperhealth.schema.clinical_outputs import LLMDiagnosis
 # ---------------------------------------------------------------------------
 _RUN_HF = os.getenv('RUN_HF_TESTS', '').strip().lower() in {'1', 'true', 'yes'}
 _hf_only = pytest.mark.skipif(
-    not _RUN_HF, reason='Requires HF model/network. Set RUN_HF_TESTS=1 to enable.'
+    not _RUN_HF,
+    reason='Requires HF model/network. Set RUN_HF_TESTS=1 to enable.',
 )
 
 
@@ -44,7 +45,6 @@ def _diagnosis(summary: str, options: list[str] | None = None) -> LLMDiagnosis:
 # UnsafeOutputError
 # ---------------------------------------------------------------------------
 def test_unsafe_output_error_carries_hits() -> None:
-    """UnsafeOutputError should expose the (label, score) hits."""
     hits = [('medication dosing advice', 0.92)]
     err = UnsafeOutputError('blocked', hits=hits)
     assert err.hits == hits
@@ -54,9 +54,12 @@ def test_unsafe_output_error_carries_hits() -> None:
 # ---------------------------------------------------------------------------
 # _env_float
 # ---------------------------------------------------------------------------
-def test_env_float_returns_default_when_unset(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_env_float_returns_default_when_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.delenv('HIPERHEALTH_SAFETY_THRESHOLD', raising=False)
-    assert _env_float('HIPERHEALTH_SAFETY_THRESHOLD', DEFAULT_THRESHOLD) == DEFAULT_THRESHOLD
+    result = _env_float('HIPERHEALTH_SAFETY_THRESHOLD', DEFAULT_THRESHOLD)
+    assert result == DEFAULT_THRESHOLD
 
 
 def test_env_float_parses_valid_value(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -64,9 +67,12 @@ def test_env_float_parses_valid_value(monkeypatch: pytest.MonkeyPatch) -> None:
     assert _env_float('HIPERHEALTH_SAFETY_THRESHOLD', DEFAULT_THRESHOLD) == 0.6
 
 
-def test_env_float_falls_back_on_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_env_float_falls_back_on_invalid(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv('HIPERHEALTH_SAFETY_THRESHOLD', 'not-a-float')
-    assert _env_float('HIPERHEALTH_SAFETY_THRESHOLD', DEFAULT_THRESHOLD) == DEFAULT_THRESHOLD
+    result = _env_float('HIPERHEALTH_SAFETY_THRESHOLD', DEFAULT_THRESHOLD)
+    assert result == DEFAULT_THRESHOLD
 
 
 # ---------------------------------------------------------------------------
@@ -123,7 +129,9 @@ def test_detect_banned_topics_returns_hits_above_threshold() -> None:
         'hiperhealth.agents.safety.topic_guard.create_topic_classifier',
         return_value=mock_clf,
     ):
-        result = detect_banned_topics('take 500mg every 4 hours', threshold=0.8)
+        result = detect_banned_topics(
+            'take 500mg every 4 hours', threshold=0.8
+        )
     assert len(result) == 1
     assert result[0][0] == 'medication dosing advice'
     assert result[0][1] == pytest.approx(0.95)
@@ -167,7 +175,6 @@ def test_check_output_safety_raises_unsafe_output_error_on_hit() -> None:
 
 
 def test_check_output_safety_skips_empty_combined_text() -> None:
-    """Empty summary and options should bypass the classifier entirely."""
     obj = LLMDiagnosis(summary='', options=[])
     called = []
     with patch(
@@ -179,7 +186,6 @@ def test_check_output_safety_skips_empty_combined_text() -> None:
 
 
 def test_check_output_safety_handles_dict_options() -> None:
-    """Options as dict[str, float] should not raise TypeError."""
     obj = LLMDiagnosis(summary='Assessment', options={'pancreatitis': 0.7})
     with patch(
         'hiperhealth.agents.safety.topic_guard.detect_banned_topics',
@@ -195,7 +201,9 @@ class _FakeLLM:
     def __init__(self, result: LLMDiagnosis) -> None:
         self.result = result
 
-    def generate(self, system: str, user: str, output_type: type) -> LLMDiagnosis:
+    def generate(
+        self, system: str, user: str, output_type: type
+    ) -> LLMDiagnosis:
         return self.result
 
 
@@ -246,7 +254,6 @@ def test_chat_safety_blocks_before_persist(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: pytest.TempPathFactory,
 ) -> None:
-    """dump_llm_json must NOT be called when the safety guard raises."""
     monkeypatch.setenv('HIPERHEALTH_SAFETY_ENABLED', '1')
     monkeypatch.setattr(client_mod, '_RAW_DIR', tmp_path)
 
@@ -277,7 +284,6 @@ def test_chat_safety_blocks_before_persist(
 @pytest.mark.hf
 @pytest.mark.integration
 def test_hf_detect_banned_topics_blocks_dosing_advice() -> None:
-    """Real MNLI model should flag dosing advice above default threshold."""
     text = (
         'You should take 500mg of ibuprofen every 4 hours and '
         'no more than 3200mg per day.'
@@ -295,7 +301,6 @@ def test_hf_detect_banned_topics_blocks_dosing_advice() -> None:
 @pytest.mark.hf
 @pytest.mark.integration
 def test_hf_detect_banned_topics_allows_harmless_text() -> None:
-    """Real MNLI model should NOT flag benign clinical summary."""
     text = 'The patient presents with mild upper respiratory symptoms.'
     hits = detect_banned_topics(
         text,
