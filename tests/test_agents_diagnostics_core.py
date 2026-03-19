@@ -32,10 +32,11 @@ def chat_spy(monkeypatch):
     return calls
 
 
-def test_differential_uses_language_prompt_and_utf8_json(chat_spy):
+def test_differential_uses_output_language_instruction_and_utf8_json(chat_spy):
     """
     title: >-
-      Differential should pick requested language prompt and UTF-8 payload.
+      Differential should use English task instructions, a localized output-
+      language instruction, and UTF-8 payload encoding.
     parameters:
       chat_spy:
         description: Value for chat_spy.
@@ -45,26 +46,33 @@ def test_differential_uses_language_prompt_and_utf8_json(chat_spy):
     out = diag_mod.differential(patient, language='pt', session_id='abc')
 
     assert out.summary == 'done'
-    assert chat_spy[0]['system'] == diag_mod._DIAG_PROMPTS['pt']
+    assert 'Return a JSON object with keys' in str(chat_spy[0]['system'])
+    assert 'Write all natural-language string values in Portuguese.' in str(
+        chat_spy[0]['system']
+    )
     assert chat_spy[0]['session_id'] == 'abc'
     assert '"dor no coração"' in str(chat_spy[0]['user'])
     assert '\\u00e7' not in str(chat_spy[0]['user'])
 
 
-def test_differential_falls_back_to_english_prompt(chat_spy):
+def test_differential_falls_back_to_english_output(chat_spy):
     """
-    title: Unknown language should fallback to English diagnosis prompt.
+    title: Unknown language should fallback to English output instructions.
     parameters:
       chat_spy:
         description: Value for chat_spy.
     """
     diag_mod.differential({'age': 40}, language='xx')
-    assert chat_spy[0]['system'] == diag_mod._DIAG_PROMPTS['en']
+    assert 'Write all natural-language string values in English.' in str(
+        chat_spy[0]['system']
+    )
 
 
-def test_exams_uses_language_prompt_and_json_array(chat_spy):
+def test_exams_uses_output_language_instruction_and_json_array(chat_spy):
     """
-    title: Exam suggestions should encode selected diagnoses as JSON list.
+    title: >-
+      Exam suggestions should encode selected diagnoses as JSON list and
+      request localized natural-language output.
     parameters:
       chat_spy:
         description: Value for chat_spy.
@@ -73,17 +81,22 @@ def test_exams_uses_language_prompt_and_json_array(chat_spy):
 
     diag_mod.exams(selected, language='es', session_id='sid-2')
 
-    assert chat_spy[0]['system'] == diag_mod._EXAM_PROMPTS['es']
+    assert 'Given the selected diagnoses' in str(chat_spy[0]['system'])
+    assert 'Write all natural-language string values in Spanish.' in str(
+        chat_spy[0]['system']
+    )
     assert chat_spy[0]['user'] == json.dumps(selected, ensure_ascii=False)
     assert chat_spy[0]['session_id'] == 'sid-2'
 
 
-def test_exams_falls_back_to_english_prompt(chat_spy):
+def test_exams_falls_back_to_english_output(chat_spy):
     """
-    title: Unknown language should fallback to English exam prompt.
+    title: Unknown language should fallback to English output instructions.
     parameters:
       chat_spy:
         description: Value for chat_spy.
     """
     diag_mod.exams(['A'], language='zz')
-    assert chat_spy[0]['system'] == diag_mod._EXAM_PROMPTS['en']
+    assert 'Write all natural-language string values in English.' in str(
+        chat_spy[0]['system']
+    )

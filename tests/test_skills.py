@@ -100,8 +100,11 @@ class TestDiagnosticsSkill:
         assert ctx.results[Stage.DIAGNOSIS] is fake_result
         assert len(calls) == 1
         assert calls[0]['session_id'] == 'sess-42'
-        # Portuguese prompt should be used
-        assert 'assistente médico' in calls[0]['system']
+        assert 'Return a JSON object with keys' in calls[0]['system']
+        assert (
+            'Write all natural-language string values in Portuguese.'
+            in calls[0]['system']
+        )
         # Patient data should be JSON-encoded
         parsed = json.loads(calls[0]['user'])
         assert parsed['symptoms'] == 'fever, cough'
@@ -380,11 +383,13 @@ class TestDiagnosticsSkill:
         assert 'age' not in fields
         assert 'symptoms' not in fields
 
-    def test_check_requirements_uses_language_prompt(
+    def test_check_requirements_uses_output_language_instruction(
         self, monkeypatch: Any
     ) -> None:
         """
-        title: check_requirements should use the correct language template.
+        title: >-
+          check_requirements should use English instructions plus the correct
+          output-language directive.
         parameters:
           monkeypatch:
             type: Any
@@ -410,7 +415,11 @@ class TestDiagnosticsSkill:
 
         skill.check_requirements(Stage.DIAGNOSIS, ctx)
 
-        assert 'assistente médico' in calls[0]['system']
+        assert 'Given the patient data below' in calls[0]['system']
+        assert (
+            'Write `label`, `description`, and any `choices` values in '
+            'Portuguese.' in calls[0]['system']
+        )
         assert 'diagnosis' in calls[0]['system']
 
 

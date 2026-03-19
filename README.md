@@ -222,8 +222,8 @@ ex = exams(["Acute coronary syndrome"], language="en", session_id="demo-1")
 print(ex.summary, ex.options)
 ```
 
-Supported languages: `en`, `pt`, `es`, `fr`, `it`. Unknown values fall back to
-English.
+Supported output languages: `en`, `pt`, `es`, `fr`, `it`. Unknown values fall
+back to English.
 
 ### 5. Data extraction
 

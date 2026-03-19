@@ -252,7 +252,7 @@ The diagnostics helpers return `LLMDiagnosis` objects with:
 - `summary`: short summary text
 - `options`: suggested diagnoses or exam/procedure names
 
-Supported prompt languages are:
+Supported output languages are:
 
 - `en`
 - `pt`

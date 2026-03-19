@@ -16,154 +16,80 @@ from hiperhealth.pipeline.skill import BaseSkill, SkillMetadata
 from hiperhealth.pipeline.stages import Stage
 from hiperhealth.schema.clinical_outputs import LLMDiagnosis, LLMInquiryList
 
-_DIAG_PROMPTS = {
-    'en': (
-        'You are an experienced physician assistant. '
-        "Return a JSON object with keys 'summary' (two sentences) and "
-        "'options' (array of differential diagnoses) given the patient data."
-    ),
-    'pt': (
-        'Você é um assistente médico experiente. '
-        "Retorne um objeto JSON com as chaves 'summary' (duas frases) e "
-        "'options' (lista de diagnósticos diferenciais) com base nos dados do "
-        'paciente.'
-    ),
-    'es': (
-        'Eres un asistente médico experimentado. '
-        "Devuelve un objeto JSON con las claves 'summary' (dos frases) y "
-        "'options' (lista de diagnósticos diferenciales) a partir de los "
-        'datos del paciente.'
-    ),
-    'fr': (
-        'Vous êtes un assistant médical expérimenté. '
-        "Retournez un objet JSON avec les clés 'summary' (deux phrases) et "
-        "'options' (liste des diagnostics différentiels) à partir des données "
-        'du patient.'
-    ),
-    'it': (
-        'Sei un assistente medico esperto. '
-        "Restituisci un oggetto JSON con le chiavi 'summary' (due frasi) e "
-        "'options' (elenco delle diagnosi differenziali) in base ai dati del "
-        'paziente.'
-    ),
+_SUPPORTED_OUTPUT_LANGUAGES = {
+    'en': 'English',
+    'pt': 'Portuguese',
+    'es': 'Spanish',
+    'fr': 'French',
+    'it': 'Italian',
 }
 
-_EXAM_PROMPTS = {
-    'en': (
-        'You are an experienced physician assistant. '
-        "Given the selected diagnoses, return JSON with keys 'summary' and "
-        "'options' (max 10 exam/procedure names)."
-    ),
-    'pt': (
-        'Você é um assistente médico experiente. '
-        'Com base nos diagnósticos selecionados, retorne um JSON com as '
-        "chaves 'summary' e 'options' (no máximo 10 nomes de "
-        'exames/procedimentos).'
-    ),
-    'es': (
-        'Eres un asistente médico experimentado. '
-        'Dado los diagnósticos seleccionados, devuelve un JSON con las claves '
-        "'summary' y 'options' (máx. 10 nombres de "
-        'exámenes/procedimientos).'
-    ),
-    'fr': (
-        'Vous êtes un assistant médical expérimenté. '
-        'À partir des diagnostics sélectionnés, retournez un JSON avec les '
-        "clés 'summary' et 'options' (maximum 10 noms d'examens/"
-        'procédures).'
-    ),
-    'it': (
-        'Sei un assistente medico esperto. '
-        'Dati i diagnosi selezionati, restituisci un JSON con le chiavi '
-        "'summary' e 'options' (massimo 10 nomi di esami/procedure)."
-    ),
-}
+_DIAG_PROMPT = (
+    'You are an experienced physician assistant. '
+    "Return a JSON object with keys 'summary' (two sentences) and "
+    "'options' (array of differential diagnoses) given the patient data."
+)
+
+_EXAM_PROMPT = (
+    'You are an experienced physician assistant. '
+    "Given the selected diagnoses, return JSON with keys 'summary' and "
+    "'options' (max 10 exam/procedure names)."
+)
+
+_REQ_PROMPT_TEMPLATE = (
+    'You are an experienced physician assistant. '
+    'Given the patient data below, identify what additional clinical '
+    'information is missing or incomplete that would be important for '
+    'the "{stage}" phase of care. '
+    'Consider standard medical history elements: chief complaint, '
+    'history of present illness, past medical history, medications, '
+    'allergies, family history, social history, review of systems, '
+    'and vital signs. '
+    'Only request information that is NOT already present in the data. '
+    'For each item, assign priority: "required" (essential for safety), '
+    '"supplementary" (improves accuracy), or "deferred" (can wait '
+    'until after initial assessment). '
+    'Use input_type "select" with choices when there is a finite set '
+    'of valid answers.'
+)
 
 
-_REQ_PROMPT_TEMPLATE = {
-    'en': (
-        'You are an experienced physician assistant. '
-        'Given the patient data below, identify what additional clinical '
-        'information is missing or incomplete that would be important for '
-        'the "{stage}" phase of care. '
-        'Consider standard medical history elements: chief complaint, '
-        'history of present illness, past medical history, medications, '
-        'allergies, family history, social history, review of systems, '
-        'and vital signs. '
-        'Only request information that is NOT already present in the data. '
-        'For each item, assign priority: "required" (essential for safety), '
-        '"supplementary" (improves accuracy), or "deferred" (can wait '
-        'until after initial assessment). '
-        'Use input_type "select" with choices when there is a finite set '
-        'of valid answers.'
-    ),
-    'pt': (
-        'Você é um assistente médico experiente. '
-        'Dados os dados do paciente abaixo, identifique quais informações '
-        'clínicas adicionais estão faltando ou incompletas que seriam '
-        'importantes para a fase de "{stage}" do atendimento. '
-        'Considere elementos padrão do histórico médico: queixa principal, '
-        'história da doença atual, antecedentes pessoais, medicamentos, '
-        'alergias, história familiar, história social, revisão de sistemas '
-        'e sinais vitais. '
-        'Solicite apenas informações que NÃO estejam presentes nos dados. '
-        'Para cada item, atribua prioridade: "required" (essencial para '
-        'segurança), "supplementary" (melhora a precisão) ou "deferred" '
-        '(pode esperar até após a avaliação inicial). '
-        'Use input_type "select" com choices quando houver um conjunto '
-        'finito de respostas válidas.'
-    ),
-    'es': (
-        'Eres un asistente médico experimentado. '
-        'Dados los datos del paciente a continuación, identifica qué '
-        'información clínica adicional falta o está incompleta que sería '
-        'importante para la fase de "{stage}" de la atención. '
-        'Considera elementos estándar del historial médico: motivo de '
-        'consulta, historia de la enfermedad actual, antecedentes '
-        'personales, medicamentos, alergias, historia familiar, historia '
-        'social, revisión por sistemas y signos vitales. '
-        'Solo solicita información que NO esté presente en los datos. '
-        'Para cada elemento, asigna prioridad: "required" (esencial para '
-        'la seguridad), "supplementary" (mejora la precisión) o "deferred" '
-        '(puede esperar hasta después de la evaluación inicial). '
-        'Usa input_type "select" con choices cuando haya un conjunto '
-        'finito de respuestas válidas.'
-    ),
-    'fr': (
-        'Vous êtes un assistant médical expérimenté. '
-        'À partir des données du patient ci-dessous, identifiez quelles '
-        'informations cliniques supplémentaires manquent ou sont '
-        'incomplètes et seraient importantes pour la phase de "{stage}" '
-        'des soins. '
-        'Considérez les éléments standard du dossier médical : motif de '
-        'consultation, histoire de la maladie actuelle, antécédents '
-        'médicaux, médicaments, allergies, histoire familiale, histoire '
-        'sociale, revue des systèmes et signes vitaux. '
-        'Ne demandez que les informations qui ne sont PAS déjà présentes. '
-        'Pour chaque élément, attribuez une priorité : "required" '
-        '(essentiel pour la sécurité), "supplementary" (améliore la '
-        'précision) ou "deferred" (peut attendre après l\'évaluation '
-        'initiale). '
-        'Utilisez input_type "select" avec choices lorsqu\'il y a un '
-        'ensemble fini de réponses valides.'
-    ),
-    'it': (
-        'Sei un assistente medico esperto. '
-        'Dati i dati del paziente qui sotto, identifica quali informazioni '
-        'cliniche aggiuntive mancano o sono incomplete e sarebbero '
-        'importanti per la fase di "{stage}" delle cure. '
-        'Considera gli elementi standard della cartella clinica: motivo '
-        'della visita, storia della malattia attuale, anamnesi patologica, '
-        'farmaci, allergie, storia familiare, storia sociale, revisione '
-        'dei sistemi e segni vitali. '
-        'Richiedi solo informazioni che NON sono già presenti nei dati. '
-        'Per ogni elemento, assegna una priorità: "required" (essenziale '
-        'per la sicurezza), "supplementary" (migliora la precisione) o '
-        '"deferred" (può aspettare fino a dopo la valutazione iniziale). '
-        'Usa input_type "select" con choices quando c\'è un insieme '
-        'finito di risposte valide.'
-    ),
-}
+def _language_name(language: str) -> str:
+    return _SUPPORTED_OUTPUT_LANGUAGES.get(language, 'English')
+
+
+def _natural_language_instruction(language: str) -> str:
+    return (
+        'Write all natural-language string values in '
+        f'{_language_name(language)}. '
+        'Keep JSON keys exactly as requested.'
+    )
+
+
+def _requirements_language_instruction(language: str) -> str:
+    return (
+        'Write `label`, `description`, and any `choices` values in '
+        f'{_language_name(language)}. '
+        'Keep `field` as stable English snake_case. '
+        "Keep `priority` exactly one of 'required', 'supplementary', or "
+        "'deferred'. "
+        'Keep `input_type` in English. '
+        'Keep JSON keys exactly as requested.'
+    )
+
+
+def _diagnosis_prompt(language: str) -> str:
+    return f'{_DIAG_PROMPT}\n\n{_natural_language_instruction(language)}'
+
+
+def _exam_prompt(language: str) -> str:
+    return f'{_EXAM_PROMPT}\n\n{_natural_language_instruction(language)}'
+
+
+def _requirements_prompt(stage: str, language: str) -> str:
+    stage_label = stage.value if hasattr(stage, 'value') else stage
+    base_prompt = _REQ_PROMPT_TEMPLATE.format(stage=stage_label)
+    return f'{base_prompt}\n\n{_requirements_language_instruction(language)}'
 
 
 def differential(
@@ -195,7 +121,7 @@ def differential(
       type: LLMDiagnosis
       description: Return value.
     """
-    prompt = _DIAG_PROMPTS.get(language, _DIAG_PROMPTS['en'])
+    prompt = _diagnosis_prompt(language)
     chat_kwargs: dict[str, Any] = {'session_id': session_id}
     if llm is not None:
         chat_kwargs['llm'] = llm
@@ -237,7 +163,7 @@ def exams(
       type: LLMDiagnosis
       description: Return value.
     """
-    prompt = _EXAM_PROMPTS.get(language, _EXAM_PROMPTS['en'])
+    prompt = _exam_prompt(language)
     chat_kwargs: dict[str, Any] = {'session_id': session_id}
     if llm is not None:
         chat_kwargs['llm'] = llm
@@ -288,11 +214,7 @@ class DiagnosticsSkill(BaseSkill):
         llm = run_kwargs.get('llm')
         llm_settings = run_kwargs.get('llm_settings')
 
-        template = _REQ_PROMPT_TEMPLATE.get(
-            ctx.language, _REQ_PROMPT_TEMPLATE['en']
-        )
-        stage_label = stage.value if hasattr(stage, 'value') else stage
-        system_prompt = template.format(stage=stage_label)
+        system_prompt = _requirements_prompt(stage, ctx.language)
 
         extra = ctx.extras.get('prompt_fragments', {}).get(
             f'{stage}_requirements', ''
@@ -341,7 +263,7 @@ class DiagnosticsSkill(BaseSkill):
         llm_settings = run_kwargs.get('llm_settings')
 
         if stage == Stage.DIAGNOSIS:
-            prompt = _DIAG_PROMPTS.get(ctx.language, _DIAG_PROMPTS['en'])
+            prompt = _diagnosis_prompt(ctx.language)
             extra = ctx.extras.get('prompt_fragments', {}).get('diagnosis', '')
             if extra:
                 prompt = f'{prompt}\n\n{extra}'
@@ -372,7 +294,7 @@ class DiagnosticsSkill(BaseSkill):
                 else []
             )
 
-            prompt = _EXAM_PROMPTS.get(ctx.language, _EXAM_PROMPTS['en'])
+            prompt = _exam_prompt(ctx.language)
             extra = ctx.extras.get('prompt_fragments', {}).get('exam', '')
             if extra:
                 prompt = f'{prompt}\n\n{extra}'
