@@ -28,35 +28,6 @@ _LOCAL_NAME_PATTERN = re.compile(r'^[A-Za-z0-9_-]+$')
 
 
 class SkillManifest(BaseModel):
-    """
-    Metadata parsed from a skill ``hiperhealth.yaml`` file.
-
-    Parameters
-    ----------
-    api_version:
-        Manifest schema version.
-    name:
-        Skill name declared by the manifest.
-    version:
-        Skill version string.
-    entry_point:
-        Import target in ``module:ClassName`` format.
-    stages:
-        Pipeline stages handled by the skill.
-    description:
-        Human-readable description.
-    author:
-        Author information.
-    license:
-        License identifier.
-    homepage:
-        Project homepage.
-    min_hiperhealth_version:
-        Minimum supported hiperhealth version string.
-    dependencies:
-        Extra Python package dependencies.
-    """
-
     api_version: int = 1
     name: str
     version: str
@@ -71,29 +42,6 @@ class SkillManifest(BaseModel):
 
 
 class ChannelMetadata(BaseModel):
-    """
-    Root metadata stored in ``skills.yaml``.
-
-    Parameters
-    ----------
-    name:
-        Canonical remote channel name.
-    display_name:
-        Human-readable channel name.
-    default_alias:
-        Suggested local alias for the channel.
-    version:
-        Channel metadata version.
-    description:
-        Channel description.
-    homepage:
-        Channel homepage.
-    license:
-        Channel license identifier.
-    min_hiperhealth_version:
-        Minimum supported hiperhealth version string.
-    """
-
     name: str
     display_name: str = ''
     default_alias: str | None = None
@@ -105,39 +53,11 @@ class ChannelMetadata(BaseModel):
 
 
 class ChannelDiscovery(BaseModel):
-    """
-    Discovery hints stored in ``skills.yaml``.
-
-    Parameters
-    ----------
-    skills_dir:
-        Directory containing installable skills.
-    ignore:
-        Repository paths that are not installable skills.
-    """
-
     skills_dir: str = 'skills'
     ignore: list[str] = Field(default_factory=list)
 
 
 class DeclaredSkill(BaseModel):
-    """
-    One installable skill declaration inside ``skills.yaml``.
-
-    Parameters
-    ----------
-    name:
-        Channel-local skill name.
-    path:
-        Relative path to the skill directory.
-    manifest:
-        Relative path to the skill manifest.
-    enabled:
-        Whether the skill participates in default channel installs.
-    tags:
-        Optional skill tags.
-    """
-
     name: str
     path: str
     manifest: str
@@ -146,21 +66,6 @@ class DeclaredSkill(BaseModel):
 
 
 class ChannelManifest(BaseModel):
-    """
-    Parsed root-level ``skills.yaml`` manifest.
-
-    Parameters
-    ----------
-    api_version:
-        Manifest schema version.
-    channel:
-        Channel metadata block.
-    discovery:
-        Discovery configuration block.
-    skills:
-        Declared installable skills.
-    """
-
     api_version: int = 1
     channel: ChannelMetadata
     discovery: ChannelDiscovery = Field(default_factory=ChannelDiscovery)
@@ -178,31 +83,6 @@ class ChannelManifest(BaseModel):
 
 
 class ChannelRecord(BaseModel):
-    """
-    Persisted metadata for one registered channel.
-
-    Parameters
-    ----------
-    local_name:
-        User-defined local alias.
-    remote_name:
-        Channel name from ``skills.yaml``.
-    provider:
-        Source provider name such as ``github`` or ``gitlab``.
-    source:
-        Original source URL or local git path.
-    ref:
-        Tracking git reference, if any.
-    commit:
-        Current checked-out commit hash.
-    registered_at:
-        Initial registration timestamp in UTC.
-    updated_at:
-        Last update timestamp in UTC.
-    available_skills:
-        Available canonical skill identifiers.
-    """
-
     local_name: str
     remote_name: str
     provider: str
@@ -215,27 +95,6 @@ class ChannelRecord(BaseModel):
 
 
 class AvailableSkillRecord(BaseModel):
-    """
-    One installable skill exposed by a channel.
-
-    Parameters
-    ----------
-    channel:
-        Local channel alias.
-    name:
-        Channel-local skill name.
-    canonical_id:
-        Canonical skill identifier.
-    path:
-        Relative path to the skill directory.
-    manifest_path:
-        Relative path to the skill manifest.
-    enabled:
-        Whether the skill participates in default channel installs.
-    tags:
-        Optional skill tags.
-    """
-
     channel: str
     name: str
     canonical_id: str
@@ -246,37 +105,6 @@ class AvailableSkillRecord(BaseModel):
 
 
 class InstalledSkillRecord(BaseModel):
-    """
-    Persisted metadata for one installed skill.
-
-    Parameters
-    ----------
-    id:
-        Canonical installed skill identifier.
-    channel:
-        Owning channel alias, if any.
-    skill_name:
-        Channel-local skill name or legacy skill name.
-    manifest_path:
-        Absolute path to the active skill manifest.
-    installed_at:
-        Installation timestamp in UTC.
-    updated_at:
-        Last refresh timestamp in UTC.
-    version:
-        Installed skill version.
-    source_commit:
-        Source commit hash for channel installs.
-    enabled:
-        Whether the source declaration is enabled.
-    source:
-        Original source URL or local path.
-    artifact_path:
-        Optional copied artifact path for legacy installs.
-    legacy:
-        Whether this record comes from a legacy single-skill install.
-    """
-
     id: str
     channel: str | None = None
     skill_name: str
@@ -292,45 +120,11 @@ class InstalledSkillRecord(BaseModel):
 
 
 class RegistryState(BaseModel):
-    """
-    Persisted registry state.
-
-    Parameters
-    ----------
-    channels:
-        Registered channels keyed by local alias.
-    skills:
-        Installed skills keyed by canonical identifier.
-    """
-
     channels: dict[str, ChannelRecord] = Field(default_factory=dict)
     skills: dict[str, InstalledSkillRecord] = Field(default_factory=dict)
 
 
 class SkillSummary(SkillManifest):
-    """
-    Skill manifest plus registry-specific summary data.
-
-    Parameters
-    ----------
-    channel:
-        Owning channel alias. ``None`` for legacy installs.
-    skill_name:
-        Channel-local skill name or legacy skill name.
-    canonical_id:
-        Canonical identifier used by registry operations.
-    manifest_path:
-        Absolute path to the manifest file.
-    installed:
-        Whether the skill is installed locally.
-    enabled:
-        Whether the skill is enabled in its source declaration.
-    builtin:
-        Whether the skill ships with hiperhealth itself.
-    tags:
-        Optional channel-level skill tags.
-    """
-
     channel: str | None = None
     skill_name: str
     canonical_id: str
@@ -361,19 +155,6 @@ class _ResolvedChannelSkill:
 
 
 def _parse_yaml(path: Path) -> dict[str, Any]:
-    """
-    Parse a YAML file into a dictionary.
-
-    Parameters
-    ----------
-    path:
-        Path to the YAML file.
-
-    Returns
-    -------
-    dict[str, Any]
-        Parsed YAML content.
-    """
     import yaml
 
     with path.open(encoding='utf-8') as handle:
@@ -381,50 +162,14 @@ def _parse_yaml(path: Path) -> dict[str, Any]:
 
 
 def _utcnow() -> str:
-    """
-    Return the current UTC timestamp in ISO 8601 format.
-
-    Returns
-    -------
-    str
-        Current UTC timestamp.
-    """
     return datetime.now(timezone.utc).isoformat()
 
 
 def _canonical_skill_id(local_name: str, skill_name: str) -> str:
-    """
-    Build a canonical skill identifier.
-
-    Parameters
-    ----------
-    local_name:
-        Local channel alias.
-    skill_name:
-        Channel-local skill name.
-
-    Returns
-    -------
-    str
-        Canonical skill identifier.
-    """
     return f'{local_name}.{skill_name}'
 
 
 def _split_entry_point(entry_point: str) -> tuple[str, str]:
-    """
-    Split an entry point into module and class names.
-
-    Parameters
-    ----------
-    entry_point:
-        Entry point in ``module:ClassName`` format.
-
-    Returns
-    -------
-    tuple[str, str]
-        Module name and class name.
-    """
     module_name, separator, class_name = entry_point.partition(':')
     if not separator or not module_name or not class_name:
         msg = (
@@ -437,19 +182,6 @@ def _split_entry_point(entry_point: str) -> tuple[str, str]:
 
 @contextmanager
 def _prepend_sys_path(path: Path) -> Iterator[None]:
-    """
-    Temporarily prepend a directory to ``sys.path``.
-
-    Parameters
-    ----------
-    path:
-        Directory to prepend.
-
-    Yields
-    ------
-    None
-        Context manager sentinel.
-    """
     value = str(path)
     sys.path.insert(0, value)
     try:
@@ -460,21 +192,6 @@ def _prepend_sys_path(path: Path) -> Iterator[None]:
 
 
 def _load_class_from_directory(skill_dir: Path, entry_point: str) -> type[Any]:
-    """
-    Dynamically import a skill class from a skill directory.
-
-    Parameters
-    ----------
-    skill_dir:
-        Root skill directory.
-    entry_point:
-        Entry point in ``module:ClassName`` format.
-
-    Returns
-    -------
-    type[Any]
-        Loaded class object.
-    """
     module_name, class_name = _split_entry_point(entry_point)
     root_module = module_name.split('.')[0]
     importlib.invalidate_caches()
@@ -493,21 +210,6 @@ def _load_class_from_directory(skill_dir: Path, entry_point: str) -> type[Any]:
 
 
 def _load_class_from_package(package_base: str, entry_point: str) -> type[Any]:
-    """
-    Dynamically import a built-in skill class from the package.
-
-    Parameters
-    ----------
-    package_base:
-        Built-in package prefix.
-    entry_point:
-        Entry point in ``module:ClassName`` format.
-
-    Returns
-    -------
-    type[Any]
-        Loaded class object.
-    """
     module_name, class_name = _split_entry_point(entry_point)
     module = importlib.import_module(f'{package_base}.{module_name}')
     cls = getattr(module, class_name)
@@ -518,16 +220,6 @@ def _load_class_from_package(package_base: str, entry_point: str) -> type[Any]:
 
 
 class SkillRegistry:
-    """
-    Manage built-in, channel-based, and legacy single-skill registries.
-
-    Parameters
-    ----------
-    registry_dir:
-        Optional artifact directory for installed skills. When omitted,
-        ``~/.hiperhealth/artifacts/skills`` is used.
-    """
-
     def __init__(self, registry_dir: Path | None = None) -> None:
         self._registry_dir = (
             registry_dir
@@ -546,52 +238,18 @@ class SkillRegistry:
 
     @property
     def registry_dir(self) -> Path:
-        """
-        Return the legacy-compatible skill artifact directory.
-
-        Returns
-        -------
-        Path
-            Installed skill artifact directory.
-        """
         return self._registry_dir
 
     @property
     def root_dir(self) -> Path:
-        """
-        Return the registry root directory.
-
-        Returns
-        -------
-        Path
-            Registry root directory.
-        """
         return self._root_dir
 
     def _ensure_storage_dirs(self) -> None:
-        """
-        Create the registry storage directories when missing.
-        """
         self._state_dir.mkdir(parents=True, exist_ok=True)
         self._channels_dir.mkdir(parents=True, exist_ok=True)
         self._registry_dir.mkdir(parents=True, exist_ok=True)
 
     def _run_command(self, args: list[str], cwd: Path | None = None) -> str:
-        """
-        Run a subprocess command and return stripped stdout.
-
-        Parameters
-        ----------
-        args:
-            Command arguments.
-        cwd:
-            Optional working directory.
-
-        Returns
-        -------
-        str
-            Command stdout.
-        """
         completed = subprocess.run(
             args,
             check=True,
@@ -626,14 +284,6 @@ class SkillRegistry:
         return self._registry_dir / skill_id
 
     def _load_state(self) -> RegistryState:
-        """
-        Load registry state from disk.
-
-        Returns
-        -------
-        RegistryState
-            Current registry state.
-        """
         self._maybe_migrate_legacy_registry()
         state_path = self._state_path()
         if state_path.exists():
@@ -658,14 +308,6 @@ class SkillRegistry:
         return RegistryState.model_validate(data)
 
     def _save_state(self, state: RegistryState) -> None:
-        """
-        Persist registry state and split indexes to disk.
-
-        Parameters
-        ----------
-        state:
-            Registry state to persist.
-        """
         self._ensure_storage_dirs()
         state_data = state.model_dump(mode='json')
         self._state_path().write_text(
@@ -687,18 +329,6 @@ class SkillRegistry:
         record: ChannelRecord,
         repo_dir: Path,
     ) -> None:
-        """
-        Persist metadata files for one registered channel.
-
-        Parameters
-        ----------
-        local_name:
-            Local channel alias.
-        record:
-            Channel record to persist.
-        repo_dir:
-            Channel repository checkout.
-        """
         channel_dir = self._channel_dir(local_name)
         channel_dir.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(
@@ -711,9 +341,6 @@ class SkillRegistry:
         )
 
     def _maybe_migrate_legacy_registry(self) -> None:
-        """
-        Import legacy flat registry metadata when present.
-        """
         state_path = self._state_path()
         if state_path.exists():
             return
@@ -746,19 +373,6 @@ class SkillRegistry:
         self._save_state(state)
 
     def _read_skill_manifest_file(self, manifest_path: Path) -> SkillManifest:
-        """
-        Read and validate a skill manifest file.
-
-        Parameters
-        ----------
-        manifest_path:
-            Path to ``hiperhealth.yaml``.
-
-        Returns
-        -------
-        SkillManifest
-            Validated skill manifest.
-        """
         if not manifest_path.exists():
             msg = (
                 f'No hiperhealth.yaml found at {manifest_path}. '
@@ -768,35 +382,9 @@ class SkillRegistry:
         return SkillManifest.model_validate(_parse_yaml(manifest_path))
 
     def _read_manifest(self, skill_dir: Path) -> SkillManifest:
-        """
-        Read and validate a skill manifest from a directory.
-
-        Parameters
-        ----------
-        skill_dir:
-            Skill directory containing ``hiperhealth.yaml``.
-
-        Returns
-        -------
-        SkillManifest
-            Validated skill manifest.
-        """
         return self._read_skill_manifest_file(skill_dir / 'hiperhealth.yaml')
 
     def _read_channel_manifest(self, repo_dir: Path) -> ChannelManifest:
-        """
-        Read and validate a channel manifest.
-
-        Parameters
-        ----------
-        repo_dir:
-            Repository root directory.
-
-        Returns
-        -------
-        ChannelManifest
-            Validated channel manifest.
-        """
         manifest_path = repo_dir / 'skills.yaml'
         if not manifest_path.exists():
             msg = f'No skills.yaml found in {repo_dir}.'
@@ -828,19 +416,6 @@ class SkillRegistry:
         return manifest
 
     def _detect_source_kind(self, repo_dir: Path) -> str:
-        """
-        Detect whether a repository is a channel or legacy skill source.
-
-        Parameters
-        ----------
-        repo_dir:
-            Repository root directory.
-
-        Returns
-        -------
-        str
-            ``"channel"`` or ``"legacy"``.
-        """
         if (repo_dir / 'skills.yaml').exists():
             return 'channel'
         if (repo_dir / 'hiperhealth.yaml').exists():
@@ -855,21 +430,6 @@ class SkillRegistry:
     def _validate_local_name(
         self, local_name: str, state: RegistryState
     ) -> str:
-        """
-        Validate and normalize a local channel alias.
-
-        Parameters
-        ----------
-        local_name:
-            Proposed local channel alias.
-        state:
-            Current registry state.
-
-        Returns
-        -------
-        str
-            Validated local alias.
-        """
         value = local_name.strip()
         if not value:
             raise ValueError('local_name must not be empty.')
@@ -896,23 +456,6 @@ class SkillRegistry:
         local_name: str | None,
         state: RegistryState,
     ) -> str:
-        """
-        Resolve the final local channel alias.
-
-        Parameters
-        ----------
-        channel_manifest:
-            Parsed channel manifest.
-        local_name:
-            User-provided local alias, if any.
-        state:
-            Current registry state.
-
-        Returns
-        -------
-        str
-            Final local alias.
-        """
         candidate = (
             local_name
             or channel_manifest.channel.default_alias
@@ -927,19 +470,6 @@ class SkillRegistry:
         return self._validate_local_name(candidate, state)
 
     def _detect_provider(self, source: str) -> str:
-        """
-        Detect the provider type for a git source string.
-
-        Parameters
-        ----------
-        source:
-            Source URL or local path.
-
-        Returns
-        -------
-        str
-            Provider name.
-        """
         if Path(source).exists():
             return 'local'
         parsed = urlparse(source)
@@ -955,19 +485,6 @@ class SkillRegistry:
         return 'local'
 
     def _looks_like_git_source(self, source: str) -> bool:
-        """
-        Return whether a source looks cloneable by git.
-
-        Parameters
-        ----------
-        source:
-            Source URL or local path.
-
-        Returns
-        -------
-        bool
-            Whether the source is git-like.
-        """
         path = Path(source)
         return path.exists() or source.startswith(
             ('https://', 'http://', 'git@', 'ssh://', 'file://')
@@ -976,18 +493,6 @@ class SkillRegistry:
     def _clone_repo(
         self, source: str, target_dir: Path, ref: str | None = None
     ) -> None:
-        """
-        Clone a git repository to a target directory.
-
-        Parameters
-        ----------
-        source:
-            Source URL or local git path.
-        target_dir:
-            Clone destination.
-        ref:
-            Optional git reference to checkout.
-        """
         self._run_command(['git', 'clone', source, str(target_dir)])
         if ref is not None:
             self._run_command(
@@ -996,35 +501,9 @@ class SkillRegistry:
             )
 
     def _current_commit(self, repo_dir: Path) -> str:
-        """
-        Return the current git commit hash.
-
-        Parameters
-        ----------
-        repo_dir:
-            Repository directory.
-
-        Returns
-        -------
-        str
-            Current commit hash.
-        """
         return self._run_command(['git', 'rev-parse', 'HEAD'], cwd=repo_dir)
 
     def _current_ref(self, repo_dir: Path) -> str | None:
-        """
-        Return the current git branch name, if attached.
-
-        Parameters
-        ----------
-        repo_dir:
-            Repository directory.
-
-        Returns
-        -------
-        str | None
-            Current branch name or ``None`` for detached HEAD.
-        """
         ref = self._run_command(
             ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
             cwd=repo_dir,
@@ -1032,21 +511,6 @@ class SkillRegistry:
         return None if ref == 'HEAD' else ref
 
     def _update_repo(self, repo_dir: Path, ref: str | None = None) -> str:
-        """
-        Update a cloned git repository in place.
-
-        Parameters
-        ----------
-        repo_dir:
-            Repository directory.
-        ref:
-            Optional reference to track after fetching.
-
-        Returns
-        -------
-        str
-            Current commit hash after the update.
-        """
         self._run_command(
             ['git', 'fetch', 'origin', '--tags', '--prune'],
             cwd=repo_dir,
@@ -1075,27 +539,6 @@ class SkillRegistry:
         registered_at: str | None = None,
         ref: str | None = None,
     ) -> ChannelRecord:
-        """
-        Build a channel record from a checked-out repository.
-
-        Parameters
-        ----------
-        local_name:
-            Local channel alias.
-        source:
-            Original source string.
-        repo_dir:
-            Channel repository checkout.
-        registered_at:
-            Existing registration timestamp, if any.
-        ref:
-            Tracking ref override.
-
-        Returns
-        -------
-        ChannelRecord
-            Channel record ready to persist.
-        """
         channel_manifest = self._read_channel_manifest(repo_dir)
         ref_value = ref if ref is not None else self._current_ref(repo_dir)
         timestamp = _utcnow()
@@ -1118,14 +561,6 @@ class SkillRegistry:
     def _iter_builtin_skill_entries(
         self,
     ) -> Iterator[tuple[Path, SkillManifest]]:
-        """
-        Yield built-in skill directories and manifests.
-
-        Yields
-        ------
-        tuple[Path, SkillManifest]
-            Built-in skill directory and manifest.
-        """
         if not self._builtin_dir.is_dir():
             return
         for child in sorted(self._builtin_dir.iterdir()):
@@ -1144,19 +579,6 @@ class SkillRegistry:
     def _iter_channel_skill_entries(
         self, local_name: str
     ) -> list[_ResolvedChannelSkill]:
-        """
-        Resolve all declared skills for one registered channel.
-
-        Parameters
-        ----------
-        local_name:
-            Local channel alias.
-
-        Returns
-        -------
-        list[_ResolvedChannelSkill]
-            Resolved available skills.
-        """
         repo_dir = self._channel_repo_dir(local_name)
         if not repo_dir.is_dir():
             msg = f'Channel {local_name!r} is not registered.'
@@ -1189,19 +611,6 @@ class SkillRegistry:
     def _find_available_channel_skill(
         self, skill_id: str
     ) -> _ResolvedChannelSkill | None:
-        """
-        Resolve an available channel skill from its canonical identifier.
-
-        Parameters
-        ----------
-        skill_id:
-            Canonical skill identifier.
-
-        Returns
-        -------
-        _ResolvedChannelSkill | None
-            Matching skill entry, if present.
-        """
         local_name, separator, skill_name = skill_id.partition('.')
         if not separator:
             return None
@@ -1215,14 +624,6 @@ class SkillRegistry:
         return None
 
     def _install_dependencies(self, dependencies: list[str]) -> None:
-        """
-        Install Python dependencies declared by a skill.
-
-        Parameters
-        ----------
-        dependencies:
-            Dependency specifiers to install with pip.
-        """
         if not dependencies:
             return
         subprocess.run(
@@ -1235,21 +636,6 @@ class SkillRegistry:
     def _normalize_loaded_skill(
         self, skill: BaseSkill, canonical_id: str
     ) -> BaseSkill:
-        """
-        Rewrite loaded skill metadata to its registry identifier.
-
-        Parameters
-        ----------
-        skill:
-            Instantiated skill.
-        canonical_id:
-            Registry identifier used to load the skill.
-
-        Returns
-        -------
-        BaseSkill
-            Skill instance with normalized metadata.
-        """
         skill.metadata = SkillMetadata(
             name=canonical_id,
             version=skill.metadata.version,
@@ -1259,19 +645,6 @@ class SkillRegistry:
         return skill
 
     def _load_channel_skill(self, record: InstalledSkillRecord) -> BaseSkill:
-        """
-        Load an installed channel-based skill.
-
-        Parameters
-        ----------
-        record:
-            Installed skill record.
-
-        Returns
-        -------
-        BaseSkill
-            Instantiated skill.
-        """
         manifest_path = Path(record.manifest_path)
         manifest = self._read_skill_manifest_file(manifest_path)
         skill_dir = manifest_path.parent
@@ -1280,19 +653,6 @@ class SkillRegistry:
         return self._normalize_loaded_skill(skill, record.id)
 
     def _load_legacy_skill(self, record: InstalledSkillRecord) -> BaseSkill:
-        """
-        Load an installed legacy single-skill project.
-
-        Parameters
-        ----------
-        record:
-            Installed skill record.
-
-        Returns
-        -------
-        BaseSkill
-            Instantiated skill.
-        """
         manifest_path = Path(record.manifest_path)
         manifest = self._read_skill_manifest_file(manifest_path)
         cls = _load_class_from_directory(
@@ -1307,23 +667,6 @@ class SkillRegistry:
         local_name: str | None = None,
         ref: str | None = None,
     ) -> str:
-        """
-        Register a channel from a git repository.
-
-        Parameters
-        ----------
-        source:
-            Git URL or local git repository path.
-        local_name:
-            Optional local alias for the channel.
-        ref:
-            Optional git reference to checkout.
-
-        Returns
-        -------
-        str
-            Final local channel alias.
-        """
         if not self._looks_like_git_source(source):
             msg = (
                 f'Cannot register channel from {source!r}. Provide a git URL '
@@ -1368,33 +711,12 @@ class SkillRegistry:
         return resolved_name
 
     def list_channels(self) -> list[ChannelRecord]:
-        """
-        List registered channels.
-
-        Returns
-        -------
-        list[ChannelRecord]
-            Registered channels sorted by local alias.
-        """
         state = self._load_state()
         return [state.channels[name] for name in sorted(state.channels.keys())]
 
     def list_channel_skills(
         self, local_name: str
     ) -> list[AvailableSkillRecord]:
-        """
-        List all skills declared by one registered channel.
-
-        Parameters
-        ----------
-        local_name:
-            Local channel alias.
-
-        Returns
-        -------
-        list[AvailableSkillRecord]
-            Declared channel skills.
-        """
         state = self._load_state()
         if local_name not in state.channels:
             msg = f'Channel {local_name!r} is not registered.'
@@ -1411,21 +733,6 @@ class SkillRegistry:
     def update_channel(
         self, local_name: str, ref: str | None = None
     ) -> list[str]:
-        """
-        Update a registered channel checkout and refresh installed skills.
-
-        Parameters
-        ----------
-        local_name:
-            Local channel alias.
-        ref:
-            Optional git reference override.
-
-        Returns
-        -------
-        list[str]
-            Installed skill identifiers refreshed by the update.
-        """
         state = self._load_state()
         channel = state.channels.get(local_name)
         if channel is None:
@@ -1479,14 +786,6 @@ class SkillRegistry:
         return sorted(updated)
 
     def remove_channel(self, local_name: str) -> None:
-        """
-        Remove a registered channel and its installed skills.
-
-        Parameters
-        ----------
-        local_name:
-            Local channel alias.
-        """
         state = self._load_state()
         if local_name not in state.channels:
             msg = f'Channel {local_name!r} is not registered.'
@@ -1504,19 +803,6 @@ class SkillRegistry:
         self._save_state(state)
 
     def install(self, source: str) -> str:
-        """
-        Install a legacy single-skill project from a path or git URL.
-
-        Parameters
-        ----------
-        source:
-            Local path or git URL for a legacy single-skill project.
-
-        Returns
-        -------
-        str
-            Installed skill identifier.
-        """
         source_path = Path(source)
         if source_path.is_dir():
             return self._install_legacy_from_path(source_path, source)
@@ -1536,21 +822,6 @@ class SkillRegistry:
     def _install_legacy_from_path(
         self, source_path: Path, source_str: str
     ) -> str:
-        """
-        Install a legacy single-skill project from a directory.
-
-        Parameters
-        ----------
-        source_path:
-            Source directory.
-        source_str:
-            Original source string.
-
-        Returns
-        -------
-        str
-            Installed skill identifier.
-        """
         if (
             not (source_path / 'skills.yaml').exists()
             and not (source_path / 'hiperhealth.yaml').exists()
@@ -1603,14 +874,6 @@ class SkillRegistry:
         return manifest.name
 
     def uninstall(self, name: str) -> None:
-        """
-        Backward-compatible alias for ``remove_skill()``.
-
-        Parameters
-        ----------
-        name:
-            Installed skill identifier.
-        """
         self.remove_skill(name)
 
     def list_skills(
@@ -1618,21 +881,6 @@ class SkillRegistry:
         channel: str | None = None,
         installed_only: bool = False,
     ) -> list[SkillSummary]:
-        """
-        List skills across built-ins, channels, and legacy installs.
-
-        Parameters
-        ----------
-        channel:
-            Optional local channel alias filter.
-        installed_only:
-            When ``True``, only include installed skills and built-ins.
-
-        Returns
-        -------
-        list[SkillSummary]
-            Skill summaries sorted by canonical identifier.
-        """
         state = self._load_state()
         summaries: list[SkillSummary] = []
 
@@ -1712,19 +960,6 @@ class SkillRegistry:
         return [unique[key] for key in sorted(unique.keys())]
 
     def install_skill(self, skill_id: str) -> str:
-        """
-        Install one skill from a registered channel.
-
-        Parameters
-        ----------
-        skill_id:
-            Canonical skill identifier.
-
-        Returns
-        -------
-        str
-            Installed canonical skill identifier.
-        """
         if skill_id.startswith(f'{BUILTIN_CHANNEL}.'):
             msg = 'Built-in hiperhealth skills do not need installation.'
             raise ValueError(msg)
@@ -1767,21 +1002,6 @@ class SkillRegistry:
     def install_channel(
         self, local_name: str, include_disabled: bool = False
     ) -> list[str]:
-        """
-        Install all skills from a registered channel.
-
-        Parameters
-        ----------
-        local_name:
-            Local channel alias.
-        include_disabled:
-            Whether to include disabled skills.
-
-        Returns
-        -------
-        list[str]
-            Installed canonical skill identifiers.
-        """
         state = self._load_state()
         if local_name not in state.channels:
             msg = f'Channel {local_name!r} is not registered.'
@@ -1795,21 +1015,6 @@ class SkillRegistry:
         return sorted(installed)
 
     def update_skill(self, skill_id: str, pull_channel: bool = False) -> str:
-        """
-        Refresh one installed skill.
-
-        Parameters
-        ----------
-        skill_id:
-            Canonical installed skill identifier.
-        pull_channel:
-            Whether to pull the channel checkout first.
-
-        Returns
-        -------
-        str
-            Refreshed skill identifier.
-        """
         state = self._load_state()
         record = state.skills.get(skill_id)
         if record is None:
@@ -1856,14 +1061,6 @@ class SkillRegistry:
         return skill_id
 
     def remove_skill(self, skill_id: str) -> None:
-        """
-        Remove one installed skill.
-
-        Parameters
-        ----------
-        skill_id:
-            Installed skill identifier.
-        """
         if skill_id.startswith(f'{BUILTIN_CHANNEL}.'):
             msg = 'Built-in hiperhealth skills cannot be removed.'
             raise ValueError(msg)
@@ -1880,20 +1077,6 @@ class SkillRegistry:
         self._save_state(state)
 
     def load(self, name: str) -> BaseSkill:
-        """
-        Instantiate a skill by its canonical identifier.
-
-        Parameters
-        ----------
-        name:
-            Built-in canonical identifier, installed channel skill
-            identifier, or installed legacy skill name.
-
-        Returns
-        -------
-        BaseSkill
-            Instantiated skill.
-        """
         for skill_dir, manifest in self._iter_builtin_skill_entries():
             if manifest.name != name:
                 continue

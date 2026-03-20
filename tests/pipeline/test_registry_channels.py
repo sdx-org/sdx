@@ -26,19 +26,6 @@ from ._registry_test_utils import (
 
 @pytest.fixture
 def registry(tmp_path: Path) -> SkillRegistry:
-    """
-    Create a registry rooted in a temporary directory.
-
-    Parameters
-    ----------
-    tmp_path:
-        Temporary directory provided by pytest.
-
-    Returns
-    -------
-    SkillRegistry
-        Test registry.
-    """
     return SkillRegistry(
         registry_dir=tmp_path / '.hiperhealth' / 'artifacts' / 'skills'
     )
@@ -46,37 +33,11 @@ def registry(tmp_path: Path) -> SkillRegistry:
 
 @pytest.fixture
 def channel_repo(tmp_path: Path) -> Path:
-    """
-    Create a local git-backed channel fixture.
-
-    Parameters
-    ----------
-    tmp_path:
-        Temporary directory provided by pytest.
-
-    Returns
-    -------
-    Path
-        Channel repository path.
-    """
     return create_channel_repo(tmp_path)
 
 
 @pytest.fixture
 def legacy_repo(tmp_path: Path) -> Path:
-    """
-    Create a legacy single-skill repository fixture.
-
-    Parameters
-    ----------
-    tmp_path:
-        Temporary directory provided by pytest.
-
-    Returns
-    -------
-    Path
-        Legacy repository path.
-    """
     return create_legacy_repo(tmp_path)
 
 
@@ -84,9 +45,6 @@ def test_parse_valid_skills_yaml(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Parse a valid channel manifest.
-    """
     manifest = registry._read_channel_manifest(channel_repo)
 
     assert manifest.channel.name == 'traditional-medicine'
@@ -102,9 +60,6 @@ def test_reject_invalid_skills_yaml(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Reject an invalid channel manifest.
-    """
     write_file(
         channel_repo / 'skills.yaml',
         """
@@ -121,9 +76,6 @@ def test_reject_duplicate_skill_names_within_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Reject duplicate skill names within one channel manifest.
-    """
     write_file(
         channel_repo / 'skills.yaml',
         """
@@ -149,9 +101,6 @@ def test_reject_missing_per_skill_manifest(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Reject channel manifests that reference missing skill manifests.
-    """
     (channel_repo / 'skills' / 'nutrition' / 'hiperhealth.yaml').unlink()
 
     with pytest.raises(ValueError, match='Declared manifest'):
@@ -162,9 +111,6 @@ def test_enforce_local_alias_uniqueness(
     registry: SkillRegistry,
     tmp_path: Path,
 ) -> None:
-    """
-    Reject duplicate local aliases.
-    """
     first_repo = create_channel_repo(tmp_path / 'first')
     second_repo = create_channel_repo(tmp_path / 'second')
 
@@ -177,9 +123,6 @@ def test_list_channels_and_skills(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    List registered channels and available skills.
-    """
     registry.add_channel(str(channel_repo))
 
     channels = registry.list_channels()
@@ -211,9 +154,6 @@ def test_register_channel_from_local_git_fixture(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Register a channel from a local git repository.
-    """
     local_name = registry.add_channel(str(channel_repo))
 
     assert local_name == 'tm'
@@ -230,9 +170,6 @@ def test_install_one_skill_from_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Install one skill from a channel.
-    """
     registry.add_channel(str(channel_repo))
     installed = registry.install_skill('tm.ayurveda')
 
@@ -251,9 +188,6 @@ def test_install_all_skills_from_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Install all enabled skills from a channel.
-    """
     registry.add_channel(str(channel_repo))
 
     installed = registry.install_channel('tm')
@@ -267,9 +201,6 @@ def test_install_channel_include_disabled(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Install all channel skills including disabled ones.
-    """
     registry.add_channel(str(channel_repo))
 
     installed = registry.install_channel('tm', include_disabled=True)
@@ -281,9 +212,6 @@ def test_update_one_skill_without_pulling_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Refresh one skill without pulling the channel checkout.
-    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.ayurveda')
     bump_channel_skill_version(channel_repo, 'ayurveda', '0.2.0')
@@ -298,9 +226,6 @@ def test_update_one_skill_with_pulling_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Refresh one skill after pulling the channel checkout.
-    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.ayurveda')
     bump_channel_skill_version(channel_repo, 'ayurveda', '0.2.0')
@@ -317,9 +242,6 @@ def test_update_whole_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Update a channel checkout and refresh installed skills.
-    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.ayurveda')
     before_commit = registry.list_channels()[0].commit
@@ -337,9 +259,6 @@ def test_remove_one_skill(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Remove one installed channel skill.
-    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.ayurveda')
 
@@ -353,9 +272,6 @@ def test_remove_whole_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Remove a channel and its installed skills.
-    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.ayurveda')
 
@@ -370,9 +286,6 @@ def test_load_skill_by_canonical_id_and_stage_runner(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    """
-    Load a channel skill by canonical id and run it through the runner.
-    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.nutrition')
 
@@ -388,9 +301,6 @@ def test_legacy_single_skill_repo_install_still_works(
     registry: SkillRegistry,
     legacy_repo: Path,
 ) -> None:
-    """
-    Preserve legacy single-skill repository installs.
-    """
     installed = registry.install(str(legacy_repo))
 
     assert installed == 'legacy.greeting'

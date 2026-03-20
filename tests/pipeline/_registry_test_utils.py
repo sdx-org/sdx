@@ -13,14 +13,14 @@ from pathlib import Path
 
 def write_file(path: Path, content: str) -> None:
     """
-    Write a text file, creating parent directories as needed.
-
-    Parameters
-    ----------
-    path:
-        Output file path.
-    content:
-        File content.
+    title: Write a text file, creating parent directories as needed
+    parameters:
+      path:
+        type: Path
+        description: Output file path.
+      content:
+        type: str
+        description: File content.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
@@ -31,19 +31,18 @@ def write_file(path: Path, content: str) -> None:
 
 def run_git(repo: Path, *args: str) -> str:
     """
-    Run a git command inside a repository.
-
-    Parameters
-    ----------
-    repo:
-        Repository directory.
-    args:
-        Git arguments.
-
-    Returns
-    -------
-    str
-        Command stdout.
+    title: Run a git command inside a repository
+    parameters:
+      repo:
+        type: Path
+        description: Repository directory.
+      args:
+        type: str
+        description: Git arguments.
+        variadic: positional
+    returns:
+      type: str
+      description: Command stdout.
     """
     completed = subprocess.run(
         ['git', *args],
@@ -57,12 +56,11 @@ def run_git(repo: Path, *args: str) -> str:
 
 def init_git_repo(repo: Path) -> None:
     """
-    Initialize a local git repository for tests.
-
-    Parameters
-    ----------
-    repo:
-        Repository directory.
+    title: Initialize a local git repository for tests
+    parameters:
+      repo:
+        type: Path
+        description: Repository directory.
     """
     repo.mkdir(parents=True, exist_ok=True)
     run_git(repo, 'init')
@@ -73,14 +71,14 @@ def init_git_repo(repo: Path) -> None:
 
 def commit_all(repo: Path, message: str) -> None:
     """
-    Commit all current repository changes.
-
-    Parameters
-    ----------
-    repo:
-        Repository directory.
-    message:
-        Commit message.
+    title: Commit all current repository changes
+    parameters:
+      repo:
+        type: Path
+        description: Repository directory.
+      message:
+        type: str
+        description: Commit message.
     """
     run_git(repo, 'add', '.')
     run_git(repo, 'commit', '-m', message)
@@ -88,17 +86,14 @@ def commit_all(repo: Path, message: str) -> None:
 
 def create_channel_repo(base_dir: Path) -> Path:
     """
-    Create a channel repository fixture.
-
-    Parameters
-    ----------
-    base_dir:
-        Directory where the repository should be created.
-
-    Returns
-    -------
-    Path
-        Repository path.
+    title: Create a channel repository fixture
+    parameters:
+      base_dir:
+        type: Path
+        description: Directory where the repository should be created.
+    returns:
+      type: Path
+      description: Repository path.
     """
     repo = base_dir / 'traditional-medicine'
     init_git_repo(repo)
@@ -294,17 +289,14 @@ def create_channel_repo(base_dir: Path) -> Path:
 
 def create_legacy_repo(base_dir: Path) -> Path:
     """
-    Create a legacy single-skill repository fixture.
-
-    Parameters
-    ----------
-    base_dir:
-        Directory where the repository should be created.
-
-    Returns
-    -------
-    Path
-        Repository path.
+    title: Create a legacy single-skill repository fixture
+    parameters:
+      base_dir:
+        type: Path
+        description: Directory where the repository should be created.
+    returns:
+      type: Path
+      description: Repository path.
     """
     repo = base_dir / 'legacy-greeting'
     init_git_repo(repo)
@@ -358,16 +350,17 @@ def bump_channel_skill_version(
     new_version: str,
 ) -> None:
     """
-    Update a channel skill version in both manifest and Python code.
-
-    Parameters
-    ----------
-    repo:
-        Channel repository path.
-    skill_name:
-        Channel-local skill name.
-    new_version:
-        Replacement version string.
+    title: Update a channel skill version in both manifest and Python code
+    parameters:
+      repo:
+        type: Path
+        description: Channel repository path.
+      skill_name:
+        type: str
+        description: Channel-local skill name.
+      new_version:
+        type: str
+        description: Replacement version string.
     """
     manifest_path = repo / 'skills' / skill_name / 'hiperhealth.yaml'
     manifest_text = manifest_path.read_text(encoding='utf-8')

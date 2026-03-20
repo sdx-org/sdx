@@ -20,37 +20,11 @@ from ._registry_test_utils import (
 
 @pytest.fixture
 def registry_dir(tmp_path: Path) -> Path:
-    """
-    Create a temporary CLI registry directory.
-
-    Parameters
-    ----------
-    tmp_path:
-        Temporary directory provided by pytest.
-
-    Returns
-    -------
-    Path
-        Registry artifact directory.
-    """
     return tmp_path / '.hiperhealth' / 'artifacts' / 'skills'
 
 
 @pytest.fixture
 def channel_repo(tmp_path: Path) -> Path:
-    """
-    Create a local git-backed channel fixture.
-
-    Parameters
-    ----------
-    tmp_path:
-        Temporary directory provided by pytest.
-
-    Returns
-    -------
-    Path
-        Channel repository path.
-    """
     return create_channel_repo(tmp_path)
 
 
@@ -59,23 +33,6 @@ def run_cli(
     capsys: pytest.CaptureFixture[str],
     *args: str,
 ) -> str:
-    """
-    Invoke the CLI and return stdout.
-
-    Parameters
-    ----------
-    registry_dir:
-        Registry artifact directory.
-    capsys:
-        Pytest capture fixture.
-    args:
-        CLI arguments after ``--registry-dir``.
-
-    Returns
-    -------
-    str
-        Captured stdout.
-    """
     exit_code = main(['--registry-dir', str(registry_dir), *args])
     captured = capsys.readouterr()
     assert exit_code == 0
@@ -87,9 +44,6 @@ def test_channel_add(
     channel_repo: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """
-    Add a channel through the CLI.
-    """
     stdout = run_cli(
         registry_dir,
         capsys,
@@ -108,9 +62,6 @@ def test_channel_list(
     channel_repo: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """
-    List registered channels through the CLI.
-    """
     run_cli(
         registry_dir,
         capsys,
@@ -132,9 +83,6 @@ def test_channel_skills(
     channel_repo: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """
-    List channel skills through the CLI.
-    """
     run_cli(registry_dir, capsys, 'channel', 'add', str(channel_repo))
 
     stdout = run_cli(registry_dir, capsys, 'channel', 'skills', 'tm')
@@ -152,9 +100,6 @@ def test_skill_list(
     channel_repo: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """
-    List available skills through the CLI.
-    """
     run_cli(registry_dir, capsys, 'channel', 'add', str(channel_repo))
 
     stdout = run_cli(
@@ -179,9 +124,6 @@ def test_channel_install(
     channel_repo: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """
-    Install all channel skills through the CLI.
-    """
     run_cli(registry_dir, capsys, 'channel', 'add', str(channel_repo))
 
     stdout = run_cli(
@@ -202,9 +144,6 @@ def test_skill_install(
     channel_repo: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """
-    Install one skill through the CLI.
-    """
     run_cli(registry_dir, capsys, 'channel', 'add', str(channel_repo))
 
     stdout = run_cli(
@@ -223,9 +162,6 @@ def test_skill_update(
     channel_repo: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """
-    Update one installed skill through the CLI.
-    """
     run_cli(registry_dir, capsys, 'channel', 'add', str(channel_repo))
     run_cli(registry_dir, capsys, 'skill', 'install', 'tm.ayurveda')
     bump_channel_skill_version(channel_repo, 'ayurveda', '0.2.0')
@@ -259,9 +195,6 @@ def test_skill_remove(
     channel_repo: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """
-    Remove one installed skill through the CLI.
-    """
     run_cli(registry_dir, capsys, 'channel', 'add', str(channel_repo))
     run_cli(registry_dir, capsys, 'skill', 'install', 'tm.ayurveda')
 
@@ -293,9 +226,6 @@ def test_channel_remove(
     channel_repo: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """
-    Remove a channel through the CLI.
-    """
     run_cli(registry_dir, capsys, 'channel', 'add', str(channel_repo))
     run_cli(registry_dir, capsys, 'skill', 'install', 'tm.ayurveda')
 

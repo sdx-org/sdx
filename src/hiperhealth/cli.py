@@ -16,12 +16,10 @@ from hiperhealth.pipeline.registry import SkillRegistry
 
 def _build_parser() -> argparse.ArgumentParser:
     """
-    Build the hiperhealth CLI argument parser.
-
-    Returns
-    -------
-    argparse.ArgumentParser
-        Configured argument parser.
+    title: Build the hiperhealth CLI argument parser
+    returns:
+      type: argparse.ArgumentParser
+      description: Configured argument parser.
     """
     parser = argparse.ArgumentParser(prog='hiperhealth')
     parser.add_argument(
@@ -102,29 +100,26 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _print_json(payload: object) -> None:
     """
-    Print JSON to stdout.
-
-    Parameters
-    ----------
-    payload:
-        JSON-serializable payload.
+    title: Print JSON to stdout
+    parameters:
+      payload:
+        type: object
+        description: JSON-serializable payload.
     """
     print(json.dumps(payload, indent=2))
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """
-    Run the hiperhealth CLI.
-
-    Parameters
-    ----------
-    argv:
-        Optional CLI arguments. When omitted, ``sys.argv`` is used.
-
-    Returns
-    -------
-    int
-        Process exit code.
+    title: Run the hiperhealth CLI
+    parameters:
+      argv:
+        type: Sequence[str] | None
+        description: >-
+          Optional CLI arguments. When omitted, ``sys.argv`` is used.
+    returns:
+      type: int
+      description: Process exit code.
     """
     parser = _build_parser()
     args = parser.parse_args(list(argv) if argv is not None else None)
