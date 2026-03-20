@@ -625,6 +625,21 @@ Extra keyword arguments to `run()` are available to skills via
 ctx = runner.run(Stage.DIAGNOSIS, ctx, llm_settings=my_settings)
 ```
 
+### Temporarily disable skills
+
+Use `runner.disabled(...)` when you want to compare a stage with and without
+specific registered skills, without uninstalling them or changing the registry:
+
+```python
+with runner.disabled({'tm.ayurveda'}):
+    ctx_without_ayurveda = runner.run(Stage.TREATMENT, ctx)
+
+ctx_with_ayurveda = runner.run(Stage.TREATMENT, ctx)
+```
+
+For one-off calls, `run()`, `run_many()`, `run_session()`, and
+`check_requirements()` also accept `disabled_skills=`.
+
 ## Stages
 
 The built-in stages are defined as a string enum:

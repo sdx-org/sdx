@@ -197,6 +197,44 @@ class TestStageRunner:
         assert Stage.DIAGNOSIS in result.results
         assert Stage.EXAM in result.results
 
+    def test_run_can_disable_skills_for_single_call(self) -> None:
+        first = _CounterSkill(name='first')
+        second = _CounterSkill(name='second')
+        runner = StageRunner(skills=[first, second])
+        ctx = PipelineContext()
+
+        result = runner.run(
+            Stage.DIAGNOSIS,
+            ctx,
+            disabled_skills={'second'},
+        )
+
+        assert first.execute_count == 1
+        assert second.execute_count == 0
+        assert result.results[Stage.DIAGNOSIS] == 'first_executed'
+        assert [entry.skill_name for entry in result.audit] == [
+            'first',
+            'first',
+            'first',
+        ]
+
+    def test_run_many_respects_disabled_skills(self) -> None:
+        skill = _CounterSkill(stages=(Stage.DIAGNOSIS, Stage.EXAM))
+        runner = StageRunner(skills=[skill])
+        ctx = PipelineContext()
+
+        result = runner.run_many(
+            [Stage.DIAGNOSIS, Stage.EXAM],
+            ctx,
+            disabled_skills='counter',
+        )
+
+        assert skill.pre_count == 0
+        assert skill.execute_count == 0
+        assert skill.post_count == 0
+        assert result.results == {}
+        assert result.audit == []
+
     def test_registration_order(self) -> None:
         first = _CounterSkill(
             name='first',
@@ -268,6 +306,38 @@ class TestStageRunner:
 
         assert result.extras['_run_kwargs']['llm'] == 'mock'
         assert result.extras['_run_kwargs']['llm_settings'] == 's'
+
+    def test_disabled_context_manager_is_temporary(self) -> None:
+        first = _CounterSkill(name='first')
+        second = _CounterSkill(name='second')
+        runner = StageRunner(skills=[first, second])
+
+        with runner.disabled({'second'}):
+            disabled_ctx = runner.run(Stage.DIAGNOSIS, PipelineContext())
+
+        enabled_ctx = runner.run(Stage.DIAGNOSIS, PipelineContext())
+
+        assert first.execute_count == 2
+        assert second.execute_count == 1
+        assert disabled_ctx.results[Stage.DIAGNOSIS] == 'first_executed'
+        assert enabled_ctx.results[Stage.DIAGNOSIS] == 'second_executed'
+
+    def test_disabled_context_manager_supports_nesting(self) -> None:
+        first = _CounterSkill(name='first')
+        second = _CounterSkill(name='second')
+        runner = StageRunner(skills=[first, second])
+
+        with runner.disabled({'first'}):
+            with runner.disabled({'second'}):
+                no_skill_ctx = runner.run(Stage.DIAGNOSIS, PipelineContext())
+
+            restored_ctx = runner.run(Stage.DIAGNOSIS, PipelineContext())
+
+        assert no_skill_ctx.results == {}
+        assert no_skill_ctx.audit == []
+        assert restored_ctx.results[Stage.DIAGNOSIS] == 'second_executed'
+        assert first.execute_count == 0
+        assert second.execute_count == 1
 
     def test_context_serialization_between_runs(self) -> None:
         skill = _CounterSkill()

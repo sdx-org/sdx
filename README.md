@@ -276,6 +276,9 @@ registry.install_skill('tm.ayurveda')
 
 runner = create_default_runner()
 runner.register('tm.ayurveda', index=0)
+
+with runner.disabled({'tm.ayurveda'}):
+    ctx_without_ayurveda = runner.run(Stage.TREATMENT, ctx)
 ```
 
 Recommended channel layout:

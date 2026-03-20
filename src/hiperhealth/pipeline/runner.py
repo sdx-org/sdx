@@ -4,6 +4,8 @@ title: StageRunner — executes pipeline stages independently.
 
 from __future__ import annotations
 
+from collections.abc import Collection, Iterator
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
 
 from hiperhealth.pipeline.context import AuditEntry, PipelineContext
@@ -27,6 +29,8 @@ class StageRunner:
         type: list[Skill]
       _registry:
         description: Value for _registry.
+      _disabled_skill_names:
+        type: set[str]
     """
 
     def __init__(
@@ -36,6 +40,7 @@ class StageRunner:
     ) -> None:
         self._skills: list[Skill] = list(skills or [])
         self._registry = registry
+        self._disabled_skill_names: set[str] = set()
 
     def register(self, name: str, index: int | None = None) -> None:
         """
@@ -74,10 +79,37 @@ class StageRunner:
         """
         return list(self._skills)
 
+    @contextmanager
+    def disabled(
+        self,
+        skill_names: str | Collection[str],
+    ) -> Iterator[None]:
+        """
+        title: Temporarily disable one or more registered skills.
+        summary: |-
+          Disabled skills stay registered and installed, but are skipped
+          during runner operations while the context is active.
+        parameters:
+          skill_names:
+            type: str | Collection[str]
+        returns:
+          type: Iterator[None]
+        """
+        previous = set(self._disabled_skill_names)
+        self._disabled_skill_names.update(
+            self._normalize_skill_names(skill_names)
+        )
+        try:
+            yield
+        finally:
+            self._disabled_skill_names = previous
+
     def run(
         self,
         stage: str,
         ctx: PipelineContext,
+        *,
+        disabled_skills: str | Collection[str] | None = None,
         **kwargs: Any,
     ) -> PipelineContext:
         """
@@ -91,6 +123,8 @@ class StageRunner:
             type: str
           ctx:
             type: PipelineContext
+          disabled_skills:
+            type: str | Collection[str] | None
           kwargs:
             type: Any
             variadic: keyword
@@ -98,12 +132,14 @@ class StageRunner:
           type: PipelineContext
         """
         ctx.extras['_run_kwargs'] = kwargs
-        return self._run_stage(stage, ctx)
+        return self._run_stage(stage, ctx, disabled_skills=disabled_skills)
 
     def run_many(
         self,
         stages: list[str],
         ctx: PipelineContext,
+        *,
+        disabled_skills: str | Collection[str] | None = None,
         **kwargs: Any,
     ) -> PipelineContext:
         """
@@ -113,6 +149,8 @@ class StageRunner:
             type: list[str]
           ctx:
             type: PipelineContext
+          disabled_skills:
+            type: str | Collection[str] | None
           kwargs:
             type: Any
             variadic: keyword
@@ -120,11 +158,50 @@ class StageRunner:
           type: PipelineContext
         """
         for stage in stages:
-            ctx = self.run(stage, ctx, **kwargs)
+            ctx = self.run(
+                stage,
+                ctx,
+                disabled_skills=disabled_skills,
+                **kwargs,
+            )
         return ctx
 
-    def _run_stage(self, stage: str, ctx: PipelineContext) -> PipelineContext:
-        relevant = [s for s in self._skills if stage in s.metadata.stages]
+    def _normalize_skill_names(
+        self,
+        skill_names: str | Collection[str] | None,
+    ) -> set[str]:
+        if skill_names is None:
+            return set()
+        if isinstance(skill_names, str):
+            return {skill_names}
+        return set(skill_names)
+
+    def _relevant_skills(
+        self,
+        stage: str,
+        disabled_skills: str | Collection[str] | None = None,
+    ) -> list[Skill]:
+        disabled_names = self._disabled_skill_names.union(
+            self._normalize_skill_names(disabled_skills)
+        )
+        return [
+            skill
+            for skill in self._skills
+            if stage in skill.metadata.stages
+            and skill.metadata.name not in disabled_names
+        ]
+
+    def _run_stage(
+        self,
+        stage: str,
+        ctx: PipelineContext,
+        *,
+        disabled_skills: str | Collection[str] | None = None,
+    ) -> PipelineContext:
+        relevant = self._relevant_skills(
+            stage,
+            disabled_skills=disabled_skills,
+        )
 
         for skill in relevant:
             ctx = skill.pre(stage, ctx)
@@ -164,6 +241,8 @@ class StageRunner:
         self,
         stage: str,
         session: Session,
+        *,
+        disabled_skills: str | Collection[str] | None = None,
         **kwargs: Any,
     ) -> list[Inquiry]:
         """
@@ -181,6 +260,8 @@ class StageRunner:
             type: str
           session:
             type: Session
+          disabled_skills:
+            type: str | Collection[str] | None
           kwargs:
             type: Any
             variadic: keyword
@@ -191,7 +272,10 @@ class StageRunner:
         ctx.extras['_run_kwargs'] = kwargs
         session.record_event('check_requirements_started', stage=stage)
 
-        relevant = [s for s in self._skills if stage in s.metadata.stages]
+        relevant = self._relevant_skills(
+            stage,
+            disabled_skills=disabled_skills,
+        )
         all_inquiries: list[Inquiry] = []
 
         for skill in relevant:
@@ -218,6 +302,8 @@ class StageRunner:
         self,
         stage: str,
         session: Session,
+        *,
+        disabled_skills: str | Collection[str] | None = None,
         **kwargs: Any,
     ) -> Session:
         """
@@ -231,6 +317,8 @@ class StageRunner:
             type: str
           session:
             type: Session
+          disabled_skills:
+            type: str | Collection[str] | None
           kwargs:
             type: Any
             variadic: keyword
@@ -239,6 +327,11 @@ class StageRunner:
         """
         ctx = session.to_context()
         session.record_event('stage_started', stage=stage)
-        ctx = self.run(stage, ctx, **kwargs)
+        ctx = self.run(
+            stage,
+            ctx,
+            disabled_skills=disabled_skills,
+            **kwargs,
+        )
         session.update_from_context(stage, ctx)
         return session

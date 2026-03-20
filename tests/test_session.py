@@ -366,6 +366,27 @@ class TestCheckRequirements:
         assert len(inquiries) == 2
         assert all(i.skill_name == 'test.assessor' for i in inquiries)
 
+    def test_assess_respects_temporarily_disabled_skills(
+        self, tmp_path: Path
+    ) -> None:
+        path = tmp_path / 'session.parquet'
+        session = Session.create(path)
+        session.set_clinical_data({'symptoms': 'bloating'})
+
+        skill = _AssessingSkill()
+        runner = StageRunner(skills=[skill])
+
+        with runner.disabled({'test.assessor'}):
+            inquiries = runner.check_requirements(Stage.DIAGNOSIS, session)
+
+        restored_inquiries = runner.check_requirements(
+            Stage.DIAGNOSIS,
+            session,
+        )
+
+        assert inquiries == []
+        assert len(restored_inquiries) == 2
+
     def test_assess_irrelevant_stage(self, tmp_path: Path) -> None:
         path = tmp_path / 'session.parquet'
         session = Session.create(path)

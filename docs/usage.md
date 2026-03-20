@@ -109,6 +109,18 @@ registry.list_skills(channel='tm')
 registry.list_skills(channel='tm', installed_only=True)
 ```
 
+To compare results with and without a specific skill, temporarily disable it at
+the runner layer without uninstalling or unregistering it:
+
+```python
+with runner.disabled({'tm.ayurveda'}):
+    ctx_without_ayurveda = runner.run(Stage.TREATMENT, ctx)
+
+ctx_with_ayurveda = runner.run(Stage.TREATMENT, ctx)
+```
+
+For one-off calls, `run()` also accepts `disabled_skills=`.
+
 For channel lifecycle operations such as `update_channel()`, `remove_channel()`,
 `install_channel(include_disabled=True)`, and the `skills-channel.yaml` /
 `skill.yaml` manifest layout, see [Creating Skills](skills.md).
