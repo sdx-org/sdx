@@ -41,8 +41,10 @@ class StageRunner:
         """
         title: Load a skill from the registry by name and activate it.
         summary: |-
-          Looks up the skill in the attached SkillRegistry,
-          instantiates it, and adds it to the execution list.
+          Looks up the skill in the attached SkillRegistry using either a
+          built-in name, a canonical channel skill id such as
+          ``tm.ayurveda``, or a legacy installed skill name; then it
+          instantiates the skill and adds it to the execution list.
           Pass ``index`` to control execution order.
         parameters:
           name:

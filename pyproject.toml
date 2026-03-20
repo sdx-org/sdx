@@ -38,6 +38,9 @@ dependencies = [
 Homepage = "https://github.com/hiperhealth/hiperhealth"
 Issues = "https://github.com/hiperhealth/hiperhealth/issues"
 
+[project.scripts]
+hiperhealth = "hiperhealth.cli:main"
+
 [project.entry-points."hiperhealth.skills"]
 diagnostics = "hiperhealth.skills.diagnostics:DiagnosticsSkill"
 privacy = "hiperhealth.skills.privacy:PrivacySkill"

@@ -79,24 +79,38 @@ Skills run in registration order, so `PrivacySkill` always runs before
 
 ### Installing and registering custom skills
 
-Custom skills can be installed from local paths or Git URLs using the
-`SkillRegistry`, then activated in a runner by name:
+Custom skills are typically published through channel repositories. Register a
+channel once, inspect its skills, then install and register the canonical skill
+id you want:
 
 ```python
-from hiperhealth.pipeline import SkillRegistry, create_default_runner, Stage
+from hiperhealth.pipeline import SkillRegistry, create_default_runner
 
-# Install skills into the internal registry (~/.hiperhealth/skills/)
 registry = SkillRegistry()
-registry.install('/path/to/ayurveda_skill/')
-registry.install('https://github.com/my_org/tcm_skill')
+registry.add_channel(
+    'https://github.com/my-org/traditional-medicine.git',
+    local_name='tm',
+)
 
-# Create a runner and register installed skills
+registry.list_channels()
+registry.list_channel_skills('tm')
+registry.install_skill('tm.ayurveda')
+
 runner = create_default_runner()
-runner.register('ayurveda', index=0)       # insert before built-ins
-runner.register('traditional-chinese-medicine')  # append at end
+runner.register('tm.ayurveda', index=0)
 ```
 
-See [Creating Skills](skills.md) for details on writing skill projects.
+In notebooks and scripts, `registry.list_skills()` is useful for exploring all
+registered channel skills and built-ins from one place.
+
+```python
+registry.list_skills()
+registry.list_skills(channel='tm')
+registry.list_skills(channel='tm', installed_only=True)
+```
+
+See [Creating Skills](skills.md) for the full channel repository layout and
+manifest schema.
 
 ## Session-based workflow
 

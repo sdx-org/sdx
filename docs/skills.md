@@ -337,76 +337,142 @@ The `DiagnosticsSkill` checks `ctx.extras['prompt_fragments']` in two places:
 
 ## Skill registry
 
-The `SkillRegistry` manages skill installation and loading. Skills can be
-installed from local paths or Git URLs, and are stored in an internal registry
-directory (`~/.hiperhealth/skills/`).
+The `SkillRegistry` now treats a git repository as a **channel** and a folder
+inside that repository as an installable **skill**. Channel-based skills use
+canonical ids in the form `<local_channel_name>.<skill_name>`, such as
+`tm.ayurveda`.
 
-### Installing skills
+### Recommended channel repository layout
+
+```text
+channel-repo/
+├── skills.yaml
+├── README.md
+├── LICENSE
+├── docs/
+├── infra/
+├── scripts/
+├── shared/
+├── skills/
+│   ├── ayurveda/
+│   │   ├── hiperhealth.yaml
+│   │   └── skill.py
+│   ├── nutrition/
+│   │   ├── hiperhealth.yaml
+│   │   └── skill.py
+│   └── triage/
+│       ├── hiperhealth.yaml
+│       └── skill.py
+└── tests/
+```
+
+Only skills explicitly declared in `skills.yaml` are installable. Repository
+folders such as `infra/`, `docs/`, `scripts/`, and `shared/` are not treated as
+skills.
+
+### `skills.yaml`
+
+```yaml
+api_version: 1
+channel:
+  name: traditional-medicine
+  display_name: Traditional Medicine
+  default_alias: tm
+  version: 0.1.0
+  description: Complementary and traditional medicine skills
+  homepage: https://github.com/my-org/traditional-medicine
+  license: BSD-3-Clause
+  min_hiperhealth_version: ">=0.5.0"
+
+discovery:
+  skills_dir: skills
+  ignore:
+    - infra
+    - docs
+    - scripts
+    - .github
+    - shared
+    - tests
+
+skills:
+  - name: ayurveda
+    path: skills/ayurveda
+    manifest: skills/ayurveda/hiperhealth.yaml
+    enabled: true
+    tags: [traditional-medicine, treatment]
+
+  - name: nutrition
+    path: skills/nutrition
+    manifest: skills/nutrition/hiperhealth.yaml
+    enabled: true
+    tags: [nutrition]
+```
+
+Each listed skill keeps its own `hiperhealth.yaml`, which preserves the existing
+per-skill manifest format.
+
+### Python API for scripts and notebooks
 
 ```python
 from hiperhealth.pipeline import SkillRegistry
 
 registry = SkillRegistry()
+registry.add_channel(
+    'https://github.com/my-org/traditional-medicine.git',
+    local_name='tm',
+)
 
-# Install from a local directory
-registry.install('/path/to/my_skill/')
+registry.list_channels()
+registry.list_channel_skills('tm')
+registry.list_skills()
+registry.list_skills(channel='tm')
 
-# Install from a Git repository
-registry.install('https://github.com/my_org/my_skill')
-
-# List all available skills (built-in + installed)
-for manifest in registry.list_skills():
-    print(f'{manifest.name} v{manifest.version}: {manifest.description}')
-
-# Remove an installed skill
-registry.uninstall('my_org.skill_name')
+registry.install_skill('tm.ayurveda')
+registry.install_channel('tm')
+registry.update_skill('tm.ayurveda')
+registry.remove_skill('tm.ayurveda')
 ```
 
-### Registering skills in the runner
-
-Use `register()` to activate an installed skill by name:
+`StageRunner.register()` uses the same canonical ids:
 
 ```python
-from hiperhealth.pipeline import SkillRegistry, StageRunner, Stage
-
-registry = SkillRegistry()
-runner = StageRunner(registry=registry)
-
-# Register skills — order defines execution order
-runner.register('hiperhealth.privacy')
-runner.register('hiperhealth.diagnostics')
-
-# Insert a custom skill at the beginning
-runner.register('my_org.greeting', index=0)
-```
-
-### Using the default runner with custom skills
-
-```python
-from hiperhealth.pipeline import create_default_runner
+from hiperhealth.pipeline import StageRunner, create_default_runner
 
 runner = create_default_runner()
-
-# Add an externally installed skill
-runner.register('ayurveda')
-
-ctx = runner.run(Stage.DIAGNOSIS, ctx)
+runner.register('tm.ayurveda', index=0)
 ```
 
-### Internal registry layout
+### CLI
 
+The CLI is a thin wrapper over the same registry API:
+
+```bash
+hiperhealth channel add https://github.com/my-org/traditional-medicine.git --name tm
+hiperhealth channel list
+hiperhealth channel skills tm
+hiperhealth channel install tm --all
+hiperhealth skill list --channel tm
+hiperhealth skill install tm.ayurveda
+hiperhealth skill update tm.ayurveda --pull
+hiperhealth skill remove tm.ayurveda
 ```
+
+### Local storage layout
+
+```text
 ~/.hiperhealth/
-└── skills/
-    ├── manifest.json                    # index of installed skills
-    ├── ayurveda/
-    │   ├── hiperhealth.yaml
-    │   └── skill.py
-    └── traditional-chinese-medicine/
-        ├── hiperhealth.yaml
-        ├── skill.py
-        └── data/
-            └── herbs.json
+├── registry/
+│   ├── channels.json
+│   ├── skills.json
+│   └── state.json
+├── channels/
+│   └── tm/
+│       ├── repo/
+│       ├── skills.yaml
+│       └── channel.json
+└── artifacts/
+    └── skills/
+        └── legacy.greeting/
 ```
 
 ## Using the runner
@@ -544,13 +610,14 @@ from hiperhealth.pipeline import (
     PipelineContext, SkillRegistry, Stage, create_default_runner,
 )
 
-# Install the skill
+# Register the channel and install the skill
 registry = SkillRegistry()
-registry.install('/path/to/bmi_calculator/')
+registry.add_channel('/path/to/my_clinic_channel_repo', local_name='clinic')
+registry.install_skill('clinic.bmi_calculator')
 
 # Use it in a pipeline
 runner = create_default_runner()
-runner.register('my_clinic.bmi_calculator')
+runner.register('clinic.bmi_calculator')
 
 ctx = PipelineContext(
     patient={'height_m': 1.75, 'weight_kg': 70},

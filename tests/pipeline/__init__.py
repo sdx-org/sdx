@@ -1,0 +1,3 @@
+"""
+title: Pipeline registry tests.
+"""

@@ -28,7 +28,9 @@ def tmp_registry(tmp_path: Path) -> SkillRegistry:
     returns:
       type: SkillRegistry
     """
-    return SkillRegistry(registry_dir=tmp_path / 'skills')
+    return SkillRegistry(
+        registry_dir=tmp_path / '.hiperhealth' / 'artifacts' / 'skills'
+    )
 
 
 @pytest.fixture
@@ -198,8 +200,8 @@ class TestSkillRegistryInstall:
         assert name == 'test.greeting'
         # Skill directory should exist in registry
         assert (tmp_registry.registry_dir / 'test.greeting').is_dir()
-        # manifest.json should exist
-        assert (tmp_registry.registry_dir / 'manifest.json').exists()
+        # registry state should exist
+        assert (tmp_registry.root_dir / 'registry' / 'state.json').exists()
 
     def test_installed_skill_appears_in_list(
         self,
