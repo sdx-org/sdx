@@ -47,7 +47,11 @@ def engine():
     """
     title: In-memory SQLite engine for fast, isolated tests.
     """
-    return create_engine('sqlite:///:memory:', future=True, echo=False)
+    engine = create_engine('sqlite:///:memory:', future=True, echo=False)
+    try:
+        yield engine
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture(scope='session')
