@@ -110,8 +110,8 @@ registry.list_skills(channel='tm', installed_only=True)
 ```
 
 For channel lifecycle operations such as `update_channel()`, `remove_channel()`,
-`install_channel(include_disabled=True)`, or legacy single-skill compatibility,
-see [Creating Skills](skills.md).
+`install_channel(include_disabled=True)`, and the `skills-channel.yaml` /
+`skill.yaml` manifest layout, see [Creating Skills](skills.md).
 
 See [Creating Skills](skills.md) for the full channel repository layout and
 manifest schema.

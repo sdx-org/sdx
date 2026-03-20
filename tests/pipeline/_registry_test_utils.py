@@ -84,22 +84,28 @@ def commit_all(repo: Path, message: str) -> None:
     run_git(repo, 'commit', '-m', message)
 
 
-def create_channel_repo(base_dir: Path) -> Path:
+def create_channel_repo(base_dir: Path, *, use_git: bool = True) -> Path:
     """
     title: Create a channel repository fixture
     parameters:
       base_dir:
         type: Path
         description: Directory where the repository should be created.
+      use_git:
+        type: bool
+        description: Whether to initialize the fixture as a git repository.
     returns:
       type: Path
       description: Repository path.
     """
     repo = base_dir / 'traditional-medicine'
-    init_git_repo(repo)
+    if use_git:
+        init_git_repo(repo)
+    else:
+        repo.mkdir(parents=True, exist_ok=True)
 
     write_file(
-        repo / 'skills.yaml',
+        repo / 'skills-channel.yaml',
         """
         api_version: 1
         channel:
@@ -112,32 +118,16 @@ def create_channel_repo(base_dir: Path) -> Path:
           license: BSD-3-Clause
           min_hiperhealth_version: ">=0.5.0"
 
-        discovery:
-          skills_dir: skills
-          ignore:
-            - infra
-            - docs
-            - scripts
-            - .github
-            - shared
-            - tests
-
         skills:
           - name: ayurveda
-            path: skills/ayurveda
-            manifest: skills/ayurveda/hiperhealth.yaml
             enabled: true
             tags: [traditional-medicine, treatment]
 
           - name: nutrition
-            path: skills/nutrition
-            manifest: skills/nutrition/hiperhealth.yaml
             enabled: true
             tags: [nutrition]
 
           - name: triage
-            path: skills/triage
-            manifest: skills/triage/hiperhealth.yaml
             enabled: false
             tags: [screening]
         """,
@@ -146,7 +136,7 @@ def create_channel_repo(base_dir: Path) -> Path:
     write_file(repo / 'infra' / 'README.md', 'infra')
 
     write_file(
-        repo / 'skills' / 'ayurveda' / 'hiperhealth.yaml',
+        repo / 'skills' / 'ayurveda' / 'skill.yaml',
         """
         api_version: 1
         name: ayurveda
@@ -187,7 +177,7 @@ def create_channel_repo(base_dir: Path) -> Path:
     )
 
     write_file(
-        repo / 'skills' / 'nutrition' / 'hiperhealth.yaml',
+        repo / 'skills' / 'nutrition' / 'skill.yaml',
         """
         api_version: 1
         name: nutrition
@@ -244,7 +234,7 @@ def create_channel_repo(base_dir: Path) -> Path:
     )
 
     write_file(
-        repo / 'skills' / 'triage' / 'hiperhealth.yaml',
+        repo / 'skills' / 'triage' / 'skill.yaml',
         """
         api_version: 1
         name: triage
@@ -283,64 +273,8 @@ def create_channel_repo(base_dir: Path) -> Path:
         """,
     )
 
-    commit_all(repo, 'initial channel')
-    return repo
-
-
-def create_legacy_repo(base_dir: Path) -> Path:
-    """
-    title: Create a legacy single-skill repository fixture
-    parameters:
-      base_dir:
-        type: Path
-        description: Directory where the repository should be created.
-    returns:
-      type: Path
-      description: Repository path.
-    """
-    repo = base_dir / 'legacy-greeting'
-    init_git_repo(repo)
-
-    write_file(
-        repo / 'hiperhealth.yaml',
-        """
-        api_version: 1
-        name: legacy.greeting
-        version: 1.0.0
-        entry_point: skill:GreetingSkill
-        stages:
-          - screening
-        description: Legacy greeting skill
-        author: Test Org
-        license: BSD-3-Clause
-        homepage: https://example.com/legacy-greeting
-        dependencies: []
-        """,
-    )
-    write_file(
-        repo / 'skill.py',
-        """
-        from hiperhealth.pipeline import BaseSkill, SkillMetadata
-
-
-        class GreetingSkill(BaseSkill):
-            def __init__(self) -> None:
-                super().__init__(
-                    SkillMetadata(
-                        name='legacy.greeting',
-                        version='1.0.0',
-                        stages=('screening',),
-                        description='Legacy greeting skill',
-                    )
-                )
-
-            def execute(self, stage, ctx):
-                ctx.extras['legacy'] = 'hello'
-                return ctx
-        """,
-    )
-
-    commit_all(repo, 'initial legacy skill')
+    if use_git:
+        commit_all(repo, 'initial channel')
     return repo
 
 
@@ -362,7 +296,7 @@ def bump_channel_skill_version(
         type: str
         description: Replacement version string.
     """
-    manifest_path = repo / 'skills' / skill_name / 'hiperhealth.yaml'
+    manifest_path = repo / 'skills' / skill_name / 'skill.yaml'
     manifest_text = manifest_path.read_text(encoding='utf-8')
     match = re.search(r'^version:\s*(.+)$', manifest_text, re.MULTILINE)
     assert match is not None

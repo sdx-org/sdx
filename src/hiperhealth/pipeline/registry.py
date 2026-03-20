@@ -1,5 +1,5 @@
 """
-title: Channel-aware skill registry for built-in, channel, and legacy skills.
+title: Channel-aware skill registry for built-in and channel skills.
 """
 
 from __future__ import annotations
@@ -52,15 +52,8 @@ class ChannelMetadata(BaseModel):
     min_hiperhealth_version: str = ''
 
 
-class ChannelDiscovery(BaseModel):
-    skills_dir: str = 'skills'
-    ignore: list[str] = Field(default_factory=list)
-
-
 class DeclaredSkill(BaseModel):
     name: str
-    path: str
-    manifest: str
     enabled: bool = True
     tags: list[str] = Field(default_factory=list)
 
@@ -68,7 +61,6 @@ class DeclaredSkill(BaseModel):
 class ChannelManifest(BaseModel):
     api_version: int = 1
     channel: ChannelMetadata
-    discovery: ChannelDiscovery = Field(default_factory=ChannelDiscovery)
     skills: list[DeclaredSkill] = Field(default_factory=list)
 
     @model_validator(mode='after')
@@ -77,7 +69,10 @@ class ChannelManifest(BaseModel):
         duplicates = sorted({name for name in names if names.count(name) > 1})
         if duplicates:
             joined = ', '.join(duplicates)
-            msg = f'Duplicate skill names declared in skills.yaml: {joined}.'
+            msg = (
+                'Duplicate skill names declared in '
+                f'skills-channel.yaml: {joined}.'
+            )
             raise ValueError(msg)
         return self
 
@@ -114,9 +109,6 @@ class InstalledSkillRecord(BaseModel):
     version: str
     source_commit: str = ''
     enabled: bool = True
-    source: str = ''
-    artifact_path: str | None = None
-    legacy: bool = False
 
 
 class RegistryState(BaseModel):
@@ -133,18 +125,6 @@ class SkillSummary(SkillManifest):
     enabled: bool = True
     builtin: bool = False
     tags: list[str] = Field(default_factory=list)
-
-
-class _LegacyInstalledSkillRecord(BaseModel):
-    source: str
-    installed_at: str
-    version: str
-
-
-class _LegacyRegistryIndex(BaseModel):
-    skills: dict[str, _LegacyInstalledSkillRecord] = Field(
-        default_factory=dict
-    )
 
 
 @dataclass(frozen=True)
@@ -275,16 +255,18 @@ class SkillRegistry:
         return self._channel_dir(local_name) / 'repo'
 
     def _channel_manifest_copy_path(self, local_name: str) -> Path:
-        return self._channel_dir(local_name) / 'skills.yaml'
+        return self._channel_dir(local_name) / 'skills-channel.yaml'
 
     def _channel_record_path(self, local_name: str) -> Path:
         return self._channel_dir(local_name) / 'channel.json'
 
-    def _artifact_dir(self, skill_id: str) -> Path:
-        return self._registry_dir / skill_id
+    def _skill_dir(self, repo_dir: Path, skill_name: str) -> Path:
+        return repo_dir / 'skills' / skill_name
+
+    def _skill_manifest_path(self, repo_dir: Path, skill_name: str) -> Path:
+        return self._skill_dir(repo_dir, skill_name) / 'skill.yaml'
 
     def _load_state(self) -> RegistryState:
-        self._maybe_migrate_legacy_registry()
         state_path = self._state_path()
         if state_path.exists():
             return RegistryState.model_validate_json(
@@ -332,7 +314,7 @@ class SkillRegistry:
         channel_dir = self._channel_dir(local_name)
         channel_dir.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(
-            repo_dir / 'skills.yaml',
+            repo_dir / 'skills-channel.yaml',
             self._channel_manifest_copy_path(local_name),
         )
         self._channel_record_path(local_name).write_text(
@@ -340,75 +322,44 @@ class SkillRegistry:
             encoding='utf-8',
         )
 
-    def _maybe_migrate_legacy_registry(self) -> None:
-        state_path = self._state_path()
-        if state_path.exists():
-            return
-
-        manifest_path = self._registry_dir / 'manifest.json'
-        if not manifest_path.exists():
-            return
-
-        legacy_index = _LegacyRegistryIndex.model_validate_json(
-            manifest_path.read_text(encoding='utf-8')
-        )
-        state = RegistryState()
-        for skill_id, legacy_record in legacy_index.skills.items():
-            manifest_path_value = (
-                self._artifact_dir(skill_id) / 'hiperhealth.yaml'
-            )
-            if not manifest_path_value.exists():
-                continue
-            state.skills[skill_id] = InstalledSkillRecord(
-                id=skill_id,
-                skill_name=skill_id,
-                manifest_path=str(manifest_path_value),
-                installed_at=legacy_record.installed_at,
-                updated_at=legacy_record.installed_at,
-                version=legacy_record.version,
-                source=legacy_record.source,
-                artifact_path=str(self._artifact_dir(skill_id)),
-                legacy=True,
-            )
-        self._save_state(state)
-
     def _read_skill_manifest_file(self, manifest_path: Path) -> SkillManifest:
         if not manifest_path.exists():
             msg = (
-                f'No hiperhealth.yaml found at {manifest_path}. '
-                'Every skill project must include a hiperhealth.yaml file.'
+                f'No skill.yaml found at {manifest_path}. '
+                'Every skill project must include a skill.yaml file.'
             )
             raise FileNotFoundError(msg)
         return SkillManifest.model_validate(_parse_yaml(manifest_path))
 
-    def _read_manifest(self, skill_dir: Path) -> SkillManifest:
-        return self._read_skill_manifest_file(skill_dir / 'hiperhealth.yaml')
-
     def _read_channel_manifest(self, repo_dir: Path) -> ChannelManifest:
-        manifest_path = repo_dir / 'skills.yaml'
+        manifest_path = repo_dir / 'skills-channel.yaml'
         if not manifest_path.exists():
-            msg = f'No skills.yaml found in {repo_dir}.'
+            msg = f'No skills-channel.yaml found in {repo_dir}.'
             raise FileNotFoundError(msg)
 
         manifest = ChannelManifest.model_validate(_parse_yaml(manifest_path))
         if not manifest.skills:
-            msg = 'skills.yaml must declare at least one installable skill.'
+            msg = (
+                'skills-channel.yaml must declare at least one installable '
+                'skill.'
+            )
             raise ValueError(msg)
 
         for declared in manifest.skills:
-            skill_dir = repo_dir / declared.path
-            skill_manifest = repo_dir / declared.manifest
+            skill_dir = self._skill_dir(repo_dir, declared.name)
+            skill_manifest = self._skill_manifest_path(repo_dir, declared.name)
             if not skill_dir.is_dir():
+                relative_dir = skill_dir.relative_to(repo_dir)
                 msg = (
-                    f'Declared skill path {declared.path!r} does not exist in '
-                    f'{repo_dir}.'
+                    f'Declared skill {declared.name!r} is missing its '
+                    f'expected directory {relative_dir!s} in {repo_dir}.'
                 )
                 raise ValueError(msg)
             if not skill_manifest.is_file():
+                relative_manifest = skill_manifest.relative_to(repo_dir)
                 msg = (
-                    f'Declared manifest {declared.manifest!r} '
-                    'does not exist in '
-                    f'{repo_dir}.'
+                    f'Declared skill {declared.name!r} is missing its '
+                    f'expected manifest {relative_manifest!s} in {repo_dir}.'
                 )
                 raise ValueError(msg)
             self._read_skill_manifest_file(skill_manifest)
@@ -416,14 +367,11 @@ class SkillRegistry:
         return manifest
 
     def _detect_source_kind(self, repo_dir: Path) -> str:
-        if (repo_dir / 'skills.yaml').exists():
+        if (repo_dir / 'skills-channel.yaml').exists():
             return 'channel'
-        if (repo_dir / 'hiperhealth.yaml').exists():
-            return 'legacy'
         msg = (
-            f'Cannot register {repo_dir}. Expected skills.yaml for a channel '
-            'repository or hiperhealth.yaml for a legacy single-skill '
-            'repository.'
+            f'Cannot register {repo_dir}. Expected skills-channel.yaml at the '
+            'channel root.'
         )
         raise ValueError(msg)
 
@@ -485,10 +433,42 @@ class SkillRegistry:
         return 'local'
 
     def _looks_like_git_source(self, source: str) -> bool:
-        path = Path(source)
-        return path.exists() or source.startswith(
+        return source.startswith(
             ('https://', 'http://', 'git@', 'ssh://', 'file://')
         )
+
+    def _copy_source_tree(self, source_dir: Path, target_dir: Path) -> None:
+        if target_dir.exists():
+            shutil.rmtree(target_dir)
+        shutil.copytree(source_dir, target_dir)
+
+    def _materialize_channel_source(
+        self, source: str, target_dir: Path, ref: str | None = None
+    ) -> tuple[str, bool]:
+        source_path = Path(source).expanduser()
+        if source_path.exists():
+            if not source_path.is_dir():
+                msg = (
+                    f'Cannot register channel from {source!r}. Provide a '
+                    'directory path or a Git URL.'
+                )
+                raise ValueError(msg)
+            if ref is not None:
+                msg = 'ref is only supported for remote git sources.'
+                raise ValueError(msg)
+            resolved_source = source_path.resolve()
+            self._copy_source_tree(resolved_source, target_dir)
+            return str(resolved_source), True
+
+        if not self._looks_like_git_source(source):
+            msg = (
+                f'Cannot register channel from {source!r}. Provide a local '
+                'directory path or a Git URL.'
+            )
+            raise ValueError(msg)
+
+        self._clone_repo(source, target_dir, ref=ref)
+        return source, False
 
     def _clone_repo(
         self, source: str, target_dir: Path, ref: str | None = None
@@ -501,13 +481,22 @@ class SkillRegistry:
             )
 
     def _current_commit(self, repo_dir: Path) -> str:
-        return self._run_command(['git', 'rev-parse', 'HEAD'], cwd=repo_dir)
+        try:
+            return self._run_command(
+                ['git', 'rev-parse', 'HEAD'],
+                cwd=repo_dir,
+            )
+        except subprocess.CalledProcessError:
+            return ''
 
     def _current_ref(self, repo_dir: Path) -> str | None:
-        ref = self._run_command(
-            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-            cwd=repo_dir,
-        )
+        try:
+            ref = self._run_command(
+                ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                cwd=repo_dir,
+            )
+        except subprocess.CalledProcessError:
+            return None
         return None if ref == 'HEAD' else ref
 
     def _update_repo(self, repo_dir: Path, ref: str | None = None) -> str:
@@ -564,7 +553,7 @@ class SkillRegistry:
         if not self._builtin_dir.is_dir():
             return
         for child in sorted(self._builtin_dir.iterdir()):
-            manifest_path = child / 'hiperhealth.yaml'
+            manifest_path = child / 'skill.yaml'
             if manifest_path.exists():
                 yield child, self._read_skill_manifest_file(manifest_path)
 
@@ -587,7 +576,8 @@ class SkillRegistry:
         channel_manifest = self._read_channel_manifest(repo_dir)
         resolved: list[_ResolvedChannelSkill] = []
         for declared in channel_manifest.skills:
-            manifest_path = repo_dir / declared.manifest
+            skill_dir = self._skill_dir(repo_dir, declared.name)
+            manifest_path = self._skill_manifest_path(repo_dir, declared.name)
             manifest = self._read_skill_manifest_file(manifest_path)
             resolved.append(
                 _ResolvedChannelSkill(
@@ -597,8 +587,8 @@ class SkillRegistry:
                         canonical_id=_canonical_skill_id(
                             local_name, declared.name
                         ),
-                        path=declared.path,
-                        manifest_path=declared.manifest,
+                        path=str(skill_dir.relative_to(repo_dir)),
+                        manifest_path=str(manifest_path.relative_to(repo_dir)),
                         enabled=declared.enabled,
                         tags=list(declared.tags),
                     ),
@@ -652,42 +642,22 @@ class SkillRegistry:
         skill = cls()
         return self._normalize_loaded_skill(skill, record.id)
 
-    def _load_legacy_skill(self, record: InstalledSkillRecord) -> BaseSkill:
-        manifest_path = Path(record.manifest_path)
-        manifest = self._read_skill_manifest_file(manifest_path)
-        cls = _load_class_from_directory(
-            manifest_path.parent, manifest.entry_point
-        )
-        skill = cls()
-        return self._normalize_loaded_skill(skill, record.id)
-
     def add_channel(
         self,
         source: str,
         local_name: str | None = None,
         ref: str | None = None,
     ) -> str:
-        if not self._looks_like_git_source(source):
-            msg = (
-                f'Cannot register channel from {source!r}. Provide a git URL '
-                'or a local git repository path.'
-            )
-            raise ValueError(msg)
-
         self._ensure_storage_dirs()
         state = self._load_state()
         with tempfile.TemporaryDirectory() as tmp_dir:
             temp_repo = Path(tmp_dir) / 'repo'
-            self._clone_repo(source, temp_repo, ref=ref)
-            source_kind = self._detect_source_kind(temp_repo)
-            if source_kind != 'channel':
-                msg = (
-                    'The provided source is a legacy single-skill repository. '
-                    'Use install() for backward-compatible single-skill '
-                    'installs.'
-                )
-                raise ValueError(msg)
-
+            normalized_source, is_local = self._materialize_channel_source(
+                source,
+                temp_repo,
+                ref=ref,
+            )
+            self._detect_source_kind(temp_repo)
             channel_manifest = self._read_channel_manifest(temp_repo)
             resolved_name = self._resolve_local_name(
                 channel_manifest, local_name, state
@@ -701,9 +671,9 @@ class SkillRegistry:
 
         record = self._channel_record_from_repo(
             resolved_name,
-            source,
+            normalized_source,
             target_repo,
-            ref=ref,
+            ref=None if is_local else ref,
         )
         state.channels[resolved_name] = record
         self._save_state(state)
@@ -739,9 +709,23 @@ class SkillRegistry:
             msg = f'Channel {local_name!r} is not registered.'
             raise KeyError(msg)
 
-        target_ref = ref if ref is not None else channel.ref
         repo_dir = self._channel_repo_dir(local_name)
-        self._update_repo(repo_dir, ref=target_ref)
+        target_ref: str | None = None
+        if channel.provider == 'local':
+            if ref is not None:
+                msg = 'ref is only supported for remote git sources.'
+                raise ValueError(msg)
+            source_dir = Path(channel.source)
+            if not source_dir.is_dir():
+                msg = (
+                    f'Local channel source {channel.source!r} no longer '
+                    'exists.'
+                )
+                raise FileNotFoundError(msg)
+            self._copy_source_tree(source_dir, repo_dir)
+        else:
+            target_ref = ref if ref is not None else channel.ref
+            self._update_repo(repo_dir, ref=target_ref)
         refreshed_channel = self._channel_record_from_repo(
             local_name,
             channel.source,
@@ -761,8 +745,6 @@ class SkillRegistry:
                 continue
             available = available_map.get(skill_id)
             if available is None:
-                if record.artifact_path is not None:
-                    shutil.rmtree(record.artifact_path, ignore_errors=True)
                 state.skills.pop(skill_id, None)
                 continue
 
@@ -777,7 +759,6 @@ class SkillRegistry:
                 version=available.manifest.version,
                 source_commit=refreshed_channel.commit,
                 enabled=available.available.enabled,
-                source=channel.source,
             )
             updated.append(skill_id)
 
@@ -794,87 +775,11 @@ class SkillRegistry:
         for skill_id, record in list(state.skills.items()):
             if record.channel != local_name:
                 continue
-            if record.artifact_path is not None:
-                shutil.rmtree(record.artifact_path, ignore_errors=True)
             state.skills.pop(skill_id, None)
 
         shutil.rmtree(self._channel_dir(local_name), ignore_errors=True)
         state.channels.pop(local_name, None)
         self._save_state(state)
-
-    def install(self, source: str) -> str:
-        source_path = Path(source)
-        if source_path.is_dir():
-            return self._install_legacy_from_path(source_path, source)
-
-        if self._looks_like_git_source(source):
-            with tempfile.TemporaryDirectory() as tmp_dir:
-                temp_repo = Path(tmp_dir) / 'repo'
-                self._clone_repo(source, temp_repo)
-                return self._install_legacy_from_path(temp_repo, source)
-
-        msg = (
-            f'Cannot install from {source!r}. Provide a local directory path '
-            'or a Git URL.'
-        )
-        raise ValueError(msg)
-
-    def _install_legacy_from_path(
-        self, source_path: Path, source_str: str
-    ) -> str:
-        if (
-            not (source_path / 'skills.yaml').exists()
-            and not (source_path / 'hiperhealth.yaml').exists()
-        ):
-            msg = (
-                f'No hiperhealth.yaml found in {source_path}. Every skill '
-                'project must include a hiperhealth.yaml metadata file.'
-            )
-            raise FileNotFoundError(msg)
-
-        source_kind = self._detect_source_kind(source_path)
-        if source_kind != 'legacy':
-            msg = (
-                'The provided source is a channel repository. '
-                'Use add_channel() '
-                'and install_skill() or install_channel() instead.'
-            )
-            raise ValueError(msg)
-
-        manifest = self._read_manifest(source_path)
-        state = self._load_state()
-        existing = state.skills.get(manifest.name)
-        if existing is not None and not existing.legacy:
-            msg = (
-                f'Skill id {manifest.name!r} already belongs to a registered '
-                'channel install.'
-            )
-            raise ValueError(msg)
-
-        self._ensure_storage_dirs()
-        target_dir = self._artifact_dir(manifest.name)
-        if target_dir.exists():
-            shutil.rmtree(target_dir)
-        shutil.copytree(source_path, target_dir)
-
-        installed_at = existing.installed_at if existing else _utcnow()
-        state.skills[manifest.name] = InstalledSkillRecord(
-            id=manifest.name,
-            skill_name=manifest.name,
-            manifest_path=str(target_dir / 'hiperhealth.yaml'),
-            installed_at=installed_at,
-            updated_at=_utcnow(),
-            version=manifest.version,
-            source=source_str,
-            artifact_path=str(target_dir),
-            legacy=True,
-        )
-        self._save_state(state)
-        self._install_dependencies(manifest.dependencies)
-        return manifest.name
-
-    def uninstall(self, name: str) -> None:
-        self.remove_skill(name)
 
     def list_skills(
         self,
@@ -894,7 +799,7 @@ class SkillRegistry:
                         channel=BUILTIN_CHANNEL,
                         skill_name=skill_name,
                         canonical_id=canonical_id,
-                        manifest_path=str(skill_dir / 'hiperhealth.yaml'),
+                        manifest_path=str(skill_dir / 'skill.yaml'),
                         installed=True,
                         enabled=True,
                         builtin=True,
@@ -934,26 +839,6 @@ class SkillRegistry:
                     )
                 )
 
-        for record in state.skills.values():
-            if not record.legacy:
-                continue
-            if channel is not None:
-                continue
-            manifest = self._read_skill_manifest_file(
-                Path(record.manifest_path)
-            )
-            summaries.append(
-                SkillSummary(
-                    **manifest.model_dump(),
-                    channel=None,
-                    skill_name=record.skill_name,
-                    canonical_id=record.id,
-                    manifest_path=record.manifest_path,
-                    installed=True,
-                    enabled=record.enabled,
-                )
-            )
-
         unique: dict[str, SkillSummary] = {
             summary.canonical_id: summary for summary in summaries
         }
@@ -974,13 +859,6 @@ class SkillRegistry:
             raise KeyError(msg)
 
         existing = state.skills.get(skill_id)
-        if existing is not None and existing.legacy:
-            msg = (
-                f'Skill id {skill_id!r} is already used by a legacy single-'
-                'skill install.'
-            )
-            raise ValueError(msg)
-
         channel = state.channels[available.available.channel]
         installed_at = existing.installed_at if existing else _utcnow()
         state.skills[skill_id] = InstalledSkillRecord(
@@ -993,7 +871,6 @@ class SkillRegistry:
             version=available.manifest.version,
             source_commit=channel.commit,
             enabled=available.available.enabled,
-            source=channel.source,
         )
         self._save_state(state)
         self._install_dependencies(available.manifest.dependencies)
@@ -1020,12 +897,6 @@ class SkillRegistry:
         if record is None:
             msg = f'Skill {skill_id!r} is not installed.'
             raise KeyError(msg)
-
-        if record.legacy:
-            if not record.source:
-                msg = f'Legacy skill {skill_id!r} has no update source.'
-                raise ValueError(msg)
-            return self.install(record.source)
 
         if record.channel is None:
             msg = f'Skill {skill_id!r} has no owning channel.'
@@ -1054,7 +925,6 @@ class SkillRegistry:
             version=available.manifest.version,
             source_commit=channel.commit,
             enabled=available.available.enabled,
-            source=channel.source,
         )
         self._save_state(state)
         self._install_dependencies(available.manifest.dependencies)
@@ -1071,8 +941,6 @@ class SkillRegistry:
             msg = f'Skill {skill_id!r} is not installed.'
             raise KeyError(msg)
 
-        if record.artifact_path is not None:
-            shutil.rmtree(record.artifact_path, ignore_errors=True)
         state.skills.pop(skill_id, None)
         self._save_state(state)
 
@@ -1088,8 +956,6 @@ class SkillRegistry:
         state = self._load_state()
         record = state.skills.get(name)
         if record is not None:
-            if record.legacy:
-                return self._load_legacy_skill(record)
             return self._load_channel_skill(record)
 
         if self._find_available_channel_skill(name) is not None:
@@ -1101,6 +967,7 @@ class SkillRegistry:
 
         msg = (
             f'Skill {name!r} not found. Use list_skills() to inspect '
-            'available skills and install_skill() or install() to add them.'
+            'available skills and install_skill() or install_channel() to add '
+            'them.'
         )
         raise KeyError(msg)

@@ -17,6 +17,8 @@ from hiperhealth.pipeline import (
     create_default_runner,
 )
 
+from tests.pipeline._registry_test_utils import create_channel_repo
+
 
 @pytest.fixture
 def tmp_registry(tmp_path: Path) -> SkillRegistry:
@@ -34,52 +36,8 @@ def tmp_registry(tmp_path: Path) -> SkillRegistry:
 
 
 @pytest.fixture
-def sample_skill_dir(tmp_path: Path) -> Path:
-    """
-    title: Create a minimal skill project directory for testing.
-    parameters:
-      tmp_path:
-        type: Path
-    returns:
-      type: Path
-    """
-    skill_dir = tmp_path / 'sample_skill'
-    skill_dir.mkdir()
-
-    yaml_content = (
-        'name: test.greeting\n'
-        'version: 1.0.0\n'
-        'entry_point: "skill:GreetingSkill"\n'
-        'stages:\n'
-        '  - screening\n'
-        'description: A test greeting skill.\n'
-    )
-    (skill_dir / 'hiperhealth.yaml').write_text(yaml_content)
-
-    skill_code = (
-        'from hiperhealth.pipeline import BaseSkill, SkillMetadata\n'
-        'from hiperhealth.pipeline.context import PipelineContext\n'
-        '\n'
-        '\n'
-        'class GreetingSkill(BaseSkill):\n'
-        '    def __init__(self):\n'
-        '        super().__init__(\n'
-        '            SkillMetadata(\n'
-        '                name="test.greeting",\n'
-        '                version="1.0.0",\n'
-        '                stages=("screening",),\n'
-        '                description="A test greeting skill.",\n'
-        '            )\n'
-        '        )\n'
-        '\n'
-        '    def execute(self, stage, ctx):\n'
-        '        name = ctx.patient.get("name", "Patient")\n'
-        '        ctx.extras["greeting"] = f"Welcome, {name}!"\n'
-        '        return ctx\n'
-    )
-    (skill_dir / 'skill.py').write_text(skill_code)
-
-    return skill_dir
+def channel_repo(tmp_path: Path) -> Path:
+    return create_channel_repo(tmp_path)
 
 
 class TestSkillManifest:
@@ -177,165 +135,6 @@ class TestSkillRegistryBuiltins:
             registry.load('nonexistent.skill')
 
 
-class TestSkillRegistryInstall:
-    """
-    title: Tests for installing skills from local paths.
-    """
-
-    def test_install_from_path(
-        self,
-        tmp_registry: SkillRegistry,
-        sample_skill_dir: Path,
-    ) -> None:
-        """
-        title: Installing a skill from a local path should copy it.
-        parameters:
-          tmp_registry:
-            type: SkillRegistry
-          sample_skill_dir:
-            type: Path
-        """
-        name = tmp_registry.install(str(sample_skill_dir))
-
-        assert name == 'test.greeting'
-        # Skill directory should exist in registry
-        assert (tmp_registry.registry_dir / 'test.greeting').is_dir()
-        # registry state should exist
-        assert (tmp_registry.root_dir / 'registry' / 'state.json').exists()
-
-    def test_installed_skill_appears_in_list(
-        self,
-        tmp_registry: SkillRegistry,
-        sample_skill_dir: Path,
-    ) -> None:
-        """
-        title: Installed skills should appear in list_skills.
-        parameters:
-          tmp_registry:
-            type: SkillRegistry
-          sample_skill_dir:
-            type: Path
-        """
-        tmp_registry.install(str(sample_skill_dir))
-        manifests = tmp_registry.list_skills()
-        names = [m.name for m in manifests]
-
-        assert 'test.greeting' in names
-
-    def test_load_installed_skill(
-        self,
-        tmp_registry: SkillRegistry,
-        sample_skill_dir: Path,
-    ) -> None:
-        """
-        title: Loading an installed skill should return an instance.
-        parameters:
-          tmp_registry:
-            type: SkillRegistry
-          sample_skill_dir:
-            type: Path
-        """
-        tmp_registry.install(str(sample_skill_dir))
-        skill = tmp_registry.load('test.greeting')
-
-        assert skill.metadata.name == 'test.greeting'
-        assert skill.metadata.version == '1.0.0'
-
-    def test_installed_skill_executes(
-        self,
-        tmp_registry: SkillRegistry,
-        sample_skill_dir: Path,
-    ) -> None:
-        """
-        title: An installed skill should execute correctly in a runner.
-        parameters:
-          tmp_registry:
-            type: SkillRegistry
-          sample_skill_dir:
-            type: Path
-        """
-        tmp_registry.install(str(sample_skill_dir))
-        skill = tmp_registry.load('test.greeting')
-
-        runner = StageRunner(skills=[skill])
-        ctx = PipelineContext(patient={'name': 'Alice'})
-        ctx = runner.run(Stage.SCREENING, ctx)
-
-        assert ctx.extras['greeting'] == 'Welcome, Alice!'
-
-    def test_uninstall_removes_skill(
-        self,
-        tmp_registry: SkillRegistry,
-        sample_skill_dir: Path,
-    ) -> None:
-        """
-        title: Uninstalling a skill should remove it from the registry.
-        parameters:
-          tmp_registry:
-            type: SkillRegistry
-          sample_skill_dir:
-            type: Path
-        """
-        tmp_registry.install(str(sample_skill_dir))
-        tmp_registry.uninstall('test.greeting')
-
-        assert not (tmp_registry.registry_dir / 'test.greeting').exists()
-        with pytest.raises(KeyError):
-            tmp_registry.load('test.greeting')
-
-    def test_reinstall_overwrites(
-        self,
-        tmp_registry: SkillRegistry,
-        sample_skill_dir: Path,
-    ) -> None:
-        """
-        title: Re-installing a skill should overwrite the previous version.
-        parameters:
-          tmp_registry:
-            type: SkillRegistry
-          sample_skill_dir:
-            type: Path
-        """
-        tmp_registry.install(str(sample_skill_dir))
-        tmp_registry.install(str(sample_skill_dir))
-
-        # Should still work fine
-        skill = tmp_registry.load('test.greeting')
-        assert skill.metadata.name == 'test.greeting'
-
-    def test_install_invalid_source_raises(
-        self,
-        tmp_registry: SkillRegistry,
-    ) -> None:
-        """
-        title: Installing from an invalid source should raise ValueError.
-        parameters:
-          tmp_registry:
-            type: SkillRegistry
-        """
-        with pytest.raises(ValueError, match='Cannot install'):
-            tmp_registry.install('not-a-path-or-url')
-
-    def test_install_missing_yaml_raises(
-        self,
-        tmp_registry: SkillRegistry,
-        tmp_path: Path,
-    ) -> None:
-        """
-        title: Installing a dir without hiperhealth.yaml should raise.
-        parameters:
-          tmp_registry:
-            type: SkillRegistry
-          tmp_path:
-            type: Path
-        """
-        empty_dir = tmp_path / 'empty_skill'
-        empty_dir.mkdir()
-
-        with pytest.raises(FileNotFoundError, match=r'hiperhealth\.yaml'):
-            tmp_registry.install(str(empty_dir))
-
-
 class TestStageRunnerRegister:
     """
     title: Tests for StageRunner.register() integration with registry.
@@ -368,46 +167,48 @@ class TestStageRunnerRegister:
     def test_register_installed_skill(
         self,
         tmp_registry: SkillRegistry,
-        sample_skill_dir: Path,
+        channel_repo: Path,
     ) -> None:
         """
         title: register() should load an externally installed skill.
         parameters:
           tmp_registry:
             type: SkillRegistry
-          sample_skill_dir:
+          channel_repo:
             type: Path
         """
-        tmp_registry.install(str(sample_skill_dir))
+        tmp_registry.add_channel(str(channel_repo))
+        tmp_registry.install_skill('tm.ayurveda')
 
         runner = StageRunner(registry=tmp_registry)
-        runner.register('test.greeting')
+        runner.register('tm.ayurveda')
 
         assert len(runner.skills) == 1
-        assert runner.skills[0].metadata.name == 'test.greeting'
+        assert runner.skills[0].metadata.name == 'tm.ayurveda'
 
     def test_register_and_run(
         self,
         tmp_registry: SkillRegistry,
-        sample_skill_dir: Path,
+        channel_repo: Path,
     ) -> None:
         """
         title: A registered skill should execute in the pipeline.
         parameters:
           tmp_registry:
             type: SkillRegistry
-          sample_skill_dir:
+          channel_repo:
             type: Path
         """
-        tmp_registry.install(str(sample_skill_dir))
+        tmp_registry.add_channel(str(channel_repo))
+        tmp_registry.install_skill('tm.ayurveda')
 
         runner = StageRunner(registry=tmp_registry)
-        runner.register('test.greeting')
+        runner.register('tm.ayurveda')
 
         ctx = PipelineContext(patient={'name': 'Bob'})
-        ctx = runner.run(Stage.SCREENING, ctx)
+        ctx = runner.run(Stage.TREATMENT, ctx)
 
-        assert ctx.extras['greeting'] == 'Welcome, Bob!'
+        assert ctx.extras['ayurveda'] == 'warm herbs'
 
 
 class TestCreateDefaultRunnerWithRegistry:
@@ -451,7 +252,7 @@ class TestCreateDefaultRunnerWithRegistry:
 
 class TestReadManifest:
     """
-    title: Tests for reading hiperhealth.yaml manifest files.
+    title: Tests for reading skill.yaml manifest files.
     """
 
     def test_read_builtin_manifests(self) -> None:

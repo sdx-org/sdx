@@ -19,7 +19,6 @@ from pydantic import ValidationError
 from ._registry_test_utils import (
     bump_channel_skill_version,
     create_channel_repo,
-    create_legacy_repo,
     write_file,
 )
 
@@ -37,11 +36,11 @@ def channel_repo(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def legacy_repo(tmp_path: Path) -> Path:
-    return create_legacy_repo(tmp_path)
+def channel_folder(tmp_path: Path) -> Path:
+    return create_channel_repo(tmp_path / 'folder-source', use_git=False)
 
 
-def test_parse_valid_skills_yaml(
+def test_parse_valid_skills_channel_yaml(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
@@ -56,12 +55,12 @@ def test_parse_valid_skills_yaml(
     ]
 
 
-def test_reject_invalid_skills_yaml(
+def test_reject_invalid_skills_channel_yaml(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
     write_file(
-        channel_repo / 'skills.yaml',
+        channel_repo / 'skills-channel.yaml',
         """
         api_version: 1
         skills: []
@@ -77,7 +76,7 @@ def test_reject_duplicate_skill_names_within_channel(
     channel_repo: Path,
 ) -> None:
     write_file(
-        channel_repo / 'skills.yaml',
+        channel_repo / 'skills-channel.yaml',
         """
         api_version: 1
         channel:
@@ -85,11 +84,7 @@ def test_reject_duplicate_skill_names_within_channel(
           default_alias: tm
         skills:
           - name: ayurveda
-            path: skills/ayurveda
-            manifest: skills/ayurveda/hiperhealth.yaml
           - name: ayurveda
-            path: skills/nutrition
-            manifest: skills/nutrition/hiperhealth.yaml
         """,
     )
 
@@ -101,9 +96,9 @@ def test_reject_missing_per_skill_manifest(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
-    (channel_repo / 'skills' / 'nutrition' / 'hiperhealth.yaml').unlink()
+    (channel_repo / 'skills' / 'nutrition' / 'skill.yaml').unlink()
 
-    with pytest.raises(ValueError, match='Declared manifest'):
+    with pytest.raises(ValueError, match='expected manifest'):
         registry._read_channel_manifest(channel_repo)
 
 
@@ -158,12 +153,33 @@ def test_register_channel_from_local_git_fixture(
 
     assert local_name == 'tm'
     assert (
-        registry.root_dir / 'channels' / 'tm' / 'repo' / 'skills.yaml'
+        registry.root_dir / 'channels' / 'tm' / 'repo' / 'skills-channel.yaml'
     ).exists()
     channel = registry.list_channels()[0]
     assert channel.source == str(channel_repo)
     assert channel.remote_name == 'traditional-medicine'
     assert channel.provider == 'local'
+
+
+def test_register_channel_from_plain_local_folder(
+    registry: SkillRegistry,
+    channel_folder: Path,
+) -> None:
+    local_name = registry.add_channel(str(channel_folder))
+
+    channel = registry.list_channels()[0]
+    assert local_name == 'tm'
+    assert channel.provider == 'local'
+    assert channel.source == str(channel_folder.resolve())
+    assert channel.commit == ''
+
+
+def test_reject_ref_for_local_folder_channel(
+    registry: SkillRegistry,
+    channel_folder: Path,
+) -> None:
+    with pytest.raises(ValueError, match='ref is only supported'):
+        registry.add_channel(str(channel_folder), ref='main')
 
 
 def test_install_one_skill_from_channel(
@@ -176,7 +192,7 @@ def test_install_one_skill_from_channel(
     assert installed == 'tm.ayurveda'
     state = registry._load_state()
     assert state.skills['tm.ayurveda'].manifest_path.endswith(
-        'skills/ayurveda/hiperhealth.yaml'
+        'skills/ayurveda/skill.yaml'
     )
 
     skill = registry.load('tm.ayurveda')
@@ -295,18 +311,3 @@ def test_load_skill_by_canonical_id_and_stage_runner(
 
     assert runner.skills[0].metadata.name == 'tm.nutrition'
     assert ctx.extras['nutrition'] == 'fiber first'
-
-
-def test_legacy_single_skill_repo_install_still_works(
-    registry: SkillRegistry,
-    legacy_repo: Path,
-) -> None:
-    installed = registry.install(str(legacy_repo))
-
-    assert installed == 'legacy.greeting'
-    skill = registry.load('legacy.greeting')
-    assert skill.metadata.name == 'legacy.greeting'
-    assert any(
-        summary.canonical_id == 'legacy.greeting'
-        for summary in registry.list_skills(installed_only=True)
-    )

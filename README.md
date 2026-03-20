@@ -282,19 +282,20 @@ Recommended channel layout:
 
 ```text
 channel-repo/
-├── skills.yaml
+├── skills-channel.yaml
 └── skills/
     ├── ayurveda/
-    │   ├── hiperhealth.yaml
+    │   ├── skill.yaml
     │   └── skill.py
     └── nutrition/
-        ├── hiperhealth.yaml
+        ├── skill.yaml
         └── skill.py
 ```
 
-The root `skills.yaml` declares which folders are installable. Each individual
-skill keeps its own `hiperhealth.yaml`. See [Creating Skills](docs/skills.md)
-for the full schema, examples, and repository guidance.
+The root `skills-channel.yaml` declares which skill folders are installable.
+Each individual skill keeps its own `skill.yaml`. See
+[Creating Skills](docs/skills.md) for the full schema, examples, and repository
+guidance.
 
 CLI commands map directly to the same API:
 
@@ -307,8 +308,8 @@ hiperhealth skill list --channel tm
 
 The complete reference lives in [Creating Skills](docs/skills.md), including
 channel update and removal flows, `--ref` and `--include-disabled` options,
-source-detection rules, local alias rules, and legacy single-skill
-compatibility.
+source-detection rules, local alias rules, and local-folder versus remote-git
+channel behavior.
 
 Notebook and script workflows use the same registry object, so the same channel
 and skill operations work from Jupyter as well.
