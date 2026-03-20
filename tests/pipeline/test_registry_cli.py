@@ -95,6 +95,32 @@ def test_channel_skills(
     ]
 
 
+def test_channel_update(
+    registry_dir: Path,
+    channel_repo: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    run_cli(registry_dir, capsys, 'channel', 'add', str(channel_repo))
+    run_cli(registry_dir, capsys, 'skill', 'install', 'tm.ayurveda')
+    bump_channel_skill_version(channel_repo, 'ayurveda', '0.2.0')
+
+    stdout = run_cli(registry_dir, capsys, 'channel', 'update', 'tm')
+    listing = json.loads(
+        run_cli(
+            registry_dir,
+            capsys,
+            'skill',
+            'list',
+            '--channel',
+            'tm',
+            '--installed-only',
+        )
+    )
+
+    assert json.loads(stdout) == ['tm.ayurveda']
+    assert listing[0]['version'] == '0.2.0'
+
+
 def test_skill_list(
     registry_dir: Path,
     channel_repo: Path,
