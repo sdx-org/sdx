@@ -42,9 +42,7 @@ class UnsafeOutputError(ValueError):
         description: Detected (label, score) pairs that exceeded the threshold.
     """
 
-    def __init__(
-        self, message: str, hits: list[tuple[str, float]]
-    ) -> None:
+    def __init__(self, message: str, hits: list[tuple[str, float]]) -> None:
         super().__init__(message)
         self.hits = hits
 
@@ -122,8 +120,7 @@ def detect_banned_topics(
         description: HF model name; env HIPERHEALTH_SAFETY_MODEL.
       hypothesis_template:
         type: str | None
-        description: |-
-          NLI hypothesis template; env HIPERHEALTH_SAFETY_HYP_TEMPLATE.
+        description: NLI template; env HIPERHEALTH_SAFETY_HYP_TEMPLATE.
     returns:
       type: list[tuple[str, float]]
       description: Detected hits above threshold.
@@ -157,8 +154,7 @@ def detect_banned_topics(
 
 def check_output_safety(obj: LLMDiagnosis) -> None:
     """
-    title: |-
-      Validate *obj* against banned topics; raise UnsafeOutputError on hit.
+    title: Validate obj against banned topics; raise UnsafeOutputError on hit.
     summary: |-
       Combines summary and options into a single text block, runs zero-shot
       MNLI classification, and raises UnsafeOutputError if any banned topic
