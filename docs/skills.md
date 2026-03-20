@@ -433,6 +433,64 @@ registry.update_skill('tm.ayurveda')
 registry.remove_skill('tm.ayurveda')
 ```
 
+### Channel registration and source detection
+
+`SkillRegistry.add_channel()` accepts local git paths, GitHub URLs, GitLab URLs,
+and generic git URLs. The repository root is interpreted with these rules:
+
+- If the repo root contains `skills.yaml`, it is treated as a channel.
+- If the repo root contains `hiperhealth.yaml`, it is treated as a legacy
+  single-skill repository and should be installed with `registry.install(...)`.
+- If neither file exists at the repo root, registration fails with a validation
+  error.
+
+Local channel aliases follow these rules:
+
+- `local_name` can be provided explicitly, or derived from
+  `channel.default_alias`, or finally from `channel.name`.
+- Local aliases must be unique within the local registry.
+- Local aliases may contain letters, numbers, `_`, and `-`.
+- Local aliases cannot contain `.` because canonical skill ids use
+  `<local_name>.<skill_name>`.
+- The alias `hiperhealth` is reserved for built-in skills.
+
+### Full Python API
+
+The public registry API is intended to be comfortable in scripts and notebooks:
+
+```python
+from hiperhealth.pipeline import SkillRegistry
+
+registry = SkillRegistry()
+
+registry.add_channel(
+    'https://github.com/my-org/traditional-medicine.git',
+    local_name='tm',
+    ref='main',
+)
+
+registry.list_channels()
+registry.list_channel_skills('tm')
+registry.update_channel('tm')
+registry.update_channel('tm', ref='main')
+registry.remove_channel('tm')
+
+registry.list_skills()
+registry.list_skills(channel='tm')
+registry.list_skills(channel='tm', installed_only=True)
+
+registry.install_skill('tm.ayurveda')
+registry.install_channel('tm')
+registry.install_channel('tm', include_disabled=True)
+registry.update_skill('tm.ayurveda')
+registry.update_skill('tm.ayurveda', pull_channel=True)
+registry.remove_skill('tm.ayurveda')
+registry.load('tm.ayurveda')
+```
+
+`install()`, `uninstall()`, and legacy single-skill loading are still available
+for repositories whose root contains `hiperhealth.yaml` directly.
+
 `StageRunner.register()` uses the same canonical ids:
 
 ```python
@@ -442,6 +500,17 @@ runner = create_default_runner()
 runner.register('tm.ayurveda', index=0)
 ```
 
+Built-in skills continue to use the built-in canonical ids:
+
+```python
+runner.register('hiperhealth.privacy')
+runner.register('hiperhealth.extraction')
+runner.register('hiperhealth.diagnostics')
+```
+
+External channel skills must be installed before `load()` or
+`StageRunner.register()` can activate them.
+
 ### CLI
 
 The CLI is a thin wrapper over the same registry API:
@@ -450,12 +519,43 @@ The CLI is a thin wrapper over the same registry API:
 hiperhealth channel add https://github.com/my-org/traditional-medicine.git --name tm
 hiperhealth channel list
 hiperhealth channel skills tm
+hiperhealth channel update tm
+hiperhealth channel update tm --ref main
+hiperhealth channel remove tm
 hiperhealth channel install tm --all
+hiperhealth channel install tm --all --include-disabled
 hiperhealth skill list --channel tm
 hiperhealth skill install tm.ayurveda
 hiperhealth skill update tm.ayurveda --pull
 hiperhealth skill remove tm.ayurveda
 ```
+
+### Update semantics
+
+Channel and skill updates are intentionally separate:
+
+- `registry.update_channel('tm')` pulls the channel checkout forward and
+  refreshes every currently installed skill from that channel.
+- `registry.update_skill('tm.ayurveda')` refreshes one installed skill against
+  the current local checkout of channel `tm` without pulling new git changes.
+- `registry.update_skill('tm.ayurveda', pull_channel=True)` first refreshes the
+  owning channel checkout, then updates the installed skill metadata.
+- `hiperhealth channel update tm` is the CLI equivalent of
+  `registry.update_channel('tm')`.
+- `hiperhealth skill update tm.ayurveda --pull` is the CLI equivalent of
+  `registry.update_skill('tm.ayurveda', pull_channel=True)`.
+
+### Validation and error behavior
+
+The registry enforces these rules:
+
+- All skill names in a channel must be unique within that channel.
+- Every declared `path` in `skills.yaml` must exist.
+- Every declared `manifest` in `skills.yaml` must exist.
+- Each declared skill manifest must be a valid `hiperhealth.yaml`.
+- Built-in skills cannot be installed or removed with channel skill commands.
+- Channel skill operations use canonical ids such as `tm.ayurveda`.
+- Skill names only need to be unique within a channel, not globally.
 
 ### Local storage layout
 
@@ -474,6 +574,21 @@ hiperhealth skill remove tm.ayurveda
     └── skills/
         └── legacy.greeting/
 ```
+
+Each registered channel keeps a single cloned checkout under
+`~/.hiperhealth/channels/<local_name>/repo`. Installed channel skills reference
+that checkout instead of copying the full repository per skill.
+
+### Backward compatibility
+
+Legacy single-skill repositories are still supported:
+
+- If the repository root contains `hiperhealth.yaml`, `registry.install(...)`
+  installs it as a single skill.
+- If the repository root contains `skills.yaml`, use `registry.add_channel(...)`
+  and the channel-based APIs instead.
+- Legacy installed skills keep using their own skill id rather than a
+  channel-based canonical id.
 
 ## Using the runner
 

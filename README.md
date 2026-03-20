@@ -305,6 +305,11 @@ hiperhealth skill install tm.ayurveda
 hiperhealth skill list --channel tm
 ```
 
+The complete reference lives in [Creating Skills](docs/skills.md), including
+channel update and removal flows, `--ref` and `--include-disabled` options,
+source-detection rules, local alias rules, and legacy single-skill
+compatibility.
+
 Notebook and script workflows use the same registry object, so the same channel
 and skill operations work from Jupyter as well.
 
