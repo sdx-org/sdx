@@ -2859,6 +2859,10 @@ parquet-backed event log — every action is recorded as a row.</p>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">session_path</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">)</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">runner</span> <span class="o">=</span> <span class="n">create_default_runner</span><span class="p">()</span>
 </code></pre></div>
+<p>This walkthrough intentionally uses only the built-in hiperhealth skills. Once
+you register a custom channel skill, it participates in the same
+session-and-runner workflow. An optional appendix near the end shows the
+channel-based setup and how to compare a run with and without a specific skill.</p>
 <h2 id="stage-1-screening">Stage 1 — Screening<a class="headerlink" href="#stage-1-screening" title="Permanent link">&para;</a></h2>
 <p>The screening stage performs initial triage and de-identifies any PII in the
 patient record. The clinical system provides data without personally
@@ -2918,32 +2922,26 @@ requirement checking cycle: assess → provide → execute.</p>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="k">if</span> <span class="n">inq</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    → </span><span class="si">{</span><span class="n">inq</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="language-text highlight"><pre><span></span><code>Total inquiries: 12
+<div class="language-text highlight"><pre><span></span><code>Total inquiries: 9
 
-  [required] vital_signs: Vital Signs (BP, HR, RR, Temperature)
-    → Baseline vital signs needed to assess current status and inflammation
-  [required] height: Height
-    → Needed to calculate BMI
-  [required] weight: Weight
-    → Current weight for BMI calculation
+  [required] vital_signs: Vital Signs
+    → Current temperature, blood pressure, heart rate, respiratory rate, weight, and height to assess baseline status.
+  [required] recent_weight_change: Recent Weight Change
+    → Amount and time frame of weight loss or gain to evaluate for malabsorption or nutritional deficiency.
   [required] stool_characteristics: Stool Characteristics
-    → Frequency, consistency, presence of blood or mucus to characterize diarrhea
-  [supplementary] weight_change: Weight Change
-    → Recent weight loss or gain associated with symptoms
-  [supplementary] medication_supplements: Over-the-Counter Medications &amp; Supplements
-    → Identify any additional medications or supplements that may contribute to symptoms
-  [supplementary] smoking_history: Smoking History
-    → Assess risk factors related to smoking
-  [supplementary] alcohol_use: Alcohol Use
-    → Quantity and frequency of alcohol intake
-  [supplementary] family_history_gi: Family History of Gastrointestinal/Autoimmune Disease
-    → Assess genetic predisposition to conditions like celiac disease or IBD
-  [supplementary] constitutional_symptoms: Constitutional Symptoms
-    → Presence of fever, night sweats, or other systemic symptoms
-  [deferred] travel_history: Travel History
-    → Recent travel to areas with risk of infectious causes of diarrhea
-  [deferred] menstrual_history: Menstrual and Reproductive History
-    → Evaluate hormonal factors or correlation with symptoms
+    → Frequency, consistency, and presence of blood or mucus in stools to characterize diarrhea.
+  [supplementary] family_history: Family Medical History
+    → Family history of celiac disease, inflammatory bowel disease, colorectal cancer, or other gastrointestinal disorders.
+  [supplementary] social_history: Social History
+    → Tobacco and alcohol use, dietary habits beyond gluten and dairy, occupational exposures, and recent travel history.
+  [supplementary] additional_past_medical_history: Additional Past Medical History
+    → Other chronic conditions, surgeries, or hospitalizations not yet described.
+  [supplementary] current_medications_and_supplements: Current Medications and Supplements
+    → All prescription, over-the-counter medications, and supplements to assess potential contributors.
+  [supplementary] systemic_symptoms: Systemic Symptoms
+    → Presence of fevers, night sweats, joint pains, rashes, or other systemic manifestations.
+  [deferred] sexual_history: Sexual History
+    → Information on sexual activity and practices relevant to gastrointestinal infections.
 </code></pre></div>
 <h3 id="provide-answers-to-the-inquiries">Provide answers to the inquiries<a class="headerlink" href="#provide-answers-to-the-inquiries" title="Permanent link">&para;</a></h3>
 <p>The clinical system collects answers from the patient or provider and feeds them
@@ -3004,8 +3002,8 @@ yet ordered) are skipped for now.</p>
 <a id="__codelineno-6-51" name="__codelineno-6-51" href="#__codelineno-6-51"></a><span class="k">if</span> <span class="n">unanswered</span><span class="p">:</span>
 <a id="__codelineno-6-52" name="__codelineno-6-52" href="#__codelineno-6-52"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not in answer bank (skipped): </span><span class="si">{</span><span class="n">unanswered</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="language-text highlight"><pre><span></span><code>Answered 1 inquiries: [&#39;vital_signs&#39;]
-Not in answer bank (skipped): [&#39;height&#39;, &#39;weight&#39;, &#39;stool_characteristics&#39;, &#39;weight_change&#39;, &#39;medication_supplements&#39;, &#39;smoking_history&#39;, &#39;alcohol_use&#39;, &#39;family_history_gi&#39;, &#39;constitutional_symptoms&#39;]
+<div class="language-text highlight"><pre><span></span><code>Answered 3 inquiries: [&#39;vital_signs&#39;, &#39;family_history&#39;, &#39;social_history&#39;]
+Not in answer bank (skipped): [&#39;recent_weight_change&#39;, &#39;stool_characteristics&#39;, &#39;additional_past_medical_history&#39;, &#39;current_medications_and_supplements&#39;, &#39;systemic_symptoms&#39;]
 </code></pre></div>
 <h3 id="run-preliminary-diagnosis">Run preliminary diagnosis<a class="headerlink" href="#run-preliminary-diagnosis" title="Permanent link">&para;</a></h3>
 <p>This is a first-pass diagnosis with available data. Deferred information (like
@@ -3022,7 +3020,7 @@ stool analysis or zonulin levels) is not yet available.</p>
 </code></pre></div>
 <div class="language-text highlight"><pre><span></span><code>Preliminary diagnosis complete.
 
-Results: {&#39;summary&#39;: &#39;A 38-year-old female with a history of IBS presents with 6 months of postprandial bloating, abdominal discomfort, intermittent diarrhea, fatigue, and brain fog exacerbated by gluten and dairy. Laboratory findings of mild inflammation and iron and vitamin D deficiencies raise concern for underlying malabsorption.&#39;, &#39;options&#39;: [&#39;Celiac disease&#39;, &#39;Lactose intolerance&#39;, &#39;Non-celiac gluten sensitivity&#39;, &#39;Small intestinal bacterial overgrowth&#39;, &#39;Exocrine pancreatic insufficiency&#39;, &#39;Irritable bowel syndrome exacerbation&#39;, &#39;Inflammatory bowel disease&#39;]}
+Results: {&#39;summary&#39;: &#39;A 38-year-old female with a history of IBS presents with six months of postprandial bloating, abdominal discomfort, intermittent diarrhea, fatigue, and brain fog, exacerbated by gluten and dairy. Labs reveal mild inflammation, low vitamin D, and ferritin, with a family history of celiac disease, suggesting a malabsorptive or inflammatory etiology.&#39;, &#39;options&#39;: [&#39;Celiac disease&#39;, &#39;Non-celiac gluten sensitivity&#39;, &#39;Lactose intolerance&#39;, &#39;Small intestinal bacterial overgrowth&#39;, &#39;Irritable bowel syndrome with diarrhea&#39;, &#39;Inflammatory bowel disease&#39;, &#39;Pancreatic exocrine insufficiency&#39;]}
 </code></pre></div>
 <h2 id="stage-4-exam">Stage 4 — Exam<a class="headerlink" href="#stage-4-exam" title="Permanent link">&para;</a></h2>
 <p>The exam stage suggests laboratory tests and procedures based on the preliminary
@@ -3039,7 +3037,7 @@ diagnosis. This is where the system requests the deferred data.</p>
 </code></pre></div>
 <div class="language-text highlight"><pre><span></span><code>Exam suggestions complete.
 
-Results: {&#39;summary&#39;: &#39;The differential includes immune‐mediated mucosal injury (celiac disease, non‐celiac gluten sensitivity), enzyme deficiencies (lactase, pancreatic), microbial overgrowth (SIBO), functional disorder (IBS), and organic inflammation (IBD). Targeted serologies, breath tests, stool assays, and endoscopic evaluation can distinguish these etiologies and guide management.&#39;, &#39;options&#39;: [&#39;Serologic testing for tissue transglutaminase IgA and total IgA&#39;, &#39;Anti‐endomysial antibody assay&#39;, &#39;Upper endoscopy with duodenal biopsy&#39;, &#39;Lactose hydrogen breath test&#39;, &#39;Glucose or lactulose breath test for SIBO&#39;, &#39;Fecal elastase level&#39;, &#39;Stool calprotectin&#39;, &#39;Colonoscopy with ileal and colonic biopsies&#39;, &#39;CRP and ESR inflammatory markers&#39;, &#39;Gluten‐free and lactose elimination diet trial&#39;]}
+Results: {&#39;summary&#39;: &#39;To distinguish among celiac disease, non-celiac gluten sensitivity, lactose intolerance, small intestinal bacterial overgrowth, IBS-D, inflammatory bowel disease, and pancreatic exocrine insufficiency, a combination of serologic, genetic, endoscopic, breath, and stool tests is recommended.&#39;, &#39;options&#39;: [&#39;Serum IgA tissue transglutaminase antibody&#39;, &#39;Serum IgA anti‐endomysial antibody&#39;, &#39;Total serum IgA level&#39;, &#39;HLA-DQ2/DQ8 genotyping&#39;, &#39;Upper endoscopy with duodenal biopsy&#39;, &#39;Lactose hydrogen breath test&#39;, &#39;Lactulose breath test for SIBO&#39;, &#39;Colonoscopy with biopsies&#39;, &#39;Fecal calprotectin&#39;, &#39;Fecal elastase&#39;]}
 </code></pre></div>
 <h2 id="multi-visit-gap-lab-results-arrive">Multi-visit gap — Lab results arrive<a class="headerlink" href="#multi-visit-gap-lab-results-arrive" title="Permanent link">&para;</a></h2>
 <p>In a real clinical workflow, days or weeks may pass while lab work is performed.
@@ -3094,11 +3092,11 @@ clinical picture. The runner uses all accumulated data.</p>
 <a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="k">else</span><span class="p">:</span>
 <a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Results: </span><span class="si">{</span><span class="n">diagnosis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="language-text highlight"><pre><span></span><code>Remaining deferred inquiries: 1
+<div class="language-text highlight"><pre><span></span><code>Remaining deferred inquiries: 3
 
 Enriched diagnosis complete (with lab results).
 
-Results: {&#39;summary&#39;: &#39;A 38-year-old woman with a history of IBS presents with six months of postprandial bloating, abdominal discomfort, fatigue, brain fog, and intermittent diarrhea exacerbated by gluten and dairy. Laboratory and stool analyses reveal elevated intestinal permeability, increased zonulin and calprotectin, low secretory IgA, and vitamin D deficiency, suggesting an immune-mediated gut barrier dysfunction.&#39;, &#39;options&#39;: [&#39;Celiac disease&#39;, &#39;Non-celiac gluten sensitivity&#39;, &#39;Lactose intolerance&#39;, &#39;Irritable bowel syndrome exacerbation&#39;, &#39;Small intestinal bacterial overgrowth&#39;]}
+Results: {&#39;summary&#39;: &#39;A 38-year-old female with a history of IBS presents with chronic postprandial bloating, abdominal discomfort, intermittent diarrhea, fatigue, and brain fog worsened by gluten and dairy, alongside mild inflammatory markers and increased intestinal permeability. Elevated zonulin, positive IgG reactivity to gluten and casein, low secretory IgA, and family history of celiac disease suggest a gluten-mediated enteropathy or related gut dysfunction.&#39;, &#39;options&#39;: [&#39;Celiac disease&#39;, &#39;Non-celiac gluten sensitivity&#39;, &#39;Irritable bowel syndrome (diarrhea-predominant)&#39;, &#39;Small intestinal bacterial overgrowth (SIBO)&#39;, &#39;Lactose intolerance&#39;, &#39;Microscopic colitis&#39;]}
 </code></pre></div>
 <h2 id="stage-5-treatment">Stage 5 — Treatment<a class="headerlink" href="#stage-5-treatment" title="Permanent link">&para;</a></h2>
 <p>The treatment stage generates a plan based on the enriched diagnosis.</p>
@@ -3163,11 +3161,11 @@ Results: {}
 <a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pending inquiries: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">pending_inquiries</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-<div class="language-text highlight"><pre><span></span><code>Session file: /tmp/tmp1dwe6i9k/gut-leak-visit.parquet
+<div class="language-text highlight"><pre><span></span><code>Session file: /tmp/tmp1e2iz9tw/gut-leak-visit.parquet
 Language: en
 Stages completed: [&#39;screening&#39;, &#39;intake&#39;, &#39;diagnosis&#39;, &#39;exam&#39;, &lt;Stage.DIAGNOSIS: &#39;diagnosis&#39;&gt;, &lt;Stage.TREATMENT: &#39;treatment&#39;&gt;, &lt;Stage.PRESCRIPTION: &#39;prescription&#39;&gt;]
 Total events: 27
-Pending inquiries: 23
+Pending inquiries: 18
 </code></pre></div>
 <h3 id="clinical-data-accumulated">Clinical data accumulated<a class="headerlink" href="#clinical-data-accumulated" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -3186,7 +3184,9 @@ Pending inquiries: 23
   &quot;medical_history&quot;: &quot;Irritable bowel syndrome diagnosed 3 years ago&quot;,
   &quot;medications&quot;: &quot;Omeprazole 20mg daily&quot;,
   &quot;allergies&quot;: &quot;None known&quot;,
-  &quot;vital_signs&quot;: &quot;BP 118/72, HR 74, Temp 36.8\u00b0C, BMI 24.1&quot;
+  &quot;vital_signs&quot;: &quot;BP 118/72, HR 74, Temp 36.8\u00b0C, BMI 24.1&quot;,
+  &quot;family_history&quot;: &quot;Mother: celiac disease, hypothyroidism. Father: type 2 diabetes, hypertension. Sibling: no significant conditions.&quot;,
+  &quot;social_history&quot;: &quot;Non-smoker, occasional alcohol (1-2 drinks/week). Office worker, sedentary lifestyle.&quot;
 }
 </code></pre></div>
 <h3 id="event-log-with-polars">Event log with polars<a class="headerlink" href="#event-log-with-polars" title="Permanent link">&para;</a></h3>
@@ -3211,9 +3211,38 @@ Pending inquiries: 23
 <a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">session_path</span><span class="p">)</span>
 <a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;event_id&quot;</span><span class="p">,</span> <span class="s2">&quot;event_type&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">]]</span>
 </code></pre></div>
+<h2 id="optional-add-a-custom-channel-skill">Optional: Add a custom channel skill<a class="headerlink" href="#optional-add-a-custom-channel-skill" title="Permanent link">&para;</a></h2>
+<p>Custom skills are now distributed through channels. After registering a channel
+and installing one of its skills, you can register it on the same runner with
+its canonical id.</p>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">hiperhealth.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">SkillRegistry</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="n">registry</span> <span class="o">=</span> <span class="n">SkillRegistry</span><span class="p">()</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="n">registry</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    <span class="s2">&quot;https://github.com/my-org/traditional-medicine.git&quot;</span><span class="p">,</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>    <span class="n">local_name</span><span class="o">=</span><span class="s2">&quot;tm&quot;</span><span class="p">,</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="p">)</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="n">registry</span><span class="o">.</span><span class="n">install_skill</span><span class="p">(</span><span class="s2">&quot;tm.ayurveda&quot;</span><span class="p">)</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="n">runner</span> <span class="o">=</span> <span class="n">create_default_runner</span><span class="p">()</span>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="n">runner</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;tm.ayurveda&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="optional-compare-a-run-with-and-without-a-skill">Optional: Compare a run with and without a skill<a class="headerlink" href="#optional-compare-a-run-with-and-without-a-skill" title="Permanent link">&para;</a></h2>
+<p>For notebook experiments, the runner can temporarily disable one or more
+registered skills without uninstalling them. This is useful for side-by-side
+comparisons.</p>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">treatment_ctx</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">to_context</span><span class="p">()</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="n">with_skill</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">TREATMENT</span><span class="p">,</span> <span class="n">treatment_ctx</span><span class="p">)</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="k">with</span> <span class="n">runner</span><span class="o">.</span><span class="n">disabled</span><span class="p">({</span><span class="s2">&quot;tm.ayurveda&quot;</span><span class="p">}):</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>    <span class="n">without_skill</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">Stage</span><span class="o">.</span><span class="n">TREATMENT</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">to_context</span><span class="p">())</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="c1"># One-off calls can also use: disabled_skills={&quot;tm.ayurveda&quot;}</span>
+</code></pre></div>
 <h2 id="cleanup">Cleanup<a class="headerlink" href="#cleanup" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">session_dir</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">session_dir</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
 <p>This example demonstrated the full hiperhealth pipeline for a gut leak patient:</p>
@@ -3232,6 +3261,10 @@ Pending inquiries: 23
   priority levels (required, supplementary, deferred)</li>
 <li><strong>Multi-visit workflow</strong> — session persists across days; deferred data (lab
   results) arrives later and triggers a re-run</li>
+<li><strong>Channel skills</strong> — custom skills can be registered with canonical ids such
+  as <code class="language-python highlight"><span class="n">tm</span><span class="o">.</span><span class="n">ayurveda</span></code> and used in the same runner</li>
+<li><strong>A/B comparisons</strong> — <code class="language-python highlight"><span class="n">runner</span><span class="o">.</span><span class="n">disabled</span><span class="p">({</span><span class="o">...</span><span class="p">})</span></code> temporarily skips selected
+  skills without uninstalling them</li>
 <li><strong>Session persistence</strong> — parquet event log as single source of truth,
   queryable with polars/pandas/DuckDB</li>
 <li><strong>No PII</strong> — only clinical data in the session file; the external system maps
