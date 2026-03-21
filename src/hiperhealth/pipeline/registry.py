@@ -65,6 +65,11 @@ class ChannelManifest(BaseModel):
 
     @model_validator(mode='after')
     def _validate_skill_names(self) -> ChannelManifest:
+        """
+        title: Ensure declared channel skill names are unique.
+        returns:
+          type: ChannelManifest
+        """
         names = [skill.name for skill in self.skills]
         duplicates = sorted({name for name in names if names.count(name) > 1})
         if duplicates:
@@ -135,6 +140,14 @@ class _ResolvedChannelSkill:
 
 
 def _parse_yaml(path: Path) -> dict[str, Any]:
+    """
+    title: Parse a YAML file into a plain Python dictionary.
+    parameters:
+      path:
+        type: Path
+    returns:
+      type: dict[str, Any]
+    """
     import yaml
 
     with path.open(encoding='utf-8') as handle:
@@ -142,14 +155,37 @@ def _parse_yaml(path: Path) -> dict[str, Any]:
 
 
 def _utcnow() -> str:
+    """
+    title: Return the current UTC timestamp in ISO 8601 format.
+    returns:
+      type: str
+    """
     return datetime.now(timezone.utc).isoformat()
 
 
 def _canonical_skill_id(local_name: str, skill_name: str) -> str:
+    """
+    title: Build a canonical skill id from channel and skill names.
+    parameters:
+      local_name:
+        type: str
+      skill_name:
+        type: str
+    returns:
+      type: str
+    """
     return f'{local_name}.{skill_name}'
 
 
 def _split_entry_point(entry_point: str) -> tuple[str, str]:
+    """
+    title: Split a manifest entry point into module and class names.
+    parameters:
+      entry_point:
+        type: str
+    returns:
+      type: tuple[str, str]
+    """
     module_name, separator, class_name = entry_point.partition(':')
     if not separator or not module_name or not class_name:
         msg = (
@@ -162,6 +198,14 @@ def _split_entry_point(entry_point: str) -> tuple[str, str]:
 
 @contextmanager
 def _prepend_sys_path(path: Path) -> Iterator[None]:
+    """
+    title: Temporarily prepend a directory to sys.path.
+    parameters:
+      path:
+        type: Path
+    returns:
+      type: Iterator[None]
+    """
     value = str(path)
     sys.path.insert(0, value)
     try:
@@ -172,6 +216,16 @@ def _prepend_sys_path(path: Path) -> Iterator[None]:
 
 
 def _load_class_from_directory(skill_dir: Path, entry_point: str) -> type[Any]:
+    """
+    title: Load a skill class from a channel skill directory.
+    parameters:
+      skill_dir:
+        type: Path
+      entry_point:
+        type: str
+    returns:
+      type: type[Any]
+    """
     module_name, class_name = _split_entry_point(entry_point)
     root_module = module_name.split('.')[0]
     importlib.invalidate_caches()
@@ -190,6 +244,16 @@ def _load_class_from_directory(skill_dir: Path, entry_point: str) -> type[Any]:
 
 
 def _load_class_from_package(package_base: str, entry_point: str) -> type[Any]:
+    """
+    title: Load a built-in skill class from a package path.
+    parameters:
+      package_base:
+        type: str
+      entry_point:
+        type: str
+    returns:
+      type: type[Any]
+    """
     module_name, class_name = _split_entry_point(entry_point)
     module = importlib.import_module(f'{package_base}.{module_name}')
     cls = getattr(module, class_name)
@@ -201,6 +265,12 @@ def _load_class_from_package(package_base: str, entry_point: str) -> type[Any]:
 
 class SkillRegistry:
     def __init__(self, registry_dir: Path | None = None) -> None:
+        """
+        title: Initialize the channel-aware skill registry.
+        parameters:
+          registry_dir:
+            type: Path | None
+        """
         self._registry_dir = (
             registry_dir
             or Path.home() / '.hiperhealth' / 'artifacts' / 'skills'
@@ -218,18 +288,41 @@ class SkillRegistry:
 
     @property
     def registry_dir(self) -> Path:
+        """
+        title: Return the directory used for installed skill artifacts.
+        returns:
+          type: Path
+        """
         return self._registry_dir
 
     @property
     def root_dir(self) -> Path:
+        """
+        title: Return the root directory for registry state and channels.
+        returns:
+          type: Path
+        """
         return self._root_dir
 
     def _ensure_storage_dirs(self) -> None:
+        """
+        title: Create the on-disk directories required by the registry.
+        """
         self._state_dir.mkdir(parents=True, exist_ok=True)
         self._channels_dir.mkdir(parents=True, exist_ok=True)
         self._registry_dir.mkdir(parents=True, exist_ok=True)
 
     def _run_command(self, args: list[str], cwd: Path | None = None) -> str:
+        """
+        title: Run a subprocess command and return trimmed stdout.
+        parameters:
+          args:
+            type: list[str]
+          cwd:
+            type: Path | None
+        returns:
+          type: str
+        """
         completed = subprocess.run(
             args,
             check=True,
@@ -240,33 +333,105 @@ class SkillRegistry:
         return completed.stdout.strip()
 
     def _state_path(self) -> Path:
+        """
+        title: Return the registry state file path.
+        returns:
+          type: Path
+        """
         return self._state_dir / 'state.json'
 
     def _channels_index_path(self) -> Path:
+        """
+        title: Return the legacy channels index file path.
+        returns:
+          type: Path
+        """
         return self._state_dir / 'channels.json'
 
     def _skills_index_path(self) -> Path:
+        """
+        title: Return the legacy installed-skills index file path.
+        returns:
+          type: Path
+        """
         return self._state_dir / 'skills.json'
 
     def _channel_dir(self, local_name: str) -> Path:
+        """
+        title: Return the storage directory for a registered channel.
+        parameters:
+          local_name:
+            type: str
+        returns:
+          type: Path
+        """
         return self._channels_dir / local_name
 
     def _channel_repo_dir(self, local_name: str) -> Path:
+        """
+        title: Return the local checkout directory for a channel.
+        parameters:
+          local_name:
+            type: str
+        returns:
+          type: Path
+        """
         return self._channel_dir(local_name) / 'repo'
 
     def _channel_manifest_copy_path(self, local_name: str) -> Path:
+        """
+        title: Return the cached channel manifest path.
+        parameters:
+          local_name:
+            type: str
+        returns:
+          type: Path
+        """
         return self._channel_dir(local_name) / 'skills-channel.yaml'
 
     def _channel_record_path(self, local_name: str) -> Path:
+        """
+        title: Return the per-channel metadata record path.
+        parameters:
+          local_name:
+            type: str
+        returns:
+          type: Path
+        """
         return self._channel_dir(local_name) / 'channel.json'
 
     def _skill_dir(self, repo_dir: Path, skill_name: str) -> Path:
+        """
+        title: Return the expected directory for a channel skill.
+        parameters:
+          repo_dir:
+            type: Path
+          skill_name:
+            type: str
+        returns:
+          type: Path
+        """
         return repo_dir / 'skills' / skill_name
 
     def _skill_manifest_path(self, repo_dir: Path, skill_name: str) -> Path:
+        """
+        title: Return the expected manifest path for a channel skill.
+        parameters:
+          repo_dir:
+            type: Path
+          skill_name:
+            type: str
+        returns:
+          type: Path
+        """
         return self._skill_dir(repo_dir, skill_name) / 'skill.yaml'
 
     def _load_state(self) -> RegistryState:
+        """
+        title: Load registry state from disk.
+        returns:
+          type: RegistryState
+        """
         state_path = self._state_path()
         if state_path.exists():
             return RegistryState.model_validate_json(
@@ -290,6 +455,12 @@ class SkillRegistry:
         return RegistryState.model_validate(data)
 
     def _save_state(self, state: RegistryState) -> None:
+        """
+        title: Persist registry state and compatibility index files.
+        parameters:
+          state:
+            type: RegistryState
+        """
         self._ensure_storage_dirs()
         state_data = state.model_dump(mode='json')
         self._state_path().write_text(
@@ -311,6 +482,16 @@ class SkillRegistry:
         record: ChannelRecord,
         repo_dir: Path,
     ) -> None:
+        """
+        title: Persist a channel record and cached manifest copy.
+        parameters:
+          local_name:
+            type: str
+          record:
+            type: ChannelRecord
+          repo_dir:
+            type: Path
+        """
         channel_dir = self._channel_dir(local_name)
         channel_dir.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(
@@ -323,6 +504,14 @@ class SkillRegistry:
         )
 
     def _read_skill_manifest_file(self, manifest_path: Path) -> SkillManifest:
+        """
+        title: Read and validate a per-skill manifest file.
+        parameters:
+          manifest_path:
+            type: Path
+        returns:
+          type: SkillManifest
+        """
         if not manifest_path.exists():
             msg = (
                 f'No skill.yaml found at {manifest_path}. '
@@ -332,6 +521,14 @@ class SkillRegistry:
         return SkillManifest.model_validate(_parse_yaml(manifest_path))
 
     def _read_channel_manifest(self, repo_dir: Path) -> ChannelManifest:
+        """
+        title: Read and validate a channel manifest and skill layout.
+        parameters:
+          repo_dir:
+            type: Path
+        returns:
+          type: ChannelManifest
+        """
         manifest_path = repo_dir / 'skills-channel.yaml'
         if not manifest_path.exists():
             msg = f'No skills-channel.yaml found in {repo_dir}.'
@@ -367,6 +564,14 @@ class SkillRegistry:
         return manifest
 
     def _detect_source_kind(self, repo_dir: Path) -> str:
+        """
+        title: Detect the registry source type for a materialized repo.
+        parameters:
+          repo_dir:
+            type: Path
+        returns:
+          type: str
+        """
         if (repo_dir / 'skills-channel.yaml').exists():
             return 'channel'
         msg = (
@@ -378,6 +583,16 @@ class SkillRegistry:
     def _validate_local_name(
         self, local_name: str, state: RegistryState
     ) -> str:
+        """
+        title: Validate a local channel alias for registration.
+        parameters:
+          local_name:
+            type: str
+          state:
+            type: RegistryState
+        returns:
+          type: str
+        """
         value = local_name.strip()
         if not value:
             raise ValueError('local_name must not be empty.')
@@ -404,6 +619,18 @@ class SkillRegistry:
         local_name: str | None,
         state: RegistryState,
     ) -> str:
+        """
+        title: Resolve the local alias used to store a channel.
+        parameters:
+          channel_manifest:
+            type: ChannelManifest
+          local_name:
+            type: str | None
+          state:
+            type: RegistryState
+        returns:
+          type: str
+        """
         candidate = (
             local_name
             or channel_manifest.channel.default_alias
@@ -418,6 +645,14 @@ class SkillRegistry:
         return self._validate_local_name(candidate, state)
 
     def _detect_provider(self, source: str) -> str:
+        """
+        title: Infer the provider label for a channel source string.
+        parameters:
+          source:
+            type: str
+        returns:
+          type: str
+        """
         if Path(source).exists():
             return 'local'
         parsed = urlparse(source)
@@ -433,11 +668,27 @@ class SkillRegistry:
         return 'local'
 
     def _looks_like_git_source(self, source: str) -> bool:
+        """
+        title: Check whether a source string looks like a Git URL.
+        parameters:
+          source:
+            type: str
+        returns:
+          type: bool
+        """
         return source.startswith(
             ('https://', 'http://', 'git@', 'ssh://', 'file://')
         )
 
     def _copy_source_tree(self, source_dir: Path, target_dir: Path) -> None:
+        """
+        title: Copy a local folder source into the channel checkout path.
+        parameters:
+          source_dir:
+            type: Path
+          target_dir:
+            type: Path
+        """
         if target_dir.exists():
             shutil.rmtree(target_dir)
         shutil.copytree(source_dir, target_dir)
@@ -445,6 +696,18 @@ class SkillRegistry:
     def _materialize_channel_source(
         self, source: str, target_dir: Path, ref: str | None = None
     ) -> tuple[str, bool]:
+        """
+        title: Copy or clone a channel source into a working directory.
+        parameters:
+          source:
+            type: str
+          target_dir:
+            type: Path
+          ref:
+            type: str | None
+        returns:
+          type: tuple[str, bool]
+        """
         source_path = Path(source).expanduser()
         if source_path.exists():
             if not source_path.is_dir():
@@ -473,6 +736,16 @@ class SkillRegistry:
     def _clone_repo(
         self, source: str, target_dir: Path, ref: str | None = None
     ) -> None:
+        """
+        title: Clone a remote Git repository for a channel.
+        parameters:
+          source:
+            type: str
+          target_dir:
+            type: Path
+          ref:
+            type: str | None
+        """
         self._run_command(['git', 'clone', source, str(target_dir)])
         if ref is not None:
             self._run_command(
@@ -481,6 +754,14 @@ class SkillRegistry:
             )
 
     def _current_commit(self, repo_dir: Path) -> str:
+        """
+        title: Return the current Git commit for a channel checkout.
+        parameters:
+          repo_dir:
+            type: Path
+        returns:
+          type: str
+        """
         try:
             return self._run_command(
                 ['git', 'rev-parse', 'HEAD'],
@@ -490,6 +771,14 @@ class SkillRegistry:
             return ''
 
     def _current_ref(self, repo_dir: Path) -> str | None:
+        """
+        title: Return the current Git branch name when available.
+        parameters:
+          repo_dir:
+            type: Path
+        returns:
+          type: str | None
+        """
         try:
             ref = self._run_command(
                 ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
@@ -500,6 +789,16 @@ class SkillRegistry:
         return None if ref == 'HEAD' else ref
 
     def _update_repo(self, repo_dir: Path, ref: str | None = None) -> str:
+        """
+        title: Fetch and fast-forward a remote channel checkout.
+        parameters:
+          repo_dir:
+            type: Path
+          ref:
+            type: str | None
+        returns:
+          type: str
+        """
         self._run_command(
             ['git', 'fetch', 'origin', '--tags', '--prune'],
             cwd=repo_dir,
@@ -528,6 +827,22 @@ class SkillRegistry:
         registered_at: str | None = None,
         ref: str | None = None,
     ) -> ChannelRecord:
+        """
+        title: Build persisted channel metadata from a checkout.
+        parameters:
+          local_name:
+            type: str
+          source:
+            type: str
+          repo_dir:
+            type: Path
+          registered_at:
+            type: str | None
+          ref:
+            type: str | None
+        returns:
+          type: ChannelRecord
+        """
         channel_manifest = self._read_channel_manifest(repo_dir)
         ref_value = ref if ref is not None else self._current_ref(repo_dir)
         timestamp = _utcnow()
@@ -550,6 +865,11 @@ class SkillRegistry:
     def _iter_builtin_skill_entries(
         self,
     ) -> Iterator[tuple[Path, SkillManifest]]:
+        """
+        title: Iterate over built-in skill directories and manifests.
+        returns:
+          type: Iterator[tuple[Path, SkillManifest]]
+        """
         if not self._builtin_dir.is_dir():
             return
         for child in sorted(self._builtin_dir.iterdir()):
@@ -560,6 +880,16 @@ class SkillRegistry:
     def _builtin_skill_name(
         self, manifest: SkillManifest, skill_dir: Path
     ) -> str:
+        """
+        title: Normalize the visible name for a built-in skill.
+        parameters:
+          manifest:
+            type: SkillManifest
+          skill_dir:
+            type: Path
+        returns:
+          type: str
+        """
         prefix = f'{BUILTIN_CHANNEL}.'
         if manifest.name.startswith(prefix):
             return manifest.name[len(prefix) :]
@@ -568,6 +898,14 @@ class SkillRegistry:
     def _iter_channel_skill_entries(
         self, local_name: str
     ) -> list[_ResolvedChannelSkill]:
+        """
+        title: Resolve all declared skills for a registered channel.
+        parameters:
+          local_name:
+            type: str
+        returns:
+          type: list[_ResolvedChannelSkill]
+        """
         repo_dir = self._channel_repo_dir(local_name)
         if not repo_dir.is_dir():
             msg = f'Channel {local_name!r} is not registered.'
@@ -601,6 +939,14 @@ class SkillRegistry:
     def _find_available_channel_skill(
         self, skill_id: str
     ) -> _ResolvedChannelSkill | None:
+        """
+        title: Resolve an available channel skill by canonical id.
+        parameters:
+          skill_id:
+            type: str
+        returns:
+          type: _ResolvedChannelSkill | None
+        """
         local_name, separator, skill_name = skill_id.partition('.')
         if not separator:
             return None
@@ -614,6 +960,12 @@ class SkillRegistry:
         return None
 
     def _install_dependencies(self, dependencies: list[str]) -> None:
+        """
+        title: Install Python dependencies declared by a skill.
+        parameters:
+          dependencies:
+            type: list[str]
+        """
         if not dependencies:
             return
         subprocess.run(
@@ -626,6 +978,16 @@ class SkillRegistry:
     def _normalize_loaded_skill(
         self, skill: BaseSkill, canonical_id: str
     ) -> BaseSkill:
+        """
+        title: Rewrite loaded skill metadata to use its canonical id.
+        parameters:
+          skill:
+            type: BaseSkill
+          canonical_id:
+            type: str
+        returns:
+          type: BaseSkill
+        """
         skill.metadata = SkillMetadata(
             name=canonical_id,
             version=skill.metadata.version,
@@ -635,6 +997,14 @@ class SkillRegistry:
         return skill
 
     def _load_channel_skill(self, record: InstalledSkillRecord) -> BaseSkill:
+        """
+        title: Load an installed channel skill from its manifest.
+        parameters:
+          record:
+            type: InstalledSkillRecord
+        returns:
+          type: BaseSkill
+        """
         manifest_path = Path(record.manifest_path)
         manifest = self._read_skill_manifest_file(manifest_path)
         skill_dir = manifest_path.parent
@@ -648,6 +1018,18 @@ class SkillRegistry:
         local_name: str | None = None,
         ref: str | None = None,
     ) -> str:
+        """
+        title: Register a new local-folder or Git-backed skill channel.
+        parameters:
+          source:
+            type: str
+          local_name:
+            type: str | None
+          ref:
+            type: str | None
+        returns:
+          type: str
+        """
         self._ensure_storage_dirs()
         state = self._load_state()
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -681,12 +1063,25 @@ class SkillRegistry:
         return resolved_name
 
     def list_channels(self) -> list[ChannelRecord]:
+        """
+        title: List all registered channels.
+        returns:
+          type: list[ChannelRecord]
+        """
         state = self._load_state()
         return [state.channels[name] for name in sorted(state.channels.keys())]
 
     def list_channel_skills(
         self, local_name: str
     ) -> list[AvailableSkillRecord]:
+        """
+        title: List the skills declared by one registered channel.
+        parameters:
+          local_name:
+            type: str
+        returns:
+          type: list[AvailableSkillRecord]
+        """
         state = self._load_state()
         if local_name not in state.channels:
             msg = f'Channel {local_name!r} is not registered.'
@@ -703,6 +1098,16 @@ class SkillRegistry:
     def update_channel(
         self, local_name: str, ref: str | None = None
     ) -> list[str]:
+        """
+        title: Refresh a channel checkout and its installed skills.
+        parameters:
+          local_name:
+            type: str
+          ref:
+            type: str | None
+        returns:
+          type: list[str]
+        """
         state = self._load_state()
         channel = state.channels.get(local_name)
         if channel is None:
@@ -767,6 +1172,12 @@ class SkillRegistry:
         return sorted(updated)
 
     def remove_channel(self, local_name: str) -> None:
+        """
+        title: Remove a registered channel and its installed skills.
+        parameters:
+          local_name:
+            type: str
+        """
         state = self._load_state()
         if local_name not in state.channels:
             msg = f'Channel {local_name!r} is not registered.'
@@ -786,6 +1197,16 @@ class SkillRegistry:
         channel: str | None = None,
         installed_only: bool = False,
     ) -> list[SkillSummary]:
+        """
+        title: List built-in and channel skills known to the registry.
+        parameters:
+          channel:
+            type: str | None
+          installed_only:
+            type: bool
+        returns:
+          type: list[SkillSummary]
+        """
         state = self._load_state()
         summaries: list[SkillSummary] = []
 
@@ -845,6 +1266,14 @@ class SkillRegistry:
         return [unique[key] for key in sorted(unique.keys())]
 
     def install_skill(self, skill_id: str) -> str:
+        """
+        title: Install one skill from a registered channel.
+        parameters:
+          skill_id:
+            type: str
+        returns:
+          type: str
+        """
         if skill_id.startswith(f'{BUILTIN_CHANNEL}.'):
             msg = 'Built-in hiperhealth skills do not need installation.'
             raise ValueError(msg)
@@ -879,6 +1308,16 @@ class SkillRegistry:
     def install_channel(
         self, local_name: str, include_disabled: bool = False
     ) -> list[str]:
+        """
+        title: Install all eligible skills from a registered channel.
+        parameters:
+          local_name:
+            type: str
+          include_disabled:
+            type: bool
+        returns:
+          type: list[str]
+        """
         state = self._load_state()
         if local_name not in state.channels:
             msg = f'Channel {local_name!r} is not registered.'
@@ -892,6 +1331,16 @@ class SkillRegistry:
         return sorted(installed)
 
     def update_skill(self, skill_id: str, pull_channel: bool = False) -> str:
+        """
+        title: Refresh one installed skill, optionally pulling its channel.
+        parameters:
+          skill_id:
+            type: str
+          pull_channel:
+            type: bool
+        returns:
+          type: str
+        """
         state = self._load_state()
         record = state.skills.get(skill_id)
         if record is None:
@@ -931,6 +1380,12 @@ class SkillRegistry:
         return skill_id
 
     def remove_skill(self, skill_id: str) -> None:
+        """
+        title: Remove one installed channel skill from the registry.
+        parameters:
+          skill_id:
+            type: str
+        """
         if skill_id.startswith(f'{BUILTIN_CHANNEL}.'):
             msg = 'Built-in hiperhealth skills cannot be removed.'
             raise ValueError(msg)
@@ -945,6 +1400,14 @@ class SkillRegistry:
         self._save_state(state)
 
     def load(self, name: str) -> BaseSkill:
+        """
+        title: Load a built-in or installed channel skill by name.
+        parameters:
+          name:
+            type: str
+        returns:
+          type: BaseSkill
+        """
         for skill_dir, manifest in self._iter_builtin_skill_entries():
             if manifest.name != name:
                 continue

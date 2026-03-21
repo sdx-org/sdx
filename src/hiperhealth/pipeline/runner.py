@@ -38,6 +38,14 @@ class StageRunner:
         skills: list[Skill] | None = None,
         registry: SkillRegistry | None = None,
     ) -> None:
+        """
+        title: Initialize the stage runner with optional skills.
+        parameters:
+          skills:
+            type: list[Skill] | None
+          registry:
+            type: SkillRegistry | None
+        """
         self._skills: list[Skill] = list(skills or [])
         self._registry = registry
         self._disabled_skill_names: set[str] = set()
@@ -65,6 +73,14 @@ class StageRunner:
         self._add_skill(skill, index=index)
 
     def _add_skill(self, skill: Skill, index: int | None = None) -> None:
+        """
+        title: Insert a loaded skill into the execution order.
+        parameters:
+          skill:
+            type: Skill
+          index:
+            type: int | None
+        """
         if index is not None:
             self._skills.insert(index, skill)
         else:
@@ -170,6 +186,14 @@ class StageRunner:
         self,
         skill_names: str | Collection[str] | None,
     ) -> set[str]:
+        """
+        title: Normalize one or many skill names into a set.
+        parameters:
+          skill_names:
+            type: str | Collection[str] | None
+        returns:
+          type: set[str]
+        """
         if skill_names is None:
             return set()
         if isinstance(skill_names, str):
@@ -181,6 +205,16 @@ class StageRunner:
         stage: str,
         disabled_skills: str | Collection[str] | None = None,
     ) -> list[Skill]:
+        """
+        title: Return the registered skills that apply to a stage.
+        parameters:
+          stage:
+            type: str
+          disabled_skills:
+            type: str | Collection[str] | None
+        returns:
+          type: list[Skill]
+        """
         disabled_names = self._disabled_skill_names.union(
             self._normalize_skill_names(disabled_skills)
         )
@@ -198,6 +232,18 @@ class StageRunner:
         *,
         disabled_skills: str | Collection[str] | None = None,
     ) -> PipelineContext:
+        """
+        title: Execute pre, execute, and post hooks for one stage.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+          disabled_skills:
+            type: str | Collection[str] | None
+        returns:
+          type: PipelineContext
+        """
         relevant = self._relevant_skills(
             stage,
             disabled_skills=disabled_skills,

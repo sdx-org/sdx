@@ -16,6 +16,9 @@ from hiperhealth.pipeline.context import AuditEntry
 
 class TestStage:
     def test_stage_values(self) -> None:
+        """
+        title: Stage enum values should match the public pipeline names.
+        """
         assert Stage.SCREENING == 'screening'
         assert Stage.INTAKE == 'intake'
         assert Stage.DIAGNOSIS == 'diagnosis'
@@ -24,11 +27,17 @@ class TestStage:
         assert Stage.PRESCRIPTION == 'prescription'
 
     def test_stage_is_str(self) -> None:
+        """
+        title: Stage members should behave like strings.
+        """
         assert isinstance(Stage.DIAGNOSIS, str)
 
 
 class TestPipelineContext:
     def test_default_context(self) -> None:
+        """
+        title: PipelineContext should provide safe default values.
+        """
         ctx = PipelineContext()
         assert ctx.patient == {}
         assert ctx.language == 'en'
@@ -38,6 +47,9 @@ class TestPipelineContext:
         assert ctx.extras == {}
 
     def test_context_with_data(self) -> None:
+        """
+        title: PipelineContext should preserve provided initialization data.
+        """
         ctx = PipelineContext(
             patient={'symptoms': 'headache'},
             language='pt',
@@ -48,6 +60,9 @@ class TestPipelineContext:
         assert ctx.session_id == 'abc123'
 
     def test_context_serialization_roundtrip(self) -> None:
+        """
+        title: PipelineContext JSON should round-trip without loss.
+        """
         ctx = PipelineContext(
             patient={'symptoms': 'fever', 'age': 30},
             language='es',
@@ -65,6 +80,9 @@ class TestPipelineContext:
         assert restored.extras == ctx.extras
 
     def test_audit_entry_timestamp(self) -> None:
+        """
+        title: AuditEntry should populate timestamp and metadata defaults.
+        """
         entry = AuditEntry(
             stage='diagnosis',
             skill_name='test_skill',
@@ -76,6 +94,9 @@ class TestPipelineContext:
 
 class TestSkillMetadata:
     def test_defaults(self) -> None:
+        """
+        title: SkillMetadata should supply default optional values.
+        """
         meta = SkillMetadata(name='test')
         assert meta.name == 'test'
         assert meta.version == '0.1.0'
@@ -83,6 +104,9 @@ class TestSkillMetadata:
         assert meta.description == ''
 
     def test_custom_values(self) -> None:
+        """
+        title: SkillMetadata should preserve custom initialization values.
+        """
         meta = SkillMetadata(
             name='ayurveda',
             version='1.0.0',
@@ -109,21 +133,59 @@ class _CounterSkill(BaseSkill):
         name: str = 'counter',
         stages: tuple[str, ...] = (Stage.DIAGNOSIS,),
     ) -> None:
+        """
+        title: Initialize a hook-counting test skill.
+        parameters:
+          name:
+            type: str
+          stages:
+            type: tuple[str, Ellipsis]
+        """
         super().__init__(SkillMetadata(name=name, stages=stages))
         self.pre_count = 0
         self.execute_count = 0
         self.post_count = 0
 
     def pre(self, stage: str, ctx: PipelineContext) -> PipelineContext:
+        """
+        title: Count invocations of the pre hook.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PipelineContext
+        """
         self.pre_count += 1
         return ctx
 
     def execute(self, stage: str, ctx: PipelineContext) -> PipelineContext:
+        """
+        title: Count execute calls and write a stage result.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PipelineContext
+        """
         self.execute_count += 1
         ctx.results[stage] = f'{self.metadata.name}_executed'
         return ctx
 
     def post(self, stage: str, ctx: PipelineContext) -> PipelineContext:
+        """
+        title: Count invocations of the post hook.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PipelineContext
+        """
         self.post_count += 1
         return ctx
 
@@ -134,6 +196,9 @@ class _PromptFragmentSkill(BaseSkill):
     """
 
     def __init__(self) -> None:
+        """
+        title: Initialize a test skill that injects prompt fragments.
+        """
         super().__init__(
             SkillMetadata(
                 name='fragment_injector',
@@ -142,6 +207,16 @@ class _PromptFragmentSkill(BaseSkill):
         )
 
     def pre(self, stage: str, ctx: PipelineContext) -> PipelineContext:
+        """
+        title: Inject a diagnosis prompt fragment during pre execution.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PipelineContext
+        """
         fragments = ctx.extras.setdefault('prompt_fragments', {})
         fragments['diagnosis'] = 'Consider Ayurvedic doshas.'
         return ctx
@@ -149,6 +224,9 @@ class _PromptFragmentSkill(BaseSkill):
 
 class TestBaseSkill:
     def test_no_op_hooks(self) -> None:
+        """
+        title: BaseSkill hooks should default to no-op behavior.
+        """
         skill = BaseSkill(
             SkillMetadata(name='noop', stages=(Stage.DIAGNOSIS,))
         )
@@ -160,6 +238,9 @@ class TestBaseSkill:
 
 class TestStageRunner:
     def test_run_single_stage(self) -> None:
+        """
+        title: Running one stage should call each hook once.
+        """
         skill = _CounterSkill()
         runner = StageRunner(skills=[skill])
         ctx = PipelineContext()
@@ -173,6 +254,9 @@ class TestStageRunner:
         assert len(result.audit) == 3
 
     def test_run_ignores_irrelevant_stages(self) -> None:
+        """
+        title: StageRunner should skip skills irrelevant to a stage.
+        """
         skill = _CounterSkill(stages=(Stage.DIAGNOSIS,))
         runner = StageRunner(skills=[skill])
         ctx = PipelineContext()
@@ -185,6 +269,9 @@ class TestStageRunner:
         assert len(result.audit) == 0
 
     def test_run_many(self) -> None:
+        """
+        title: run_many should execute stages sequentially.
+        """
         skill = _CounterSkill(stages=(Stage.DIAGNOSIS, Stage.EXAM))
         runner = StageRunner(skills=[skill])
         ctx = PipelineContext()
@@ -198,6 +285,9 @@ class TestStageRunner:
         assert Stage.EXAM in result.results
 
     def test_run_can_disable_skills_for_single_call(self) -> None:
+        """
+        title: One run call can temporarily disable selected skills.
+        """
         first = _CounterSkill(name='first')
         second = _CounterSkill(name='second')
         runner = StageRunner(skills=[first, second])
@@ -219,6 +309,9 @@ class TestStageRunner:
         ]
 
     def test_run_many_respects_disabled_skills(self) -> None:
+        """
+        title: run_many should honor disabled skill selections.
+        """
         skill = _CounterSkill(stages=(Stage.DIAGNOSIS, Stage.EXAM))
         runner = StageRunner(skills=[skill])
         ctx = PipelineContext()
@@ -236,6 +329,9 @@ class TestStageRunner:
         assert result.audit == []
 
     def test_registration_order(self) -> None:
+        """
+        title: Registered skill order should drive execution order.
+        """
         first = _CounterSkill(
             name='first',
             stages=(Stage.DIAGNOSIS,),
@@ -284,6 +380,9 @@ class TestStageRunner:
         assert runner.skills[0].metadata.name == ('hiperhealth.diagnostics')
 
     def test_prompt_fragments(self) -> None:
+        """
+        title: Earlier skills can inject prompt fragments for later ones.
+        """
         fragment_skill = _PromptFragmentSkill()
         counter_skill = _CounterSkill()
         runner = StageRunner(skills=[fragment_skill, counter_skill])
@@ -298,6 +397,9 @@ class TestStageRunner:
         assert counter_skill.execute_count == 1
 
     def test_run_kwargs_in_extras(self) -> None:
+        """
+        title: Extra run kwargs should be stored in context extras.
+        """
         skill = _CounterSkill()
         runner = StageRunner(skills=[skill])
         ctx = PipelineContext()
@@ -308,6 +410,9 @@ class TestStageRunner:
         assert result.extras['_run_kwargs']['llm_settings'] == 's'
 
     def test_disabled_context_manager_is_temporary(self) -> None:
+        """
+        title: Disabled context manager state should restore after exit.
+        """
         first = _CounterSkill(name='first')
         second = _CounterSkill(name='second')
         runner = StageRunner(skills=[first, second])
@@ -323,6 +428,9 @@ class TestStageRunner:
         assert enabled_ctx.results[Stage.DIAGNOSIS] == 'second_executed'
 
     def test_disabled_context_manager_supports_nesting(self) -> None:
+        """
+        title: Disabled context manager should support nested scopes.
+        """
         first = _CounterSkill(name='first')
         second = _CounterSkill(name='second')
         runner = StageRunner(skills=[first, second])
@@ -340,6 +448,9 @@ class TestStageRunner:
         assert second.execute_count == 1
 
     def test_context_serialization_between_runs(self) -> None:
+        """
+        title: Context state should persist cleanly between runner passes.
+        """
         skill = _CounterSkill()
         runner = StageRunner(skills=[skill])
 

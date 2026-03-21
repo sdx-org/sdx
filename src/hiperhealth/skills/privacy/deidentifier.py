@@ -255,6 +255,9 @@ class PrivacySkill(BaseSkill):
     """
 
     def __init__(self) -> None:
+        """
+        title: Initialize the built-in privacy skill and deidentifier.
+        """
         super().__init__(
             SkillMetadata(
                 name='hiperhealth.privacy',

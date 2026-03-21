@@ -47,13 +47,57 @@ class Skill(Protocol):
 
     def check_requirements(
         self, stage: str, ctx: PipelineContext
-    ) -> list[Inquiry]: ...
+    ) -> list[Inquiry]:
+        """
+        title: Describe what information the skill still needs.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: list[Inquiry]
+        """
+        ...
 
-    def pre(self, stage: str, ctx: PipelineContext) -> PipelineContext: ...
+    def pre(self, stage: str, ctx: PipelineContext) -> PipelineContext:
+        """
+        title: Run the pre-execution hook for a stage.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PipelineContext
+        """
+        ...
 
-    def execute(self, stage: str, ctx: PipelineContext) -> PipelineContext: ...
+    def execute(self, stage: str, ctx: PipelineContext) -> PipelineContext:
+        """
+        title: Run the main execution hook for a stage.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PipelineContext
+        """
+        ...
 
-    def post(self, stage: str, ctx: PipelineContext) -> PipelineContext: ...
+    def post(self, stage: str, ctx: PipelineContext) -> PipelineContext:
+        """
+        title: Run the post-execution hook for a stage.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PipelineContext
+        """
+        ...
 
 
 class BaseSkill:
@@ -68,6 +112,12 @@ class BaseSkill:
     metadata: SkillMetadata
 
     def __init__(self, metadata: SkillMetadata) -> None:
+        """
+        title: Initialize a base skill with immutable metadata.
+        parameters:
+          metadata:
+            type: SkillMetadata
+        """
         self.metadata = metadata
 
     def check_requirements(

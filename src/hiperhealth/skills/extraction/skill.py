@@ -31,6 +31,9 @@ class ExtractionSkill(BaseSkill):
     """
 
     def __init__(self) -> None:
+        """
+        title: Initialize extractors and built-in skill metadata.
+        """
         super().__init__(
             SkillMetadata(
                 name='hiperhealth.extraction',

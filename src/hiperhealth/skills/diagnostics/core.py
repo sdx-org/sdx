@@ -55,10 +55,26 @@ _REQ_PROMPT_TEMPLATE = (
 
 
 def _language_name(language: str) -> str:
+    """
+    title: Map a language code to a human-readable language name.
+    parameters:
+      language:
+        type: str
+    returns:
+      type: str
+    """
     return _SUPPORTED_OUTPUT_LANGUAGES.get(language, 'English')
 
 
 def _natural_language_instruction(language: str) -> str:
+    """
+    title: Build the localized output instruction for free-text fields.
+    parameters:
+      language:
+        type: str
+    returns:
+      type: str
+    """
     return (
         'Write all natural-language string values in '
         f'{_language_name(language)}. '
@@ -67,6 +83,14 @@ def _natural_language_instruction(language: str) -> str:
 
 
 def _requirements_language_instruction(language: str) -> str:
+    """
+    title: Build localized output instructions for inquiry generation.
+    parameters:
+      language:
+        type: str
+    returns:
+      type: str
+    """
     return (
         'Write `label`, `description`, and any `choices` values in '
         f'{_language_name(language)}. '
@@ -79,14 +103,40 @@ def _requirements_language_instruction(language: str) -> str:
 
 
 def _diagnosis_prompt(language: str) -> str:
+    """
+    title: Build the differential-diagnosis system prompt.
+    parameters:
+      language:
+        type: str
+    returns:
+      type: str
+    """
     return f'{_DIAG_PROMPT}\n\n{_natural_language_instruction(language)}'
 
 
 def _exam_prompt(language: str) -> str:
+    """
+    title: Build the exam-suggestion system prompt.
+    parameters:
+      language:
+        type: str
+    returns:
+      type: str
+    """
     return f'{_EXAM_PROMPT}\n\n{_natural_language_instruction(language)}'
 
 
 def _requirements_prompt(stage: str, language: str) -> str:
+    """
+    title: Build the inquiry-generation system prompt for a stage.
+    parameters:
+      stage:
+        type: str
+      language:
+        type: str
+    returns:
+      type: str
+    """
     stage_label = stage.value if hasattr(stage, 'value') else stage
     base_prompt = _REQ_PROMPT_TEMPLATE.format(stage=stage_label)
     return f'{base_prompt}\n\n{_requirements_language_instruction(language)}'
@@ -182,6 +232,9 @@ class DiagnosticsSkill(BaseSkill):
     """
 
     def __init__(self) -> None:
+        """
+        title: Initialize the built-in diagnostics skill metadata.
+        """
         super().__init__(
             SkillMetadata(
                 name='hiperhealth.diagnostics',

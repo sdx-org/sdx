@@ -93,6 +93,14 @@ class Session:
     """
 
     def __init__(self, path: Path, language: str = 'en') -> None:
+        """
+        title: Initialize an in-memory session wrapper for a parquet file.
+        parameters:
+          path:
+            type: Path
+          language:
+            type: str
+        """
         self.path: Path = path
         self._language: str = language
         self._events: list[dict[str, Any]] = []
@@ -329,6 +337,18 @@ class Session:
         skill_name: str | None = None,
         data: dict[str, Any] | None = None,
     ) -> None:
+        """
+        title: Append a new event and persist the session to disk.
+        parameters:
+          event_type:
+            type: str
+          stage:
+            type: str | None
+          skill_name:
+            type: str | None
+          data:
+            type: dict[str, Any] | None
+        """
         event: dict[str, Any] = {
             'event_id': len(self._events),
             'timestamp': datetime.now(timezone.utc),
@@ -345,6 +365,9 @@ class Session:
         self._save()
 
     def _load(self) -> None:
+        """
+        title: Load session events from the parquet file.
+        """
         table = pq.read_table(self.path, schema=SESSION_SCHEMA)
         rows = table.to_pylist()
         self._events = rows
@@ -358,6 +381,9 @@ class Session:
                 break
 
     def _save(self) -> None:
+        """
+        title: Write the current event log to the parquet file.
+        """
         if not self._events:
             table = SESSION_SCHEMA.empty_table()
         else:

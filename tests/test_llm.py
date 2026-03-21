@@ -60,6 +60,15 @@ def test_litellm_structured_llm_builds_messages_and_kwargs():
     calls: list[dict[str, object]] = []
 
     def _fake_completion(**kwargs: object) -> dict[str, object]:
+        """
+        title: Capture LiteLLM kwargs and return a fixed JSON payload.
+        parameters:
+          kwargs:
+            type: object
+            variadic: keyword
+        returns:
+          type: dict[str, object]
+        """
         calls.append(kwargs)
         return {
             'choices': [

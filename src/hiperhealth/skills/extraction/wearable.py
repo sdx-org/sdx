@@ -130,6 +130,14 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
         return self._process_file(file)
 
     def _process_file(self, file: FileInput) -> list[dict[str, object]]:
+        """
+        title: Dispatch file processing based on detected file format.
+        parameters:
+          file:
+            type: FileInput
+        returns:
+          type: list[dict[str, object]]
+        """
         if self._is_json(file):
             return self._process_json_file(file)
         elif self._is_csv(file):
@@ -162,6 +170,14 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
         return self._get_mime_type(file) in self.allowed_mimetypes
 
     def _validate_inmemory_file(self, file: IO[bytes]) -> bool:
+        """
+        title: Check that an in-memory file contains readable bytes.
+        parameters:
+          file:
+            type: IO[bytes]
+        returns:
+          type: bool
+        """
         try:
             file.seek(0)
             sample = file.read(10)  # read 10 bytes
@@ -171,6 +187,12 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             return False
 
     def _validate_or_raise(self, file: FileInput) -> None:
+        """
+        title: Validate file support or raise an extractor error.
+        parameters:
+          file:
+            type: FileInput
+        """
         if not self.is_supported(file):
             raise WearableDataExtractorError(
                 f'File is not valid. '
@@ -213,6 +235,14 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             )
 
     def _get_cache_key(self, file: FileInput) -> str:
+        """
+        title: Build a cache key for MIME detection results.
+        parameters:
+          file:
+            type: FileInput
+        returns:
+          type: str
+        """
         cache_key: str
         if isinstance(file, Path):
             cache_key = str(file.resolve())
@@ -221,6 +251,14 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
         return cache_key
 
     def _is_json(self, file: FileInput) -> bool:
+        """
+        title: Detect whether the input file contains JSON data.
+        parameters:
+          file:
+            type: FileInput
+        returns:
+          type: bool
+        """
         if isinstance(file, (tempfile.SpooledTemporaryFile, io.BytesIO)):
             try:
                 file.seek(0)
@@ -236,6 +274,14 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
         )
 
     def _is_csv(self, file: FileInput) -> bool:
+        """
+        title: Detect whether the input file contains CSV data.
+        parameters:
+          file:
+            type: FileInput
+        returns:
+          type: bool
+        """
         if isinstance(file, (tempfile.SpooledTemporaryFile, io.BytesIO)):
             try:
                 file.seek(0)
@@ -266,6 +312,14 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
         )
 
     def _process_row(self, row: dict[str, Any]) -> dict[str, object]:
+        """
+        title: Coerce scalar CSV row values into typed Python objects.
+        parameters:
+          row:
+            type: dict[str, Any]
+        returns:
+          type: dict[str, object]
+        """
         for key, value in row.items():
             if value.isnumeric():
                 row[key] = int(value)
@@ -277,6 +331,14 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
         return row
 
     def _process_json_file(self, file: FileInput) -> list[dict[str, object]]:
+        """
+        title: Load wearable data rows from a JSON file input.
+        parameters:
+          file:
+            type: FileInput
+        returns:
+          type: list[dict[str, object]]
+        """
         if isinstance(file, (str, Path)):
             with open(file, 'r', encoding='utf-8') as f:
                 return cast(list[dict[str, object]], json.load(f))
@@ -288,6 +350,14 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             )
 
     def _process_csv_file(self, file: FileInput) -> list[dict[str, object]]:
+        """
+        title: Load wearable data rows from a CSV file input.
+        parameters:
+          file:
+            type: FileInput
+        returns:
+          type: list[dict[str, object]]
+        """
         if isinstance(file, (str, Path)):
             with open(file, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)

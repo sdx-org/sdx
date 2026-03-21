@@ -37,6 +37,14 @@ def tmp_registry(tmp_path: Path) -> SkillRegistry:
 
 @pytest.fixture
 def channel_repo(tmp_path: Path) -> Path:
+    """
+    title: Create a temporary channel repository fixture.
+    parameters:
+      tmp_path:
+        type: Path
+    returns:
+      type: Path
+    """
     return create_channel_repo(tmp_path)
 
 

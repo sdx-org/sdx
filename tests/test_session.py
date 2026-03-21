@@ -25,6 +25,9 @@ class _AssessingSkill(BaseSkill):
     """
 
     def __init__(self) -> None:
+        """
+        title: Initialize a test skill that raises missing-data inquiries.
+        """
         super().__init__(
             SkillMetadata(
                 name='test.assessor',
@@ -35,6 +38,16 @@ class _AssessingSkill(BaseSkill):
     def check_requirements(
         self, stage: str, ctx: PipelineContext
     ) -> list[Inquiry]:
+        """
+        title: Return inquiries for missing dietary and stool data.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: list[Inquiry]
+        """
         inquiries: list[Inquiry] = []
         if 'dietary_history' not in ctx.patient:
             inquiries.append(
@@ -62,6 +75,16 @@ class _AssessingSkill(BaseSkill):
         return inquiries
 
     def execute(self, stage: str, ctx: PipelineContext) -> PipelineContext:
+        """
+        title: Record that the assessment stage executed successfully.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PipelineContext
+        """
         ctx.results[stage] = {'assessed': True}
         return ctx
 
@@ -72,6 +95,9 @@ class _NoAssessSkill(BaseSkill):
     """
 
     def __init__(self) -> None:
+        """
+        title: Initialize a test skill that never raises inquiries.
+        """
         super().__init__(
             SkillMetadata(
                 name='test.no_assess',
@@ -80,6 +106,16 @@ class _NoAssessSkill(BaseSkill):
         )
 
     def execute(self, stage: str, ctx: PipelineContext) -> PipelineContext:
+        """
+        title: Record that the stage executed without inquiry checks.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PipelineContext
+        """
         ctx.results[stage] = {'plain': True}
         return ctx
 
@@ -89,6 +125,9 @@ class _NoAssessSkill(BaseSkill):
 
 class TestInquiry:
     def test_defaults(self) -> None:
+        """
+        title: Inquiry defaults should use supplementary text inputs.
+        """
         inq = Inquiry(
             skill_name='test',
             stage='diagnosis',
@@ -101,6 +140,9 @@ class TestInquiry:
         assert inq.choices is None
 
     def test_full_fields(self) -> None:
+        """
+        title: Inquiry should preserve explicitly provided field values.
+        """
         inq = Inquiry(
             skill_name='test',
             stage='diagnosis',
@@ -115,6 +157,9 @@ class TestInquiry:
         assert len(inq.choices) == 10
 
     def test_serialization_roundtrip(self) -> None:
+        """
+        title: Inquiry JSON serialization should round-trip cleanly.
+        """
         inq = Inquiry(
             skill_name='test',
             stage='diagnosis',
@@ -132,6 +177,12 @@ class TestInquiry:
 
 class TestSession:
     def test_create_and_load(self, tmp_path: Path) -> None:
+        """
+        title: Sessions should create and load from parquet files.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         Session.create(path)
         assert path.exists()
@@ -142,6 +193,12 @@ class TestSession:
         assert loaded.stages_completed == []
 
     def test_create_already_exists(self, tmp_path: Path) -> None:
+        """
+        title: Creating an existing session file should fail.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         Session.create(path)
         try:
@@ -151,6 +208,12 @@ class TestSession:
             pass
 
     def test_load_not_found(self, tmp_path: Path) -> None:
+        """
+        title: Loading a missing session file should fail.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'missing.parquet'
         try:
             Session.load(path)
@@ -159,6 +222,12 @@ class TestSession:
             pass
 
     def test_set_clinical_data(self, tmp_path: Path) -> None:
+        """
+        title: Clinical data should be recorded in session state.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data(
@@ -173,6 +242,12 @@ class TestSession:
         }
 
     def test_clinical_data_persists(self, tmp_path: Path) -> None:
+        """
+        title: Clinical data should survive a session reload.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'bloating'})
@@ -181,6 +256,12 @@ class TestSession:
         assert loaded.clinical_data == {'symptoms': 'bloating'}
 
     def test_provide_answers_merges(self, tmp_path: Path) -> None:
+        """
+        title: Answer payloads should merge into clinical data.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'bloating'})
@@ -192,6 +273,12 @@ class TestSession:
         }
 
     def test_to_context(self, tmp_path: Path) -> None:
+        """
+        title: Sessions should convert current state into a context.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path, language='pt')
         session.set_clinical_data({'symptoms': 'inchaço'})
@@ -202,6 +289,12 @@ class TestSession:
         assert ctx.session_id == 'session'
 
     def test_events_are_recorded(self, tmp_path: Path) -> None:
+        """
+        title: Session actions should append event records.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'fatigue'})
@@ -213,6 +306,12 @@ class TestSession:
         assert events[1]['event_type'] == 'answers_provided'
 
     def test_stages_completed(self, tmp_path: Path) -> None:
+        """
+        title: Completed stages should be reconstructed from events.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'fatigue'})
@@ -229,6 +328,12 @@ class TestSession:
 
 class TestCheckRequirements:
     def test_assess_returns_inquiries(self, tmp_path: Path) -> None:
+        """
+        title: Requirement checks should return missing-data inquiries.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'bloating'})
@@ -244,6 +349,12 @@ class TestCheckRequirements:
     def test_assess_no_inquiries_when_data_present(
         self, tmp_path: Path
     ) -> None:
+        """
+        title: Present data should suppress already-satisfied inquiries.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data(
@@ -261,6 +372,12 @@ class TestCheckRequirements:
         assert len(inquiries) == 0
 
     def test_assess_records_events(self, tmp_path: Path) -> None:
+        """
+        title: Requirement checks should record lifecycle session events.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'bloating'})
@@ -275,6 +392,12 @@ class TestCheckRequirements:
         assert 'check_requirements_completed' in event_types
 
     def test_assess_no_inquiries_skill(self, tmp_path: Path) -> None:
+        """
+        title: Skills with no requirements should produce no inquiries.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'bloating'})
@@ -286,6 +409,12 @@ class TestCheckRequirements:
         assert len(inquiries) == 0
 
     def test_pending_inquiries_property(self, tmp_path: Path) -> None:
+        """
+        title: Pending inquiries should shrink as answers are provided.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'bloating'})
@@ -303,6 +432,12 @@ class TestCheckRequirements:
         assert session.pending_inquiries[0].field == 'stool_analysis'
 
     def test_full_assess_provide_run_cycle(self, tmp_path: Path) -> None:
+        """
+        title: Assess, answer, and run should work as one session flow.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'bloating'})
@@ -330,6 +465,12 @@ class TestCheckRequirements:
         assert session.results[Stage.DIAGNOSIS] == {'assessed': True}
 
     def test_session_survives_reload(self, tmp_path: Path) -> None:
+        """
+        title: Sessions should support multi-step flows across reloads.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
 
         # Day 1
@@ -353,6 +494,12 @@ class TestCheckRequirements:
         assert Stage.DIAGNOSIS in session2.stages_completed
 
     def test_multiple_skills_assess(self, tmp_path: Path) -> None:
+        """
+        title: Only relevant skills should contribute inquiries.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'bloating'})
@@ -369,6 +516,12 @@ class TestCheckRequirements:
     def test_assess_respects_temporarily_disabled_skills(
         self, tmp_path: Path
     ) -> None:
+        """
+        title: Temporary runner disables should skip inquiry generation.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'bloating'})
@@ -388,6 +541,12 @@ class TestCheckRequirements:
         assert len(restored_inquiries) == 2
 
     def test_assess_irrelevant_stage(self, tmp_path: Path) -> None:
+        """
+        title: Irrelevant stages should produce no inquiries.
+        parameters:
+          tmp_path:
+            type: Path
+        """
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'bloating'})

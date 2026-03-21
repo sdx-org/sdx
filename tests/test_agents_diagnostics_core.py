@@ -23,6 +23,16 @@ def chat_spy(monkeypatch):
     calls: list[dict[str, str | None]] = []
 
     def _fake_chat(system: str, user: str, *, session_id: str | None = None):
+        """
+        title: Capture diagnostics chat arguments and return a stub result.
+        parameters:
+          system:
+            type: str
+          user:
+            type: str
+          session_id:
+            type: str | None
+        """
         calls.append(
             {'system': system, 'user': user, 'session_id': session_id}
         )

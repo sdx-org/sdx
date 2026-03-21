@@ -41,6 +41,12 @@ class _FakeLLM:
     """
 
     def __init__(self, result: LLMDiagnosis) -> None:
+        """
+        title: Initialize the fake LLM with a fixed diagnosis payload.
+        parameters:
+          result:
+            type: LLMDiagnosis
+        """
         self.result = result
         self.calls: list[dict[str, object]] = []
 
@@ -50,6 +56,18 @@ class _FakeLLM:
         user: str,
         output_type: type[Any],
     ) -> LLMDiagnosis:
+        """
+        title: Record the prompt pair and return the canned response.
+        parameters:
+          system:
+            type: str
+          user:
+            type: str
+          output_type:
+            type: type[Any]
+        returns:
+          type: LLMDiagnosis
+        """
         self.calls.append({'system': system, 'user': user})
         return self.result
 
@@ -77,6 +95,22 @@ class TestDiagnosticsSkill:
             llm: Any = None,
             llm_settings: Any = None,
         ) -> LLMDiagnosis:
+            """
+            title: Capture diagnosis chat calls and return a fake result.
+            parameters:
+              system:
+                type: str
+              user:
+                type: str
+              session_id:
+                type: str | None
+              llm:
+                type: Any
+              llm_settings:
+                type: Any
+            returns:
+              type: LLMDiagnosis
+            """
             calls.append(
                 {
                     'system': system,
@@ -133,6 +167,22 @@ class TestDiagnosticsSkill:
             llm: Any = None,
             llm_settings: Any = None,
         ) -> LLMDiagnosis:
+            """
+            title: Capture exam chat calls and return a fake result.
+            parameters:
+              system:
+                type: str
+              user:
+                type: str
+              session_id:
+                type: str | None
+              llm:
+                type: Any
+              llm_settings:
+                type: Any
+            returns:
+              type: LLMDiagnosis
+            """
             calls.append({'system': system, 'user': user})
             return exam_result
 
@@ -196,6 +246,19 @@ class TestDiagnosticsSkill:
             user: str,
             **kw: Any,
         ) -> LLMDiagnosis:
+            """
+            title: Capture diagnosis prompt fragments in chat calls.
+            parameters:
+              system:
+                type: str
+              user:
+                type: str
+              kw:
+                type: Any
+                variadic: keyword
+            returns:
+              type: LLMDiagnosis
+            """
             calls.append({'system': system})
             return LLMDiagnosis(summary='ok', options=['A'])
 
@@ -228,6 +291,19 @@ class TestDiagnosticsSkill:
             user: str,
             **kw: Any,
         ) -> LLMDiagnosis:
+            """
+            title: Capture exam prompt fragments in chat calls.
+            parameters:
+              system:
+                type: str
+              user:
+                type: str
+              kw:
+                type: Any
+                variadic: keyword
+            returns:
+              type: LLMDiagnosis
+            """
             calls.append({'system': system})
             return LLMDiagnosis(summary='ok', options=['X-ray'])
 
@@ -274,6 +350,19 @@ class TestDiagnosticsSkill:
             user: str,
             **kw: Any,
         ) -> LLMDiagnosis:
+            """
+            title: Capture exam requests for diagnosis option dictionaries.
+            parameters:
+              system:
+                type: str
+              user:
+                type: str
+              kw:
+                type: Any
+                variadic: keyword
+            returns:
+              type: LLMDiagnosis
+            """
             calls.append({'user': user})
             return LLMDiagnosis(summary='ok', options=['CBC'])
 
@@ -324,6 +413,21 @@ class TestDiagnosticsSkill:
             output_type: type,
             **kw: Any,
         ) -> LLMInquiryList:
+            """
+            title: Return a fixed inquiry list for requirement checks.
+            parameters:
+              system:
+                type: str
+              user:
+                type: str
+              output_type:
+                type: type
+              kw:
+                type: Any
+                variadic: keyword
+            returns:
+              type: LLMInquiryList
+            """
             return fake_result
 
         monkeypatch.setattr(
@@ -403,6 +507,21 @@ class TestDiagnosticsSkill:
             output_type: type,
             **kw: Any,
         ) -> LLMInquiryList:
+            """
+            title: Capture localized requirement prompt instructions.
+            parameters:
+              system:
+                type: str
+              user:
+                type: str
+              output_type:
+                type: type
+              kw:
+                type: Any
+                variadic: keyword
+            returns:
+              type: LLMInquiryList
+            """
             calls.append({'system': system})
             return LLMInquiryList(inquiries=[])
 
@@ -514,6 +633,9 @@ class TestPrivacySkill:
 
         class _StubDeidentifier:
             def __init__(self) -> None:
+                """
+                title: Initialize no-op analyzer and anonymizer stubs.
+                """
                 self.analyzer = SimpleNamespace(
                     registry=SimpleNamespace(
                         recognizers=[],
@@ -524,6 +646,14 @@ class TestPrivacySkill:
                 self.anonymizer = SimpleNamespace()
 
             def deidentify(self, text: str) -> str:
+                """
+                title: Return a fixed redacted token for any input text.
+                parameters:
+                  text:
+                    type: str
+                returns:
+                  type: str
+                """
                 return '<redacted>'
 
         from hiperhealth.skills.privacy import PrivacySkill
@@ -610,6 +740,9 @@ class TestBackwardCompatImports:
     """
 
     def test_agents_diagnostics_exports(self) -> None:
+        """
+        title: Legacy diagnostics agent imports should still resolve.
+        """
         from hiperhealth.agents.diagnostics.core import (
             differential,
             exams,
@@ -619,6 +752,9 @@ class TestBackwardCompatImports:
         assert callable(exams)
 
     def test_agents_extraction_exports(self) -> None:
+        """
+        title: Legacy extraction agent imports should still resolve.
+        """
         from hiperhealth.agents.extraction.medical_reports import (
             MedicalReportFileExtractor,
         )
@@ -630,6 +766,9 @@ class TestBackwardCompatImports:
         assert WearableDataFileExtractor is not None
 
     def test_privacy_exports(self) -> None:
+        """
+        title: Legacy privacy package imports should still resolve.
+        """
         from hiperhealth.privacy import (
             Deidentifier,
             deidentify_patient_record,
@@ -639,6 +778,9 @@ class TestBackwardCompatImports:
         assert callable(deidentify_patient_record)
 
     def test_privacy_deidentifier_module_exports(self) -> None:
+        """
+        title: Legacy privacy module imports should still resolve.
+        """
         from hiperhealth.privacy.deidentifier import (
             Deidentifier,
             PrivacySkill,

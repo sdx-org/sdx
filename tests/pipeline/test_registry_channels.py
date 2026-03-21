@@ -25,6 +25,14 @@ from ._registry_test_utils import (
 
 @pytest.fixture
 def registry(tmp_path: Path) -> SkillRegistry:
+    """
+    title: Provide a temporary channel-aware registry instance.
+    parameters:
+      tmp_path:
+        type: Path
+    returns:
+      type: SkillRegistry
+    """
     return SkillRegistry(
         registry_dir=tmp_path / '.hiperhealth' / 'artifacts' / 'skills'
     )
@@ -32,11 +40,27 @@ def registry(tmp_path: Path) -> SkillRegistry:
 
 @pytest.fixture
 def channel_repo(tmp_path: Path) -> Path:
+    """
+    title: Create a Git-backed channel fixture repository.
+    parameters:
+      tmp_path:
+        type: Path
+    returns:
+      type: Path
+    """
     return create_channel_repo(tmp_path)
 
 
 @pytest.fixture
 def channel_folder(tmp_path: Path) -> Path:
+    """
+    title: Create a plain local folder channel fixture.
+    parameters:
+      tmp_path:
+        type: Path
+    returns:
+      type: Path
+    """
     return create_channel_repo(tmp_path / 'folder-source', use_git=False)
 
 
@@ -44,6 +68,14 @@ def test_parse_valid_skills_channel_yaml(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Valid channel manifests should parse successfully.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     manifest = registry._read_channel_manifest(channel_repo)
 
     assert manifest.channel.name == 'traditional-medicine'
@@ -59,6 +91,14 @@ def test_reject_invalid_skills_channel_yaml(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Invalid channel manifests should fail validation.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     write_file(
         channel_repo / 'skills-channel.yaml',
         """
@@ -75,6 +115,14 @@ def test_reject_duplicate_skill_names_within_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Duplicate declared skill names should be rejected.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     write_file(
         channel_repo / 'skills-channel.yaml',
         """
@@ -96,6 +144,14 @@ def test_reject_missing_per_skill_manifest(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Missing per-skill manifests should fail channel validation.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     (channel_repo / 'skills' / 'nutrition' / 'skill.yaml').unlink()
 
     with pytest.raises(ValueError, match='expected manifest'):
@@ -106,6 +162,14 @@ def test_enforce_local_alias_uniqueness(
     registry: SkillRegistry,
     tmp_path: Path,
 ) -> None:
+    """
+    title: Channel aliases must remain unique in local state.
+    parameters:
+      registry:
+        type: SkillRegistry
+      tmp_path:
+        type: Path
+    """
     first_repo = create_channel_repo(tmp_path / 'first')
     second_repo = create_channel_repo(tmp_path / 'second')
 
@@ -118,6 +182,14 @@ def test_list_channels_and_skills(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Listing APIs should expose channels and their skills.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     registry.add_channel(str(channel_repo))
 
     channels = registry.list_channels()
@@ -149,6 +221,14 @@ def test_register_channel_from_local_git_fixture(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Git-backed local folders should register as local channels.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     local_name = registry.add_channel(str(channel_repo))
 
     assert local_name == 'tm'
@@ -165,6 +245,14 @@ def test_register_channel_from_plain_local_folder(
     registry: SkillRegistry,
     channel_folder: Path,
 ) -> None:
+    """
+    title: Plain local folders should also register as channels.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_folder:
+        type: Path
+    """
     local_name = registry.add_channel(str(channel_folder))
 
     channel = registry.list_channels()[0]
@@ -178,6 +266,14 @@ def test_reject_ref_for_local_folder_channel(
     registry: SkillRegistry,
     channel_folder: Path,
 ) -> None:
+    """
+    title: Local folder channels should reject Git refs.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_folder:
+        type: Path
+    """
     with pytest.raises(ValueError, match='ref is only supported'):
         registry.add_channel(str(channel_folder), ref='main')
 
@@ -186,6 +282,14 @@ def test_install_one_skill_from_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: One declared channel skill should install and load.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     registry.add_channel(str(channel_repo))
     installed = registry.install_skill('tm.ayurveda')
 
@@ -204,6 +308,14 @@ def test_install_all_skills_from_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Channel install should skip disabled skills by default.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     registry.add_channel(str(channel_repo))
 
     installed = registry.install_channel('tm')
@@ -217,6 +329,14 @@ def test_install_channel_include_disabled(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Channel install can include disabled declared skills.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     registry.add_channel(str(channel_repo))
 
     installed = registry.install_channel('tm', include_disabled=True)
@@ -228,6 +348,14 @@ def test_update_one_skill_without_pulling_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Updating a skill alone should not refresh the channel checkout.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.ayurveda')
     bump_channel_skill_version(channel_repo, 'ayurveda', '0.2.0')
@@ -242,6 +370,14 @@ def test_update_one_skill_with_pulling_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Pulling a skill update should refresh its channel first.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.ayurveda')
     bump_channel_skill_version(channel_repo, 'ayurveda', '0.2.0')
@@ -258,6 +394,14 @@ def test_update_whole_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Updating a channel should refresh installed skill metadata.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.ayurveda')
     before_commit = registry.list_channels()[0].commit
@@ -275,6 +419,14 @@ def test_remove_one_skill(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Removing one installed skill should leave the channel intact.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.ayurveda')
 
@@ -288,6 +440,14 @@ def test_remove_whole_channel(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: Removing a channel should remove its local state and skills.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.ayurveda')
 
@@ -302,6 +462,14 @@ def test_load_skill_by_canonical_id_and_stage_runner(
     registry: SkillRegistry,
     channel_repo: Path,
 ) -> None:
+    """
+    title: StageRunner should register and run canonical channel skills.
+    parameters:
+      registry:
+        type: SkillRegistry
+      channel_repo:
+        type: Path
+    """
     registry.add_channel(str(channel_repo))
     registry.install_skill('tm.nutrition')
 

@@ -146,12 +146,6 @@ cython_debug/
 
 # vscode
 .vscode/
-research/backend/data
-#backend database
-research-poc/backend/backend.db
-uvicorn.log
-uvicorn.pid
-
 
 .quarto/
 *.quarto_ipynb

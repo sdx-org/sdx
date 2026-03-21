@@ -239,10 +239,23 @@ class LiteLLMStructuredLLM:
         settings: LLMSettings,
         completion_fn: _CompletionFn | None = None,
     ) -> None:
+        """
+        title: Initialize the LiteLLM-backed structured adapter.
+        parameters:
+          settings:
+            type: LLMSettings
+          completion_fn:
+            type: _CompletionFn | None
+        """
         self.settings = settings
         self._completion_fn = completion_fn
 
     def _get_completion_fn(self) -> _CompletionFn:
+        """
+        title: Resolve the completion callable used for requests.
+        returns:
+          type: _CompletionFn
+        """
         if self._completion_fn is not None:
             return self._completion_fn
 
@@ -578,6 +591,16 @@ def _prefixed_names(
     prefixes: tuple[str, ...],
     suffix: str,
 ) -> tuple[str, ...]:
+    """
+    title: Build environment variable names from prefixes and a suffix.
+    parameters:
+      prefixes:
+        type: tuple[str, Ellipsis]
+      suffix:
+        type: str
+    returns:
+      type: tuple[str, Ellipsis]
+    """
     return tuple(f'{prefix}{suffix}' for prefix in prefixes)
 
 
@@ -607,6 +630,14 @@ def _load_api_params(prefixes: tuple[str, ...]) -> dict[str, Any]:
 
 
 def _first_nonempty_env(names: tuple[str, ...]) -> str:
+    """
+    title: Return the first non-empty environment variable value.
+    parameters:
+      names:
+        type: tuple[str, Ellipsis]
+    returns:
+      type: str
+    """
     for name in names:
         value = os.getenv(name)
         if value:
@@ -615,6 +646,16 @@ def _first_nonempty_env(names: tuple[str, ...]) -> str:
 
 
 def _read_float_env(names: tuple[str, ...], *, default: float) -> float:
+    """
+    title: Read a float from environment variables with a default.
+    parameters:
+      names:
+        type: tuple[str, Ellipsis]
+      default:
+        type: float
+    returns:
+      type: float
+    """
     value = _first_nonempty_env(names)
     if not value:
         return default
@@ -622,6 +663,16 @@ def _read_float_env(names: tuple[str, ...], *, default: float) -> float:
 
 
 def _read_int_env(names: tuple[str, ...], *, default: int) -> int:
+    """
+    title: Read an integer from environment variables with a default.
+    parameters:
+      names:
+        type: tuple[str, Ellipsis]
+      default:
+        type: int
+    returns:
+      type: int
+    """
     value = _first_nonempty_env(names)
     if not value:
         return default

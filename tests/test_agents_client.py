@@ -28,6 +28,12 @@ class _FakeLLM:
     """
 
     def __init__(self, result: LLMDiagnosis) -> None:
+        """
+        title: Initialize the fake LLM with a fixed diagnosis result.
+        parameters:
+          result:
+            type: LLMDiagnosis
+        """
         self.result = result
         self.calls: list[dict[str, object]] = []
 
@@ -133,6 +139,14 @@ def test_chat_raises_library_exception_on_invalid_llm_json(monkeypatch):
 
     class _InvalidLLM:
         def generate(self, *_args, **_kwargs):
+            """
+            title: Return an invalid diagnosis payload for validation tests.
+            parameters:
+              _args:
+                variadic: positional
+              _kwargs:
+                variadic: keyword
+            """
             return LLMDiagnosis.model_validate_json('{"summary":"only"}')
 
     with pytest.raises(client_mod.LLMResponseValidationError) as exc:

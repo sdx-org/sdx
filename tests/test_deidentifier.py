@@ -37,6 +37,16 @@ class _FakePattern:
     """
 
     def __init__(self, name: str, regex: str, score: float) -> None:
+        """
+        title: Store fake pattern metadata for assertions.
+        parameters:
+          name:
+            type: str
+          regex:
+            type: str
+          score:
+            type: float
+        """
         self.name = name
         self.regex = regex
         self.score = score
@@ -53,6 +63,14 @@ class _FakePatternRecognizer:
     """
 
     def __init__(self, supported_entity: str, patterns: list[Any]) -> None:
+        """
+        title: Store fake recognizer entities and patterns.
+        parameters:
+          supported_entity:
+            type: str
+          patterns:
+            type: list[Any]
+        """
         self.supported_entities = [supported_entity]
         self.patterns = patterns
 
@@ -69,6 +87,12 @@ class _FakeRegistry:
     """
 
     def __init__(self, recognizers: list[Any]) -> None:
+        """
+        title: Initialize the fake recognizer registry state.
+        parameters:
+          recognizers:
+            type: list[Any]
+        """
         self.recognizers = recognizers
         self.added: list[Any] = []
 
@@ -116,6 +140,14 @@ class _FakeAnalyzerEngine:
     """
 
     def __init__(self, results: list[Any], recognizers: list[Any]) -> None:
+        """
+        title: Initialize fake analyzer results and recognizers.
+        parameters:
+          results:
+            type: list[Any]
+          recognizers:
+            type: list[Any]
+        """
         self._results = results
         self.registry = _FakeRegistry(recognizers)
         self.calls: list[dict[str, Any]] = []
@@ -157,6 +189,12 @@ class _FakeAnonymizerEngine:
     """
 
     def __init__(self, anonymized_text: str) -> None:
+        """
+        title: Initialize the fake anonymizer return value.
+        parameters:
+          anonymized_text:
+            type: str
+        """
         self.anonymized_text = anonymized_text
         self.calls: list[dict[str, Any]] = []
 
@@ -375,6 +413,14 @@ def test_deidentify_patient_record_recursively():
 
     class _StubDeidentifier:
         def deidentify(self, text: str) -> str:
+            """
+            title: Return a visibly redacted version of the input text.
+            parameters:
+              text:
+                type: str
+            returns:
+              type: str
+            """
             return f'<redacted:{text}>'
 
     record = {
