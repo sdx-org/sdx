@@ -38,11 +38,21 @@ class UnsafeOutputError(ValueError):
     title: Raised when LLM output contains a banned topic.
     attributes:
       hits:
-        type: list[tuple[str, float]]
         description: Detected (label, score) pairs that exceeded the threshold.
     """
 
     def __init__(self, message: str, hits: list[tuple[str, float]]) -> None:
+        """
+        title: Initialise with a human-readable message and the hit list.
+        parameters:
+          message:
+            type: str
+            description: Human-readable description of the unsafe content.
+          hits:
+            type: list[tuple[str, float]]
+            description: >-
+              Detected (label, score) pairs that exceeded the threshold.
+        """
         super().__init__(message)
         self.hits = hits
 
@@ -89,7 +99,7 @@ def _env_banned_topics() -> tuple[str, ...]:
     """
     title: Return banned topics from env or fall back to defaults.
     returns:
-      type: tuple[str, ...]
+      type: tuple[str, Ellipsis]
       description: Return value.
     """
     raw = os.getenv(f'{_ENV_PREFIX}BANNED_TOPICS', '')
@@ -135,7 +145,7 @@ def detect_banned_topics(
         type: str
         description: Text to classify.
       banned_topics:
-        type: tuple[str, ...] | None
+        type: tuple[str, Ellipsis] | None
         description: Labels to test against; defaults to DEFAULT_BANNED_TOPICS.
       threshold:
         type: float | None
