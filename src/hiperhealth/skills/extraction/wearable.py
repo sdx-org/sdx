@@ -129,6 +129,19 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
         self._validate_or_raise(file)
         return self._process_file(file)
 
+    def _normalize_file_input(self, file: FileInput) -> FileInput:
+        """
+        title: Normalize file path inputs to Path instances.
+        parameters:
+          file:
+            type: FileInput
+        returns:
+          type: FileInput
+        """
+        if isinstance(file, str):
+            return Path(file)
+        return file
+
     def _process_file(self, file: FileInput) -> list[dict[str, object]]:
         """
         title: Dispatch file processing based on detected file format.
@@ -159,6 +172,8 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
           type: bool
           description: Return value.
         """
+        file = self._normalize_file_input(file)
+
         if isinstance(file, (tempfile.SpooledTemporaryFile, io.BytesIO)):
             # if it's a inmemory-temp file, validate it
             return self._validate_inmemory_file(file)
@@ -211,6 +226,7 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
           type: str
           description: Return value.
         """
+        file = self._normalize_file_input(file)
         cache_key = self._get_cache_key(file)
 
         if cache_key in self._mimetype_cache:
@@ -243,6 +259,7 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
         returns:
           type: str
         """
+        file = self._normalize_file_input(file)
         cache_key: str
         if isinstance(file, Path):
             cache_key = str(file.resolve())
