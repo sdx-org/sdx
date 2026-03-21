@@ -48,6 +48,12 @@ class UnsafeOutputError(ValueError):
 
 
 def _get_device_id() -> int:
+    """
+    title: Return GPU device id (0) if CUDA available, else CPU (-1).
+    returns:
+      type: int
+      description: Return value.
+    """
     try:
         import torch
 
@@ -57,6 +63,19 @@ def _get_device_id() -> int:
 
 
 def _env_float(name: str, default: float) -> float:
+    """
+    title: Parse float env var; return default if missing or invalid.
+    parameters:
+      name:
+        type: str
+        description: Value for name.
+      default:
+        type: float
+        description: Value for default.
+    returns:
+      type: float
+      description: Return value.
+    """
     val = os.getenv(name)
     if val is None:
         return default
@@ -67,6 +86,12 @@ def _env_float(name: str, default: float) -> float:
 
 
 def _env_banned_topics() -> tuple[str, ...]:
+    """
+    title: Return banned topics from env or fall back to defaults.
+    returns:
+      type: tuple[str, ...]
+      description: Return value.
+    """
     raw = os.getenv(f'{_ENV_PREFIX}BANNED_TOPICS', '')
     if not raw.strip():
         return DEFAULT_BANNED_TOPICS
