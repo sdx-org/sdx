@@ -36,9 +36,7 @@ _hf_only = pytest.mark.skipif(
 )
 
 
-def _diagnosis(
-    summary: str, options: list[str] | None = None
-) -> LLMDiagnosis:
+def _diagnosis(summary: str, options: list[str] | None = None) -> LLMDiagnosis:
     """
     title: Build a minimal LLMDiagnosis fixture for testing.
     parameters:
@@ -164,9 +162,7 @@ def test_env_banned_topics_ignores_empty_string(
 # ---------------------------------------------------------------------------
 # detect_banned_topics — unit (mocked classifier)
 # ---------------------------------------------------------------------------
-def _make_mock_classifier(
-    labels: list[str], scores: list[float]
-) -> MagicMock:
+def _make_mock_classifier(labels: list[str], scores: list[float]) -> MagicMock:
     """
     title: Build a mock classifier returning fixed labels and scores.
     parameters:
@@ -185,9 +181,7 @@ def _make_mock_classifier(
     return mock
 
 
-def test_detect_banned_topics_returns_empty_when_all_below_threshold() -> (
-    None
-):
+def test_detect_banned_topics_returns_empty_when_all_below_threshold() -> None:
     """
     title: detect_banned_topics returns [] when all scores are below threshold.
     """
