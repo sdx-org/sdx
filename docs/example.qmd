@@ -45,6 +45,11 @@ session = Session.create(session_path, language="en")
 runner = create_default_runner()
 ```
 
+This walkthrough intentionally uses only the built-in hiperhealth skills. Once
+you register a custom channel skill, it participates in the same
+session-and-runner workflow. An optional appendix near the end shows the
+channel-based setup and how to compare a run with and without a specific skill.
+
 ## Stage 1 — Screening
 
 The screening stage performs initial triage and de-identifies any PII in the
@@ -380,6 +385,45 @@ df = pd.read_parquet(session_path)
 df[["event_id", "event_type", "stage", "timestamp"]]
 ```
 
+## Optional: Add a custom channel skill
+
+Custom skills are now distributed through channels. After registering a channel
+and installing one of its skills, you can register it on the same runner with
+its canonical id.
+
+```{python}
+#| eval: false
+from hiperhealth.pipeline import SkillRegistry
+
+registry = SkillRegistry()
+registry.add_channel(
+    "https://github.com/my-org/traditional-medicine.git",
+    local_name="tm",
+)
+registry.install_skill("tm.ayurveda")
+
+runner = create_default_runner()
+runner.register("tm.ayurveda", index=0)
+```
+
+## Optional: Compare a run with and without a skill
+
+For notebook experiments, the runner can temporarily disable one or more
+registered skills without uninstalling them. This is useful for side-by-side
+comparisons.
+
+```{python}
+#| eval: false
+treatment_ctx = session.to_context()
+
+with_skill = runner.run(Stage.TREATMENT, treatment_ctx)
+
+with runner.disabled({"tm.ayurveda"}):
+    without_skill = runner.run(Stage.TREATMENT, session.to_context())
+
+# One-off calls can also use: disabled_skills={"tm.ayurveda"}
+```
+
 ## Cleanup
 
 ```{python}
@@ -405,6 +449,10 @@ Key patterns shown:
   three priority levels (required, supplementary, deferred)
 - **Multi-visit workflow** — session persists across days; deferred data (lab
   results) arrives later and triggers a re-run
+- **Channel skills** — custom skills can be registered with canonical ids such
+  as `tm.ayurveda` and used in the same runner
+- **A/B comparisons** — `runner.disabled({...})` temporarily skips selected
+  skills without uninstalling them
 - **Session persistence** — parquet event log as single source of truth,
   queryable with polars/pandas/DuckDB
 - **No PII** — only clinical data in the session file; the external system maps

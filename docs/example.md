@@ -39,6 +39,11 @@ session = Session.create(session_path, language="en")
 runner = create_default_runner()
 ```
 
+This walkthrough intentionally uses only the built-in hiperhealth skills. Once
+you register a custom channel skill, it participates in the same
+session-and-runner workflow. An optional appendix near the end shows the
+channel-based setup and how to compare a run with and without a specific skill.
+
 ## Stage 1 — Screening
 
 The screening stage performs initial triage and de-identifies any PII in the
@@ -114,32 +119,26 @@ for inq in inquiries:
         print(f"    → {inq.description}")
 ```
 
-    Total inquiries: 12
+    Total inquiries: 9
 
-      [required] vital_signs: Vital Signs (BP, HR, RR, Temperature)
-        → Baseline vital signs needed to assess current status and inflammation
-      [required] height: Height
-        → Needed to calculate BMI
-      [required] weight: Weight
-        → Current weight for BMI calculation
+      [required] vital_signs: Vital Signs
+        → Current temperature, blood pressure, heart rate, respiratory rate, weight, and height to assess baseline status.
+      [required] recent_weight_change: Recent Weight Change
+        → Amount and time frame of weight loss or gain to evaluate for malabsorption or nutritional deficiency.
       [required] stool_characteristics: Stool Characteristics
-        → Frequency, consistency, presence of blood or mucus to characterize diarrhea
-      [supplementary] weight_change: Weight Change
-        → Recent weight loss or gain associated with symptoms
-      [supplementary] medication_supplements: Over-the-Counter Medications & Supplements
-        → Identify any additional medications or supplements that may contribute to symptoms
-      [supplementary] smoking_history: Smoking History
-        → Assess risk factors related to smoking
-      [supplementary] alcohol_use: Alcohol Use
-        → Quantity and frequency of alcohol intake
-      [supplementary] family_history_gi: Family History of Gastrointestinal/Autoimmune Disease
-        → Assess genetic predisposition to conditions like celiac disease or IBD
-      [supplementary] constitutional_symptoms: Constitutional Symptoms
-        → Presence of fever, night sweats, or other systemic symptoms
-      [deferred] travel_history: Travel History
-        → Recent travel to areas with risk of infectious causes of diarrhea
-      [deferred] menstrual_history: Menstrual and Reproductive History
-        → Evaluate hormonal factors or correlation with symptoms
+        → Frequency, consistency, and presence of blood or mucus in stools to characterize diarrhea.
+      [supplementary] family_history: Family Medical History
+        → Family history of celiac disease, inflammatory bowel disease, colorectal cancer, or other gastrointestinal disorders.
+      [supplementary] social_history: Social History
+        → Tobacco and alcohol use, dietary habits beyond gluten and dairy, occupational exposures, and recent travel history.
+      [supplementary] additional_past_medical_history: Additional Past Medical History
+        → Other chronic conditions, surgeries, or hospitalizations not yet described.
+      [supplementary] current_medications_and_supplements: Current Medications and Supplements
+        → All prescription, over-the-counter medications, and supplements to assess potential contributors.
+      [supplementary] systemic_symptoms: Systemic Symptoms
+        → Presence of fevers, night sweats, joint pains, rashes, or other systemic manifestations.
+      [deferred] sexual_history: Sexual History
+        → Information on sexual activity and practices relevant to gastrointestinal infections.
 
 ### Provide answers to the inquiries
 
@@ -204,8 +203,8 @@ if unanswered:
     print(f"Not in answer bank (skipped): {unanswered}")
 ```
 
-    Answered 1 inquiries: ['vital_signs']
-    Not in answer bank (skipped): ['height', 'weight', 'stool_characteristics', 'weight_change', 'medication_supplements', 'smoking_history', 'alcohol_use', 'family_history_gi', 'constitutional_symptoms']
+    Answered 3 inquiries: ['vital_signs', 'family_history', 'social_history']
+    Not in answer bank (skipped): ['recent_weight_change', 'stool_characteristics', 'additional_past_medical_history', 'current_medications_and_supplements', 'systemic_symptoms']
 
 ### Run preliminary diagnosis
 
@@ -226,7 +225,7 @@ else:
 
     Preliminary diagnosis complete.
 
-    Results: {'summary': 'A 38-year-old female with a history of IBS presents with 6 months of postprandial bloating, abdominal discomfort, intermittent diarrhea, fatigue, and brain fog exacerbated by gluten and dairy. Laboratory findings of mild inflammation and iron and vitamin D deficiencies raise concern for underlying malabsorption.', 'options': ['Celiac disease', 'Lactose intolerance', 'Non-celiac gluten sensitivity', 'Small intestinal bacterial overgrowth', 'Exocrine pancreatic insufficiency', 'Irritable bowel syndrome exacerbation', 'Inflammatory bowel disease']}
+    Results: {'summary': 'A 38-year-old female with a history of IBS presents with six months of postprandial bloating, abdominal discomfort, intermittent diarrhea, fatigue, and brain fog, exacerbated by gluten and dairy. Labs reveal mild inflammation, low vitamin D, and ferritin, with a family history of celiac disease, suggesting a malabsorptive or inflammatory etiology.', 'options': ['Celiac disease', 'Non-celiac gluten sensitivity', 'Lactose intolerance', 'Small intestinal bacterial overgrowth', 'Irritable bowel syndrome with diarrhea', 'Inflammatory bowel disease', 'Pancreatic exocrine insufficiency']}
 
 ## Stage 4 — Exam
 
@@ -247,7 +246,7 @@ else:
 
     Exam suggestions complete.
 
-    Results: {'summary': 'The differential includes immune‐mediated mucosal injury (celiac disease, non‐celiac gluten sensitivity), enzyme deficiencies (lactase, pancreatic), microbial overgrowth (SIBO), functional disorder (IBS), and organic inflammation (IBD). Targeted serologies, breath tests, stool assays, and endoscopic evaluation can distinguish these etiologies and guide management.', 'options': ['Serologic testing for tissue transglutaminase IgA and total IgA', 'Anti‐endomysial antibody assay', 'Upper endoscopy with duodenal biopsy', 'Lactose hydrogen breath test', 'Glucose or lactulose breath test for SIBO', 'Fecal elastase level', 'Stool calprotectin', 'Colonoscopy with ileal and colonic biopsies', 'CRP and ESR inflammatory markers', 'Gluten‐free and lactose elimination diet trial']}
+    Results: {'summary': 'To distinguish among celiac disease, non-celiac gluten sensitivity, lactose intolerance, small intestinal bacterial overgrowth, IBS-D, inflammatory bowel disease, and pancreatic exocrine insufficiency, a combination of serologic, genetic, endoscopic, breath, and stool tests is recommended.', 'options': ['Serum IgA tissue transglutaminase antibody', 'Serum IgA anti‐endomysial antibody', 'Total serum IgA level', 'HLA-DQ2/DQ8 genotyping', 'Upper endoscopy with duodenal biopsy', 'Lactose hydrogen breath test', 'Lactulose breath test for SIBO', 'Colonoscopy with biopsies', 'Fecal calprotectin', 'Fecal elastase']}
 
 ## Multi-visit gap — Lab results arrive
 
@@ -310,11 +309,11 @@ else:
     print(f"\nResults: {diagnosis}")
 ```
 
-    Remaining deferred inquiries: 1
+    Remaining deferred inquiries: 3
 
     Enriched diagnosis complete (with lab results).
 
-    Results: {'summary': 'A 38-year-old woman with a history of IBS presents with six months of postprandial bloating, abdominal discomfort, fatigue, brain fog, and intermittent diarrhea exacerbated by gluten and dairy. Laboratory and stool analyses reveal elevated intestinal permeability, increased zonulin and calprotectin, low secretory IgA, and vitamin D deficiency, suggesting an immune-mediated gut barrier dysfunction.', 'options': ['Celiac disease', 'Non-celiac gluten sensitivity', 'Lactose intolerance', 'Irritable bowel syndrome exacerbation', 'Small intestinal bacterial overgrowth']}
+    Results: {'summary': 'A 38-year-old female with a history of IBS presents with chronic postprandial bloating, abdominal discomfort, intermittent diarrhea, fatigue, and brain fog worsened by gluten and dairy, alongside mild inflammatory markers and increased intestinal permeability. Elevated zonulin, positive IgG reactivity to gluten and casein, low secretory IgA, and family history of celiac disease suggest a gluten-mediated enteropathy or related gut dysfunction.', 'options': ['Celiac disease', 'Non-celiac gluten sensitivity', 'Irritable bowel syndrome (diarrhea-predominant)', 'Small intestinal bacterial overgrowth (SIBO)', 'Lactose intolerance', 'Microscopic colitis']}
 
 ## Stage 5 — Treatment
 
@@ -392,11 +391,11 @@ print(f"Total events: {len(session.events)}")
 print(f"Pending inquiries: {len(session.pending_inquiries)}")
 ```
 
-    Session file: /tmp/tmp1dwe6i9k/gut-leak-visit.parquet
+    Session file: /tmp/tmp1e2iz9tw/gut-leak-visit.parquet
     Language: en
     Stages completed: ['screening', 'intake', 'diagnosis', 'exam', <Stage.DIAGNOSIS: 'diagnosis'>, <Stage.TREATMENT: 'treatment'>, <Stage.PRESCRIPTION: 'prescription'>]
     Total events: 27
-    Pending inquiries: 23
+    Pending inquiries: 18
 
 ### Clinical data accumulated
 
@@ -418,7 +417,9 @@ print(json.dumps({k: v for k, v in clinical.items()
       "medical_history": "Irritable bowel syndrome diagnosed 3 years ago",
       "medications": "Omeprazole 20mg daily",
       "allergies": "None known",
-      "vital_signs": "BP 118/72, HR 74, Temp 36.8\u00b0C, BMI 24.1"
+      "vital_signs": "BP 118/72, HR 74, Temp 36.8\u00b0C, BMI 24.1",
+      "family_history": "Mother: celiac disease, hypothyroidism. Father: type 2 diabetes, hypertension. Sibling: no significant conditions.",
+      "social_history": "Non-smoker, occasional alcohol (1-2 drinks/week). Office worker, sedentary lifestyle."
     }
 
 ### Event log with polars
@@ -449,6 +450,43 @@ df = pd.read_parquet(session_path)
 df[["event_id", "event_type", "stage", "timestamp"]]
 ```
 
+## Optional: Add a custom channel skill
+
+Custom skills are now distributed through channels. After registering a channel
+and installing one of its skills, you can register it on the same runner with
+its canonical id.
+
+```python
+from hiperhealth.pipeline import SkillRegistry
+
+registry = SkillRegistry()
+registry.add_channel(
+    "https://github.com/my-org/traditional-medicine.git",
+    local_name="tm",
+)
+registry.install_skill("tm.ayurveda")
+
+runner = create_default_runner()
+runner.register("tm.ayurveda", index=0)
+```
+
+## Optional: Compare a run with and without a skill
+
+For notebook experiments, the runner can temporarily disable one or more
+registered skills without uninstalling them. This is useful for side-by-side
+comparisons.
+
+```python
+treatment_ctx = session.to_context()
+
+with_skill = runner.run(Stage.TREATMENT, treatment_ctx)
+
+with runner.disabled({"tm.ayurveda"}):
+    without_skill = runner.run(Stage.TREATMENT, session.to_context())
+
+# One-off calls can also use: disabled_skills={"tm.ayurveda"}
+```
+
 ## Cleanup
 
 ```python
@@ -474,6 +512,10 @@ Key patterns shown:
   priority levels (required, supplementary, deferred)
 - **Multi-visit workflow** — session persists across days; deferred data (lab
   results) arrives later and triggers a re-run
+- **Channel skills** — custom skills can be registered with canonical ids such
+  as `tm.ayurveda` and used in the same runner
+- **A/B comparisons** — `runner.disabled({...})` temporarily skips selected
+  skills without uninstalling them
 - **Session persistence** — parquet event log as single source of truth,
   queryable with polars/pandas/DuckDB
 - **No PII** — only clinical data in the session file; the external system maps
