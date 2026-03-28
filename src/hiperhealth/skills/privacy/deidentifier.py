@@ -2,9 +2,9 @@
 title: PII detection, de-identification, and PrivacySkill.
 """
 
-import logging
+from __future__ import annotations
 
-from typing import Optional
+import logging
 
 from presidio_analyzer import (
     AnalyzerEngine,
@@ -108,7 +108,7 @@ class Deidentifier:
     def analyze(
         self,
         text: str,
-        entities: Optional[list[str]] = None,
+        entities: list[str] | None = None,
         language: str = 'en',
     ) -> list[RecognizerResult]:
         """
@@ -118,7 +118,7 @@ class Deidentifier:
             type: str
             description: Value for text.
           entities:
-            type: Optional[list[str]]
+            type: list[str] | None
             description: Value for entities.
           language:
             type: str

@@ -5,7 +5,7 @@ title: Domain-specific (non-FHIR) Pydantic models used across the platform.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -64,7 +64,7 @@ class Evaluation(BaseLanguage, BaseModel):
         type: Literal[safe, needs_review, unsafe]
         description: Value for safety.
       comments:
-        type: Optional[str]
+        type: str | None
         description: Value for comments.
       timestamp:
         type: datetime
@@ -78,7 +78,7 @@ class Evaluation(BaseLanguage, BaseModel):
         Literal['accuracy', 'relevance', 'usefulness', 'coherence'], int
     ]
     safety: Literal['safe', 'needs_review', 'unsafe']
-    comments: Optional[str] = None
+    comments: str | None = None
     timestamp: datetime
 
 
@@ -102,7 +102,7 @@ class DeIdentifiedDatasetDescriptor(BaseLanguage, BaseModel):
         type: str
         description: Value for license.
       url:
-        type: Optional[str]
+        type: str | None
         description: Value for url.
     """
 
@@ -111,4 +111,4 @@ class DeIdentifiedDatasetDescriptor(BaseLanguage, BaseModel):
     version: str
     records: int
     license: str
-    url: Optional[str] = None
+    url: str | None = None
