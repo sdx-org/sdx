@@ -144,3 +144,32 @@ def test_support_inmemory_csv(wearable_extractor):
     assert len(wearable_data) == 4
     assert wearable_data[0]['name'] == 'John Doe'
     assert wearable_data[1]['heart_rate'] == 80
+
+
+def test_process_row_handles_none_values(wearable_extractor):
+    """
+    title: _process_row should not crash when a CSV field value is None.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+    """
+    # Rows shorter than the header produce None values via csv.DictReader
+    raw_csv = b'name,age,score\nAlice,30'
+    some_csv = io.BytesIO(raw_csv)
+    result = wearable_extractor.extract_wearable_data(some_csv)
+    assert result[0]['score'] is None
+
+
+def test_process_row_handles_negative_integers(wearable_extractor):
+    """
+    title: _process_row should parse negative integers as int, not str.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+    """
+    raw_csv = b'timestamp,temperature\n2024-01-01,-5\n2024-01-02,-12'
+    some_csv = io.BytesIO(raw_csv)
+    result = wearable_extractor.extract_wearable_data(some_csv)
+    assert result[0]['temperature'] == -5
+    assert isinstance(result[0]['temperature'], int)
+    assert result[1]['temperature'] == -12
