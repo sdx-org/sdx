@@ -163,9 +163,11 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             # if it's a inmemory-temp file, validate it
             return self._validate_inmemory_file(file)
 
-        if isinstance(file, Path):
-            # if it's normal file, gets its extension
-            return file.suffix.replace('.', '') in self.allowed_extensions
+        if isinstance(file, (str, Path)):
+            # if it's a file path, check its extension
+            return (
+                Path(file).suffix.replace('.', '') in self.allowed_extensions
+            )
 
         return self._get_mime_type(file) in self.allowed_mimetypes
 
@@ -217,9 +219,9 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             # Return cached mimetype
             return self._mimetype_cache[cache_key]
 
-        if isinstance(file, Path):
+        if isinstance(file, (str, Path)):
             self._mimetype_cache[cache_key] = cast(
-                MimeType, self.mime.from_file(file)
+                MimeType, self.mime.from_file(str(file))
             )
             return self._mimetype_cache[cache_key]
         elif isinstance(file, io.IOBase):
@@ -244,10 +246,10 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
           type: str
         """
         cache_key: str
-        if isinstance(file, Path):
-            cache_key = str(file.resolve())
+        if isinstance(file, (str, Path)):
+            cache_key = str(Path(file).resolve())
         else:
-            cache_key = str(id(file))  # Usar o id do objeto em memória
+            cache_key = str(id(file))  # use object id for in-memory files
         return cache_key
 
     def _is_json(self, file: FileInput) -> bool:
