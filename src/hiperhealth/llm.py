@@ -114,17 +114,18 @@ class LLMSettings:
     api_params: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        """Validate settings after initialization."""
-        if self.temperature < 0.0 or self.temperature > 2.0:
-            raise ValueError(
-                f"temperature must be between 0.0 and 2.0, got {self.temperature}"
-            )
-        if self.max_tokens < 1:
-            raise ValueError(
-                f"max_tokens must be positive, got {self.max_tokens}"
-            )
-        if not self.provider:
-            raise ValueError("provider cannot be empty")
+     """Validate settings after initialization."""
+    if self.temperature < 0.0 or self.temperature > 2.0:
+        raise ValueError(
+            f"temperature must be between 0.0 and 2.0, "
+            f"got {self.temperature}"
+        )
+    if self.max_tokens < 1:
+        raise ValueError(
+            f"max_tokens must be positive, got {self.max_tokens}"
+        )
+    if not self.provider:
+        raise ValueError("provider cannot be empty")
         
     @property
     def normalized_provider(self) -> str:
