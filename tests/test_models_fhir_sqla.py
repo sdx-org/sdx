@@ -176,7 +176,11 @@ def test_model_basic_crud(model_cls, db_session: Session):
 
 # ── gen_sqla type-mapping tests (issue #136) ───────────────────────
 
-_GEN_MODELS = str(__import__('pathlib').Path('/tmp/hh4/scripts/gen_models'))
+_GEN_MODELS = str(
+    __import__('pathlib').Path(__file__).resolve().parent.parent
+    / 'scripts'
+    / 'gen_models'
+)
 if _GEN_MODELS not in sys.path:
     sys.path.insert(0, _GEN_MODELS)
 
