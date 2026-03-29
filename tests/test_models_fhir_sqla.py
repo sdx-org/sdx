@@ -46,8 +46,13 @@ from sqlalchemy.orm import Session, sessionmaker
 def engine():
     """
     title: In-memory SQLite engine for fast, isolated tests.
+    summary: |-
+      Yields the engine and disposes it after the session to avoid
+      ResourceWarning for unclosed database connections (issue #199).
     """
-    return create_engine('sqlite:///:memory:', future=True, echo=False)
+    _engine = create_engine('sqlite:///:memory:', future=True, echo=False)
+    yield _engine
+    _engine.dispose()
 
 
 @pytest.fixture(scope='session')
