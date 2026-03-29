@@ -124,6 +124,48 @@ More detail is available in
 
 ## Quickstart
 
+### New to HiperHealth? Start here (5 minutes)
+
+The fastest way to run a diagnostic workflow:
+```python
+# Install
+pip install hiperhealth
+
+# Set your OpenAI API key
+export HIPERHEALTH_DIAGNOSTICS_LLM_API_KEY="sk-..."
+
+# Run a complete diagnostic workflow
+from hiperhealth.pipeline import create_default_runner, PipelineContext, Stage
+
+runner = create_default_runner()
+
+# Patient presents with symptoms
+ctx = PipelineContext(
+    patient={
+        "age": 45,
+        "biological_sex": "male",
+        "symptoms": "chest pain radiating to left arm, shortness of breath",
+        "duration": "30 minutes"
+    },
+    language="en",
+    session_id="demo-001"
+)
+
+# Run diagnosis
+ctx = runner.run(Stage.DIAGNOSIS, ctx)
+print(f"Summary: {ctx.results['diagnosis'].summary}")
+print(f"Differential diagnoses: {ctx.results['diagnosis'].options}")
+```
+
+**That's it!** You've run your first AI-powered clinical workflow.
+
+**Next steps:**
+- See [Pipeline-based workflow](#1-pipeline-based-workflow-recommended) for more control
+- See [Session-based workflow](#2-session-based-workflow-recommended-for-multi-visit-scenarios) for multi-day patient visits
+- See [Configuration](#configuration) to use Ollama instead of OpenAI
+
+---
+
 ### 1. Pipeline-based workflow (recommended)
 
 The pipeline runs stages independently through composable skills:
