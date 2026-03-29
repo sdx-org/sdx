@@ -11,9 +11,11 @@ import pytest
 from hiperhealth.llm import (
     LiteLLMStructuredLLM,
     LLMSettings,
+    _call_completion,
     _clean_json_text,
     _coerce_model_output,
     _extract_message_content,
+    _is_transient_litellm_error,
     _join_content_blocks,
     _load_api_params,
     build_structured_llm,
@@ -373,3 +375,203 @@ def test_to_litellm_kwargs_always_includes_temperature_and_max_tokens():
         kwargs = settings.to_litellm_kwargs()
         assert kwargs['temperature'] == 0.0
         assert kwargs['max_tokens'] == 4096
+
+
+# ── Transient-error retry tests ────────────────────────────────────
+
+
+class _FakeRateLimitError(Exception):
+    """
+    title: Stand-in for litellm.RateLimitError in retry tests.
+    """
+
+
+class _FakeTimeoutError(Exception):
+    """
+    title: Stand-in for litellm.Timeout in retry tests.
+    """
+
+
+class _FakeAPIConnectionError(Exception):
+    """
+    title: Stand-in for litellm.APIConnectionError in retry tests.
+    """
+
+
+class _FakeServiceUnavailableError(Exception):
+    """
+    title: Stand-in for litellm.ServiceUnavailableError in retry tests.
+    """
+
+
+def test_is_transient_litellm_error_returns_true_for_known_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """
+    title: >-
+      _is_transient_litellm_error returns True for all four LiteLLM error
+      types.
+    parameters:
+      monkeypatch:
+        type: pytest.MonkeyPatch
+        description: Value for monkeypatch.
+    """
+    import types
+
+    fake_litellm = types.ModuleType('litellm')
+    fake_litellm.RateLimitError = _FakeRateLimitError  # type: ignore[attr-defined]
+    fake_litellm.Timeout = _FakeTimeoutError  # type: ignore[attr-defined]
+    fake_litellm.APIConnectionError = _FakeAPIConnectionError  # type: ignore[attr-defined]
+    fake_litellm.ServiceUnavailableError = _FakeServiceUnavailableError  # type: ignore[attr-defined]
+
+    import sys
+
+    monkeypatch.setitem(sys.modules, 'litellm', fake_litellm)
+
+    assert _is_transient_litellm_error(_FakeRateLimitError())
+    assert _is_transient_litellm_error(_FakeTimeoutError())
+    assert _is_transient_litellm_error(_FakeAPIConnectionError())
+    assert _is_transient_litellm_error(_FakeServiceUnavailableError())
+
+
+def test_is_transient_litellm_error_returns_false_for_other_errors() -> None:
+    """
+    title: >-
+      _is_transient_litellm_error returns False for non-transient exceptions.
+    """
+    assert not _is_transient_litellm_error(ValueError('bad input'))
+    assert not _is_transient_litellm_error(TypeError('type mismatch'))
+    assert not _is_transient_litellm_error(RuntimeError('unexpected'))
+
+
+def test_call_completion_retries_on_transient_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """
+    title: _call_completion retries up to 3 times on transient LiteLLM errors.
+    parameters:
+      monkeypatch:
+        type: pytest.MonkeyPatch
+        description: Value for monkeypatch.
+    """
+    import sys
+    import types
+
+    fake_litellm = types.ModuleType('litellm')
+    fake_litellm.RateLimitError = _FakeRateLimitError  # type: ignore[attr-defined]
+    fake_litellm.Timeout = _FakeTimeoutError  # type: ignore[attr-defined]
+    fake_litellm.APIConnectionError = _FakeAPIConnectionError  # type: ignore[attr-defined]
+    fake_litellm.ServiceUnavailableError = _FakeServiceUnavailableError  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, 'litellm', fake_litellm)
+
+    call_count = 0
+    sentinel = object()
+
+    def flaky_completion(**kwargs: object) -> object:
+        """
+        title: Fail with RateLimitError on first two calls, succeed on third.
+        parameters:
+          kwargs:
+            type: object
+            variadic: keyword
+        returns:
+          type: object
+        """
+        nonlocal call_count
+        call_count += 1
+        if call_count < 3:
+            raise _FakeRateLimitError('rate limited')
+        return sentinel
+
+    result = _call_completion(flaky_completion)
+    assert result is sentinel
+    assert call_count == 3
+
+
+def test_call_completion_does_not_retry_on_non_transient_error() -> None:
+    """
+    title: >-
+      _call_completion propagates non-transient errors immediately without
+      retry.
+    """
+    call_count = 0
+
+    def always_fails(**kwargs: object) -> object:
+        """
+        title: Always raise a non-transient ValueError.
+        parameters:
+          kwargs:
+            type: object
+            variadic: keyword
+        returns:
+          type: object
+        """
+        nonlocal call_count
+        call_count += 1
+        raise ValueError('bad request')
+
+    with pytest.raises(ValueError, match='bad request'):
+        _call_completion(always_fails)
+
+    assert call_count == 1
+
+
+def test_litellm_structured_llm_retries_on_rate_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """
+    title: >-
+      LiteLLMStructuredLLM.generate retries when completion raises a transient
+      error.
+    parameters:
+      monkeypatch:
+        type: pytest.MonkeyPatch
+        description: Value for monkeypatch.
+    """
+    import sys
+    import types
+
+    from types import SimpleNamespace
+
+    fake_litellm = types.ModuleType('litellm')
+    fake_litellm.RateLimitError = _FakeRateLimitError  # type: ignore[attr-defined]
+    fake_litellm.Timeout = _FakeTimeoutError  # type: ignore[attr-defined]
+    fake_litellm.APIConnectionError = _FakeAPIConnectionError  # type: ignore[attr-defined]
+    fake_litellm.ServiceUnavailableError = _FakeServiceUnavailableError  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, 'litellm', fake_litellm)
+
+    call_count = 0
+    good_response = SimpleNamespace(
+        choices=[
+            SimpleNamespace(
+                message=SimpleNamespace(
+                    content='{"summary": "ok", "options": ["A"]}',
+                    parsed=None,
+                    refusal=None,
+                )
+            )
+        ]
+    )
+
+    def completion_fn(**kwargs: object) -> object:
+        """
+        title: Raise RateLimitError on first call, return good response after.
+        parameters:
+          kwargs:
+            type: object
+            variadic: keyword
+        returns:
+          type: object
+        """
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            raise _FakeRateLimitError('rate limited')
+        return good_response
+
+    settings = LLMSettings(provider='openai', model='o4-mini', api_key='x')
+    llm = LiteLLMStructuredLLM(settings, completion_fn=completion_fn)
+    result = llm.generate('system', 'user', LLMDiagnosis)
+
+    assert call_count == 2
+    assert result.summary == 'ok'
