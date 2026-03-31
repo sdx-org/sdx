@@ -35,25 +35,22 @@ application.
 ## Installation
 
 
-## 🚀 Quick Start Guide (Simplified)
+## 🚀 Quick Start Guide
 
-For new users, here is a minimal setup to quickly run the library:
+For new users, here is a minimal setup to quickly run the library.
 
 ### Clone the repository
-
 ```bash
 git clone https://github.com/hiperhealth/hiperhealth.git
 cd hiperhealth
 ```
 
 ### Install dependencies
-
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Run a basic example
-
 ```python
 from hiperhealth.pipeline import PipelineContext, Stage, create_default_runner
 
