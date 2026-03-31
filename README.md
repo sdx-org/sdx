@@ -73,9 +73,9 @@ print(ctx.results)
 
 ### Notes
 
-- Ensure Python 3.9+ is installed  
-- It is recommended to use a virtual environment  
-### Stable release
+- Ensure Python 3.9+ is installed
+- It is recommended to use a virtual environment
+- ### Stable release
 
 ```bash
 pip install hiperhealth
