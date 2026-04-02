@@ -101,7 +101,7 @@ groups:
   release:
     vars:
       app: |
-        npx --yes \
+        env npm_config_ignore_scripts=true npx --yes \
         -p semantic-release \
         -p "@semantic-release/commit-analyzer" \
         -p "@semantic-release/release-notes-generator" \
