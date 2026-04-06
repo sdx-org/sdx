@@ -159,6 +159,9 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
           type: bool
           description: Return value.
         """
+        if isinstance(file, str):
+            file = Path(file)
+
         if isinstance(file, (tempfile.SpooledTemporaryFile, io.BytesIO)):
             # if it's a inmemory-temp file, validate it
             return self._validate_inmemory_file(file)
@@ -211,6 +214,9 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
           type: str
           description: Return value.
         """
+        if isinstance(file, str):
+            file = Path(file)
+
         cache_key = self._get_cache_key(file)
 
         if cache_key in self._mimetype_cache:
@@ -231,7 +237,8 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
             return self._mimetype_cache[cache_key]
         else:
             raise TypeError(
-                'Unsupported file type: must be Path or file-like object.'
+                'Expected Path or file-like object, got '
+                f'{type(file).__name__}'
             )
 
     def _get_cache_key(self, file: FileInput) -> str:
