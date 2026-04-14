@@ -410,7 +410,7 @@ def load_llm_settings(
     return LLMSettings(
         provider=provider,
         model=model,
-        api_key=api_key,
+        api_key=SecretStr(api_key) if api_key else '',
         engine=engine,
         temperature=temperature,
         max_tokens=max_tokens,

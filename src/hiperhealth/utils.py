@@ -72,3 +72,48 @@ def make_json_serializable(obj: Any) -> Any:
         return obj.isoformat()
     else:
         return obj
+
+
+_SENSITIVE_PATTERNS = {'key', 'token', 'secret', 'password', 'pwd'}
+
+
+def _scrub_sensitive_data(data: Any) -> Any:
+    """
+    title: Recursively mask sensitive fields in dictionaries or objects.
+    parameters:
+      data:
+        type: Any
+    returns:
+      type: Any
+    """
+    if isinstance(data, dict):
+        return {
+            k: '********' if _is_sensitive_key(k) else _scrub_sensitive_data(v)
+            for k, v in data.items()
+        }
+    if isinstance(data, (list, tuple)):
+        return [_scrub_sensitive_data(i) for i in data]
+
+    # Handle LLMSettings specifically if it appears in context data
+    try:
+        from hiperhealth.llm import LLMSettings
+
+        if isinstance(data, LLMSettings):
+            return 'LLMSettings(masked)'
+    except ImportError:
+        pass
+
+    return data
+
+
+def _is_sensitive_key(key: str) -> bool:
+    """
+    title: Check if a key name suggests it contains sensitive information.
+    parameters:
+      key:
+        type: str
+    returns:
+      type: bool
+    """
+    name = key.lower()
+    return any(pattern in name for pattern in _SENSITIVE_PATTERNS)
