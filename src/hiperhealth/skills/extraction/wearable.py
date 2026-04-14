@@ -126,6 +126,8 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
           type: list[dict[str, object]]
           description: Return value.
         """
+        if isinstance(file, str):
+            file = Path(file)
         self._validate_or_raise(file)
         return self._process_file(file)
 
@@ -159,6 +161,9 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
           type: bool
           description: Return value.
         """
+        if isinstance(file, str):
+            file = Path(file)
+
         if isinstance(file, (tempfile.SpooledTemporaryFile, io.BytesIO)):
             # if it's a inmemory-temp file, validate it
             return self._validate_inmemory_file(file)
@@ -211,6 +216,9 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
           type: str
           description: Return value.
         """
+        if isinstance(file, str):
+            file = Path(file)
+
         cache_key = self._get_cache_key(file)
 
         if cache_key in self._mimetype_cache:
