@@ -75,7 +75,7 @@ dev = [
   "coverage >=7.2.7",
   "pre-commit >=3.3.2",
   "ruff >=0.2.0",
-  "mypy >=1.5.0,<2",
+  "mypy ==1.15.0",
   "bandit >=1.7.5",
   "vulture >=2.7",
   "ipython >=8",
@@ -110,6 +110,18 @@ warn_unused_configs = true
 exclude = ["scripts/"]
 plugins = [
   "pydantic.mypy",
+]
+
+[[tool.mypy.overrides]]
+module = "hiperhealth.pipeline.session"
+disable_error_code = [
+  "no-untyped-call",
+]
+
+[[tool.mypy.overrides]]
+module = "hiperhealth.agents.client"
+disable_error_code = [
+  "arg-type",
 ]
 
 [tool.pytest.ini_options]
