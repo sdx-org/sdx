@@ -107,13 +107,6 @@ plugins = [
   "pydantic.mypy",
 ]
 
-[[tool.mypy.overrides]]
-module = "hiperhealth.schema.fhirx"
-disable_error_code = [
-  "name-defined",
-  "valid-type",
-]
-
 [tool.pytest.ini_options]
 testpaths = [
     "tests",
