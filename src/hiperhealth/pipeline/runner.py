@@ -95,6 +95,15 @@ class StageRunner:
         """
         return list(self._skills)
 
+    @property
+    def registry(self) -> SkillRegistry | None:
+        """
+        title: Return the registry used to load named skills.
+        returns:
+          type: SkillRegistry | None
+        """
+        return self._registry
+
     @contextmanager
     def disabled(
         self,

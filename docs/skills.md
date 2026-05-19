@@ -68,18 +68,19 @@ dependencies:
   - some-package>=1.0
 ```
 
-| Field                     | Required | Description                                         |
-| ------------------------- | -------- | --------------------------------------------------- |
-| `name`                    | yes      | Unique skill identifier. Used in `register("name")` |
-| `version`                 | yes      | Semver string                                       |
-| `entry_point`             | yes      | `module:ClassName` relative to the skill folder     |
-| `stages`                  | yes      | List of stage names this skill participates in      |
-| `description`             | no       | Human-readable description                          |
-| `author`                  | no       | Author name and contact                             |
-| `license`                 | no       | License identifier                                  |
-| `homepage`                | no       | URL for documentation or source                     |
-| `min_hiperhealth_version` | no       | Minimum compatible hiperhealth version              |
-| `dependencies`            | no       | Extra pip packages the skill requires               |
+| Field                     | Required | Description                                           |
+| ------------------------- | -------- | ----------------------------------------------------- |
+| `name`                    | yes      | Unique skill identifier. Used in `register("name")`   |
+| `version`                 | yes      | Semver string                                         |
+| `entry_point`             | yes      | `module:ClassName` relative to the skill folder       |
+| `stages`                  | yes      | List of stage names this skill participates in        |
+| `description`             | no       | Human-readable description                            |
+| `author`                  | no       | Author name and contact                               |
+| `license`                 | no       | License identifier                                    |
+| `homepage`                | no       | URL for documentation or source                       |
+| `min_hiperhealth_version` | no       | Minimum compatible hiperhealth version                |
+| `dependencies`            | no       | Extra pip packages the skill requires                 |
+| `app`                     | no       | Optional declarative UI views for notebooks/frontends |
 
 ## Minimal skill
 
@@ -754,6 +755,98 @@ ctx = runner.run(Stage.INTAKE, ctx)
 print(ctx.results['intake']['bmi'])        # 22.9
 print(ctx.results['intake']['bmi_category'])  # normal
 ```
+
+## Optional app UI declarations
+
+Skills can optionally declare notebook/UI views in `skill.yaml` with an `app`
+section. If `app` is present, `hiperhealth.notebook` can render skill-specific
+forms. If it is absent, the skill has no custom UI and still works through the
+generic pipeline controls.
+
+The declaration is data-only and renderer-agnostic:
+
+- `data_schema` uses JSON Schema-style objects for value shape and validation.
+- `ui_schema` uses a JSON Forms-style layout with `Control`, `VerticalLayout`,
+  `HorizontalLayout`, `Group`, and `Categorization`.
+- HiperHealth-specific mapping lives under `x-hiperhealth-binding`.
+
+Example:
+
+```yaml
+app:
+  api_version: 1
+  title: BMI Calculator
+  views:
+    - id: bmi_inputs
+      title: BMI inputs
+      stage: intake
+      phase: requirements
+      data_schema:
+        type: object
+        required:
+          - height_m
+          - weight_kg
+        properties:
+          height_m:
+            type: number
+            title: Height (m)
+          weight_kg:
+            type: number
+            title: Weight (kg)
+      ui_schema:
+        type: HorizontalLayout
+        elements:
+          - type: Control
+            scope: "#/properties/height_m"
+            options:
+              x-hiperhealth-binding:
+                target: session.answers
+                field: height_m
+          - type: Control
+            scope: "#/properties/weight_kg"
+            options:
+              x-hiperhealth-binding:
+                target: session.answers
+                field: weight_kg
+      actions:
+        - id: save_answers
+          label: Save answers
+          type: session.provide_answers
+        - id: run_intake
+          label: Run intake
+          type: runner.run_session
+```
+
+Supported phases are `setup`, `requirements`, `pre_run`, `run`, `post_run`,
+`results`, and `settings`. A skill can declare multiple views for different
+stage/phase pairs.
+
+Supported binding targets:
+
+| Target                    | Purpose                                                             |
+| ------------------------- | ------------------------------------------------------------------- |
+| `session.clinical_data`   | Save de-identified clinical facts via `Session.set_clinical_data()` |
+| `session.answers`         | Save inquiry answers via `Session.provide_answers()`                |
+| `session.skill_ui_data`   | Persist skill-specific form values                                  |
+| `context.extras.skill_ui` | Persist values replayed into `ctx.extras['skill_ui']`               |
+| `run_kwargs`              | Runtime-only settings, not persisted by default                     |
+| `results.stage`           | Read-only result review                                             |
+
+Skill-specific UI values are replayed into `PipelineContext.extras`:
+
+```python
+from hiperhealth.pipeline import get_skill_ui_values
+
+values = get_skill_ui_values(
+    ctx,
+    skill_id=self.metadata.name,
+    view_id='bmi_inputs',
+)
+```
+
+Do not store API keys, real PHI, or unredacted prompts in skill UI data. The UI
+manifest is declarative only; it cannot execute Python, JavaScript, shell
+commands, or remote assets.
 
 ## Testing skills
 

@@ -40,6 +40,24 @@ application.
 pip install hiperhealth
 ```
 
+### Notebook UI extra
+
+Install optional Jupyter widget dependencies if you want the interactive
+notebook interface:
+
+```bash
+pip install "hiperhealth[notebook]"
+```
+
+Then launch the guided session workflow from a notebook:
+
+```python
+from hiperhealth.notebook import ui
+
+ui.show()
+ui.show(data_dir="/my/data/path")
+```
+
 ### From source (development)
 
 ```bash

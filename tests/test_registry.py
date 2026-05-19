@@ -86,6 +86,133 @@ class TestSkillManifest:
         assert manifest.stages == ['diagnosis', 'treatment']
         assert manifest.dependencies == ['some-package>=1.0']
 
+    def test_parse_app_manifest(self) -> None:
+        """
+        title: Skill manifests can declare optional app UI views.
+        """
+        manifest = SkillManifest(
+            name='diagnostics',
+            version='1.0.0',
+            entry_point='skill:DiagnosticsSkill',
+            stages=['diagnosis'],
+            app={
+                'api_version': 1,
+                'title': 'Diagnostics',
+                'views': [
+                    {
+                        'id': 'diagnosis_options',
+                        'title': 'Diagnosis options',
+                        'stage': 'diagnosis',
+                        'phase': 'pre_run',
+                        'data_schema': {
+                            'type': 'object',
+                            'properties': {
+                                'focus': {'type': 'string'},
+                            },
+                        },
+                        'ui_schema': {
+                            'type': 'VerticalLayout',
+                            'elements': [
+                                {
+                                    'type': 'Control',
+                                    'scope': '#/properties/focus',
+                                    'options': {
+                                        'x-hiperhealth-binding': {
+                                            'target': 'session.skill_ui_data',
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        'actions': [
+                            {
+                                'id': 'save',
+                                'label': 'Save',
+                                'type': 'session.provide_skill_ui_data',
+                            },
+                        ],
+                    },
+                ],
+            },
+        )
+
+        assert manifest.app is not None
+        assert manifest.app.views[0].phase == 'pre_run'
+        assert manifest.app.views[0].actions[0].type == (
+            'session.provide_skill_ui_data'
+        )
+
+    def test_app_view_stage_must_be_declared(self) -> None:
+        """
+        title: Non-global app views must target a declared skill stage.
+        """
+        with pytest.raises(ValueError, match='undeclared stage'):
+            SkillManifest(
+                name='diagnostics',
+                version='1.0.0',
+                entry_point='skill:DiagnosticsSkill',
+                stages=['diagnosis'],
+                app={
+                    'views': [
+                        {
+                            'id': 'treatment_options',
+                            'title': 'Treatment options',
+                            'stage': 'treatment',
+                            'phase': 'pre_run',
+                            'data_schema': {'type': 'object'},
+                            'ui_schema': {
+                                'type': 'VerticalLayout',
+                                'elements': [
+                                    {
+                                        'type': 'Control',
+                                        'scope': '#/properties/focus',
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            )
+
+    def test_app_rejects_unsafe_action_type(self) -> None:
+        """
+        title: Skill app actions must use the allowlisted dispatcher types.
+        """
+        with pytest.raises(ValueError):
+            SkillManifest(
+                name='diagnostics',
+                version='1.0.0',
+                entry_point='skill:DiagnosticsSkill',
+                stages=['diagnosis'],
+                app={
+                    'views': [
+                        {
+                            'id': 'diagnosis_options',
+                            'title': 'Diagnosis options',
+                            'stage': 'diagnosis',
+                            'phase': 'pre_run',
+                            'data_schema': {'type': 'object'},
+                            'ui_schema': {
+                                'type': 'VerticalLayout',
+                                'elements': [
+                                    {
+                                        'type': 'Control',
+                                        'scope': '#/properties/focus',
+                                    },
+                                ],
+                            },
+                            'actions': [
+                                {
+                                    'id': 'unsafe',
+                                    'label': 'Unsafe',
+                                    'type': 'python.eval',
+                                },
+                            ],
+                        },
+                    ],
+                },
+            )
+
 
 class TestSkillRegistryBuiltins:
     """

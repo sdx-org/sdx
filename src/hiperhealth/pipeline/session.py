@@ -178,6 +178,28 @@ class Session:
         return data
 
     @property
+    def skill_ui_data(self) -> dict[str, dict[str, dict[str, Any]]]:
+        """
+        title: Reconstruct skill-specific UI data by replaying events.
+        returns:
+          type: dict[str, dict[str, dict[str, Any]]]
+        """
+        data: dict[str, dict[str, dict[str, Any]]] = {}
+        for event in self._events:
+            if event['event_type'] != 'skill_ui_data_provided':
+                continue
+            payload = json.loads(event['data'])
+            skill_id = payload.get('skill_id') or event.get('skill_name')
+            view_id = payload.get('view_id')
+            values = payload.get('values', {})
+            if not isinstance(skill_id, str) or not isinstance(view_id, str):
+                continue
+            if not isinstance(values, dict):
+                continue
+            data.setdefault(skill_id, {})[view_id] = values
+        return data
+
+    @property
     def results(self) -> dict[str, Any]:
         """
         title: Reconstruct stage results from completed events.
@@ -256,6 +278,37 @@ class Session:
             data={'fields': answers},
         )
 
+    def provide_skill_ui_data(
+        self,
+        skill_id: str,
+        view_id: str,
+        values: dict[str, Any],
+        *,
+        stage: str | None = None,
+    ) -> None:
+        """
+        title: Persist skill-specific UI values for later pipeline hooks.
+        parameters:
+          skill_id:
+            type: str
+          view_id:
+            type: str
+          values:
+            type: dict[str, Any]
+          stage:
+            type: str | None
+        """
+        self._append_event(
+            'skill_ui_data_provided',
+            stage=stage,
+            skill_name=skill_id,
+            data={
+                'skill_id': skill_id,
+                'view_id': view_id,
+                'values': values,
+            },
+        )
+
     # ── Context bridge ─────────────────────────────────────────────
 
     def to_context(self) -> PipelineContext:
@@ -269,7 +322,7 @@ class Session:
             language=self._language,
             session_id=self.path.stem,
             results=self.results,
-            extras={},
+            extras={'skill_ui': self.skill_ui_data},
         )
 
     def update_from_context(
@@ -368,7 +421,7 @@ class Session:
         """
         title: Load session events from the parquet file.
         """
-        table = pq.read_table(self.path, schema=SESSION_SCHEMA)  # type: ignore[no-untyped-call]
+        table = pq.read_table(self.path, schema=SESSION_SCHEMA)
         rows = table.to_pylist()
         self._events = rows
         # Recover language from first clinical_data_set if present
@@ -388,7 +441,7 @@ class Session:
             table = SESSION_SCHEMA.empty_table()
         else:
             table = pa.Table.from_pylist(self._events, schema=SESSION_SCHEMA)
-        pq.write_table(table, self.path)  # type: ignore[no-untyped-call]
+        pq.write_table(table, self.path)
 
 
 __all__ = ['SESSION_SCHEMA', 'Inquiry', 'Session']

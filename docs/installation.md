@@ -8,6 +8,27 @@ pip install hiperhealth
 
 !!! info "Python version" `hiperhealth` requires **Python >= 3.10, < 4**.
 
+## Notebook UI Extra
+
+The interactive notebook interface is optional so base installations do not pull
+in Jupyter widget dependencies:
+
+```bash
+pip install "hiperhealth[notebook]"
+```
+
+Use it from a notebook with:
+
+```python
+from hiperhealth.notebook import ui
+
+ui.show()
+ui.show(data_dir="/my/data/path")
+```
+
+The import is safe in a base install, but calling `ui.show()` requires the
+optional extra.
+
 ## System Dependencies
 
 Some extraction features rely on system packages:

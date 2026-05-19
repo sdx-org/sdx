@@ -22,6 +22,7 @@ from urllib.parse import urlparse
 from pydantic import BaseModel, Field, model_validator
 
 from hiperhealth.pipeline.skill import BaseSkill, SkillMetadata
+from hiperhealth.pipeline.skill_app import SkillAppManifest
 
 BUILTIN_CHANNEL = 'hiperhealth'
 _LOCAL_NAME_PATTERN = re.compile(r'^[A-Za-z0-9_-]+$')
@@ -39,6 +40,32 @@ class SkillManifest(BaseModel):
     homepage: str = ''
     min_hiperhealth_version: str = ''
     dependencies: list[str] = Field(default_factory=list)
+    app: SkillAppManifest | None = None
+
+    @model_validator(mode='after')
+    def _validate_app_stages(self) -> SkillManifest:
+        """
+        title: Ensure app views target stages declared by the skill.
+        returns:
+          type: SkillManifest
+        """
+        if self.app is None:
+            return self
+        unsupported = sorted(
+            {
+                view.stage
+                for view in self.app.views
+                if not view.global_view and view.stage not in self.stages
+            }
+        )
+        if unsupported:
+            joined = ', '.join(unsupported)
+            msg = (
+                f'Skill app views target undeclared stage(s): {joined}. '
+                'Add them to stages or mark the view as global.'
+            )
+            raise ValueError(msg)
+        return self
 
 
 class ChannelMetadata(BaseModel):

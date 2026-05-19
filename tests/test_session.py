@@ -14,6 +14,7 @@ from hiperhealth.pipeline import (
     SkillMetadata,
     Stage,
     StageRunner,
+    get_skill_ui_values,
 )
 
 # ── Test skill that raises inquiries ───────────────────────────────
@@ -154,6 +155,7 @@ class TestInquiry:
             choices=['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
         )
         assert inq.priority == 'required'
+        assert inq.choices is not None
         assert len(inq.choices) == 10
 
     def test_serialization_roundtrip(self) -> None:
@@ -271,6 +273,39 @@ class TestSession:
             'symptoms': 'bloating',
             'dietary_history': 'high carb',
         }
+
+    def test_skill_ui_data_persists_in_context(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """
+        title: Skill UI data should persist and replay into context extras.
+        parameters:
+          tmp_path:
+            type: Path
+        """
+        path = tmp_path / 'session.parquet'
+        session = Session.create(path)
+        session.provide_skill_ui_data(
+            skill_id='hiperhealth.diagnostics',
+            view_id='diagnosis_options',
+            values={'focus': 'gastrointestinal'},
+            stage='diagnosis',
+        )
+
+        loaded = Session.load(path)
+        ctx = loaded.to_context()
+
+        assert loaded.skill_ui_data == {
+            'hiperhealth.diagnostics': {
+                'diagnosis_options': {'focus': 'gastrointestinal'}
+            }
+        }
+        assert get_skill_ui_values(
+            ctx,
+            'hiperhealth.diagnostics',
+            'diagnosis_options',
+        ) == {'focus': 'gastrointestinal'}
 
     def test_to_context(self, tmp_path: Path) -> None:
         """
