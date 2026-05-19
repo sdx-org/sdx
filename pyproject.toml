@@ -60,6 +60,11 @@ where = ["src"]
 hiperhealth = ["py.typed", "skills/*/hiperhealth.yaml"]
 
 [project.optional-dependencies]
+notebook = [
+  "ipywidgets >=8.1,<9",
+  "ipython >=8",
+]
+
 dev = [
   "quarto-cli >=1.8.27",
   "build >=1.3.0",

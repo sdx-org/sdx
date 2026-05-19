@@ -2,7 +2,11 @@
 title: Pipeline package — skill-based stage execution engine.
 """
 
-from hiperhealth.pipeline.context import AuditEntry, PipelineContext
+from hiperhealth.pipeline.context import (
+    AuditEntry,
+    PipelineContext,
+    get_skill_ui_values,
+)
 from hiperhealth.pipeline.discovery import discover_skills
 from hiperhealth.pipeline.registry import (
     AvailableSkillRecord,
@@ -17,6 +21,12 @@ from hiperhealth.pipeline.registry import (
 from hiperhealth.pipeline.runner import StageRunner
 from hiperhealth.pipeline.session import Inquiry, Session
 from hiperhealth.pipeline.skill import BaseSkill, Skill, SkillMetadata
+from hiperhealth.pipeline.skill_app import (
+    SkillAppManifest,
+    SkillUIAction,
+    SkillUIPhase,
+    SkillUIView,
+)
 from hiperhealth.pipeline.stages import Stage
 
 __all__ = [
@@ -31,14 +41,19 @@ __all__ = [
     'RegistryState',
     'Session',
     'Skill',
+    'SkillAppManifest',
     'SkillManifest',
     'SkillMetadata',
     'SkillRegistry',
     'SkillSummary',
+    'SkillUIAction',
+    'SkillUIPhase',
+    'SkillUIView',
     'Stage',
     'StageRunner',
     'create_default_runner',
     'discover_skills',
+    'get_skill_ui_values',
 ]
 
 
