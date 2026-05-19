@@ -10,6 +10,7 @@ import pytest
 
 from hiperhealth.pipeline import (
     PipelineContext,
+    SkillAppManifest,
     SkillManifest,
     SkillRegistry,
     Stage,
@@ -212,6 +213,179 @@ class TestSkillManifest:
                     ],
                 },
             )
+
+
+def _valid_skill_app_view(**overrides: object) -> dict[str, object]:
+    """
+    title: Build a valid skill app view dictionary with optional overrides.
+    parameters:
+      overrides:
+        type: object
+        variadic: keyword
+    returns:
+      type: dict[str, object]
+    """
+    view: dict[str, object] = {
+        'id': 'diagnosis_options',
+        'title': 'Diagnosis options',
+        'stage': 'diagnosis',
+        'phase': 'pre_run',
+        'data_schema': {
+            'type': 'object',
+            'properties': {'focus': {'type': 'string'}},
+        },
+        'ui_schema': {
+            'type': 'VerticalLayout',
+            'elements': [
+                {
+                    'type': 'Control',
+                    'scope': '#/properties/focus',
+                },
+            ],
+        },
+    }
+    view.update(overrides)
+    return view
+
+
+class TestSkillAppManifestValidation:
+    """
+    title: Tests for declarative skill app validation.
+    """
+
+    def test_duplicate_view_ids_are_rejected(self) -> None:
+        """
+        title: Skill app manifests should reject duplicate view ids.
+        """
+        with pytest.raises(ValueError, match='Duplicate'):
+            SkillAppManifest(
+                views=[
+                    _valid_skill_app_view(),
+                    _valid_skill_app_view(title='Second view'),
+                ]
+            )
+
+    def test_data_schema_must_be_object(self) -> None:
+        """
+        title: Skill app views should require object data schemas.
+        """
+        with pytest.raises(ValueError, match='data_schema'):
+            SkillAppManifest(
+                views=[_valid_skill_app_view(data_schema={'type': 'array'})]
+            )
+
+    @pytest.mark.parametrize(
+        ('ui_schema', 'message'),
+        [
+            ({'type': 'Widget'}, 'Unsupported'),
+            (
+                {
+                    'type': 'Control',
+                    'scope': 'properties/focus',
+                },
+                'JSON pointer',
+            ),
+            (
+                {
+                    'type': 'VerticalLayout',
+                    'elements': [],
+                },
+                'children',
+            ),
+            (
+                {
+                    'type': 'VerticalLayout',
+                    'elements': ['bad-child'],
+                },
+                'children',
+            ),
+            (
+                {
+                    'type': 'Control',
+                    'scope': '#/properties/focus',
+                    'options': ['bad-options'],
+                },
+                'options',
+            ),
+        ],
+    )
+    def test_ui_schema_rejects_invalid_elements(
+        self,
+        ui_schema: dict[str, object],
+        message: str,
+    ) -> None:
+        """
+        title: Skill app UI schemas should reject invalid renderer elements.
+        parameters:
+          ui_schema:
+            type: dict[str, object]
+          message:
+            type: str
+        """
+        with pytest.raises(ValueError, match=message):
+            SkillAppManifest(
+                views=[_valid_skill_app_view(ui_schema=ui_schema)]
+            )
+
+    @pytest.mark.parametrize(
+        ('binding', 'message'),
+        [
+            ('bad-binding', 'must be an object'),
+            ({'target': 'python.eval'}, 'Unsupported'),
+            (
+                {
+                    'target': 'session.skill_ui_data',
+                    'field': 42,
+                },
+                'field',
+            ),
+        ],
+    )
+    def test_ui_schema_rejects_invalid_bindings(
+        self,
+        binding: object,
+        message: str,
+    ) -> None:
+        """
+        title: Skill app UI schemas should reject invalid HiperHealth bindings.
+        parameters:
+          binding:
+            type: object
+          message:
+            type: str
+        """
+        with pytest.raises(ValueError, match=message):
+            SkillAppManifest(
+                views=[
+                    _valid_skill_app_view(
+                        ui_schema={
+                            'type': 'Control',
+                            'scope': '#/properties/focus',
+                            'options': {
+                                'x-hiperhealth-binding': binding,
+                            },
+                        }
+                    )
+                ]
+            )
+
+    def test_ui_schema_allows_non_binding_options(self) -> None:
+        """
+        title: Skill app UI schemas should allow renderer-only options.
+        """
+        manifest = SkillAppManifest(
+            views=[
+                _valid_skill_app_view(
+                    ui_schema={
+                        'type': 'Control',
+                        'scope': '#/properties/focus',
+                        'options': {'readonly': True},
+                    }
+                )
+            ]
+        )
+
+        assert manifest.views[0].ui_schema['options'] == {'readonly': True}
 
 
 class TestSkillRegistryBuiltins:

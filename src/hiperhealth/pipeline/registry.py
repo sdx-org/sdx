@@ -789,6 +789,8 @@ class SkillRegistry:
         returns:
           type: str
         """
+        if not self._is_git_worktree_root(repo_dir):
+            return ''
         try:
             return self._run_command(
                 ['git', 'rev-parse', 'HEAD'],
@@ -806,6 +808,8 @@ class SkillRegistry:
         returns:
           type: str | None
         """
+        if not self._is_git_worktree_root(repo_dir):
+            return None
         try:
             ref = self._run_command(
                 ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
@@ -814,6 +818,27 @@ class SkillRegistry:
         except subprocess.CalledProcessError:
             return None
         return None if ref == 'HEAD' else ref
+
+    def _is_git_worktree_root(self, repo_dir: Path) -> bool:
+        """
+        title: Return whether a channel checkout owns its Git metadata.
+        parameters:
+          repo_dir:
+            type: Path
+        returns:
+          type: bool
+        """
+        git_metadata = repo_dir / '.git'
+        if git_metadata.exists():
+            return True
+        try:
+            top_level = self._run_command(
+                ['git', 'rev-parse', '--show-toplevel'],
+                cwd=repo_dir,
+            )
+        except subprocess.CalledProcessError:
+            return False
+        return Path(top_level).resolve() == repo_dir.resolve()
 
     def _update_repo(self, repo_dir: Path, ref: str | None = None) -> str:
         """
