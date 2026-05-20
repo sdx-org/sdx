@@ -1,6 +1,18 @@
 # Release Notes
 ---
 
+# [0.7.0](https://github.com/hiperhealth/hiperhealth/compare/0.6.0...0.7.0) (2026-05-20)
+
+
+### Bug Fixes
+
+* **ci:** ignore untyped pyarrow parquet calls in session IO ([#239](https://github.com/hiperhealth/hiperhealth/issues/239)) ([eb4d10d](https://github.com/hiperhealth/hiperhealth/commit/eb4d10d9c878acbfeea1d4c606891198a68be695))
+
+
+### Features
+
+* **notebook:** Implement optional notebook UI with state management and widgets ([#242](https://github.com/hiperhealth/hiperhealth/issues/242)) ([160a98b](https://github.com/hiperhealth/hiperhealth/commit/160a98b65472bb35e591047bdfd1f1ee9969e7e3))
+
 # [0.6.0](https://github.com/hiperhealth/hiperhealth/compare/0.5.0...0.6.0) (2026-03-21)
 
 
