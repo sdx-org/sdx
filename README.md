@@ -6,8 +6,8 @@ This repository is the **library/SDK** package (`hiperhealth`) and not the web
 application.
 
 - Software License: BSD 3-Clause
-- Documentation: https://hiperhealth.com
-- Source: https://github.com/hiperhealth/hiperhealth
+- Documentation: https://hiperhealth.github.io/hiperhealth/
+- Source code: https://github.com/hiperhealth/hiperhealth
 
 ## What this library provides
 
