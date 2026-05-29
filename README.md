@@ -58,13 +58,18 @@ ui.show()
 ui.show(data_dir="/my/data/path")
 ```
 
-### From source (development)
+### From source
+
+Clone the repository and install the development dependencies:
 
 ```bash
 git clone https://github.com/hiperhealth/hiperhealth.git
 cd hiperhealth
 ./scripts/install-dev.sh
 ```
+
+See the **Development** section below for environment setup, testing, linting,
+and documentation workflows.
 
 ## System requirements
 
@@ -369,9 +374,15 @@ class AyurvedaSkill(BaseSkill):
 ### Create development environment
 
 ```bash
-conda env create -f conda/dev.yaml -n hiperhealthlib
+mamba env create -f conda/dev.yaml -n hiperhealthlib
 conda activate hiperhealthlib
 ./scripts/install-dev.sh
+```
+
+or update:
+
+```bash
+mamba run -n hiperhealthlib  ./scripts/install-dev.sh
 ```
 
 ### Run tests
