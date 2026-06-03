@@ -5,6 +5,7 @@ title: Channel-aware skill registry for built-in and channel skills.
 from __future__ import annotations
 
 import importlib
+import importlib.util
 import json
 import re
 import shutil
@@ -157,6 +158,26 @@ class SkillSummary(SkillManifest):
     enabled: bool = True
     builtin: bool = False
     tags: list[str] = Field(default_factory=list)
+
+
+class MissingDependencyError(Exception):
+    def __init__(self, skill_id: str, missing: list[str]) -> None:
+        """
+        title: Initialize the missing dependency error.
+        parameters:
+          skill_id:
+            type: str
+          missing:
+            type: list[str]
+        """
+        self.skill_id = skill_id
+        self.missing = missing
+        packages = ', '.join(missing)
+        super().__init__(
+            f'Skill {skill_id!r} cannot be loaded because the following '
+            f'packages are missing: {packages}. '
+            f'Run install_skill({skill_id!r}) to install them.'
+        )
 
 
 @dataclass(frozen=True)
@@ -1027,6 +1048,33 @@ class SkillRegistry:
             text=True,
         )
 
+    @staticmethod
+    def _verify_dependencies(skill_id: str, dependencies: list[str]) -> None:
+        """
+        title: Verify all declared packages are importable.
+        parameters:
+          skill_id:
+            type: str
+          dependencies:
+            type: list[str]
+        raises:
+          MissingDependencyError: When one or more packages are absent.
+        """
+        if not dependencies:
+            return
+        missing: list[str] = []
+        for dep in dependencies:
+            # Strip version specifiers to get the bare package name.
+            package = re.split(r'[><=!~;\s\[]', dep, maxsplit=1)[0]
+            if not package:
+                continue
+            # Normalize hyphens to underscores for importlib lookup.
+            module_name = package.replace('-', '_')
+            if importlib.util.find_spec(module_name) is None:
+                missing.append(dep)
+        if missing:
+            raise MissingDependencyError(skill_id, missing)
+
     def _normalize_loaded_skill(
         self, skill: BaseSkill, canonical_id: str
     ) -> BaseSkill:
@@ -1059,6 +1107,7 @@ class SkillRegistry:
         """
         manifest_path = Path(record.manifest_path)
         manifest = self._read_skill_manifest_file(manifest_path)
+        self._verify_dependencies(record.id, manifest.dependencies)
         skill_dir = manifest_path.parent
         cls = _load_class_from_directory(skill_dir, manifest.entry_point)
         skill = cls()
@@ -1353,8 +1402,8 @@ class SkillRegistry:
             source_commit=channel.commit,
             enabled=available.available.enabled,
         )
-        self._save_state(state)
         self._install_dependencies(available.manifest.dependencies)
+        self._save_state(state)
         return skill_id
 
     def install_channel(
@@ -1427,8 +1476,8 @@ class SkillRegistry:
             source_commit=channel.commit,
             enabled=available.available.enabled,
         )
-        self._save_state(state)
         self._install_dependencies(available.manifest.dependencies)
+        self._save_state(state)
         return skill_id
 
     def remove_skill(self, skill_id: str) -> None:
