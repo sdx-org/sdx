@@ -51,6 +51,8 @@ def run_ruff(path: Path, *, fix: bool = True) -> None:
         subprocess.run(cmd, check=True)
         print(f'[✓] Ruff check {"fixed" if fix else "checked"} {path}')
     except subprocess.CalledProcessError as exc:
-        raise RuntimeError(
-            f'Ruff check reported issues (exit code {exc.returncode}).'
-        ) from exc
+        msg = (
+            f'Ruff check reported issues '
+            f'(exit code {exc.returncode}).'
+        )
+        raise RuntimeError(msg) from exc
