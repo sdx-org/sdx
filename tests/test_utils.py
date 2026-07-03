@@ -80,14 +80,11 @@ def test_scrub_sensitive_data():
     data = {
         'api_key': 'secret123',
         'public_info': 'hello',
-        'nested': {
-            'token': 'abc',
-            'safe': 'data'
-        },
+        'nested': {'token': 'abc', 'safe': 'data'},
         'list_data': [
             {'password': 'pwd', 'id': 1},
-            (1, 2, {'secret': 'hidden'})
-        ]
+            (1, 2, {'secret': 'hidden'}),
+        ],
     }
 
     scrubbed = _scrub_sensitive_data(data)
@@ -102,4 +99,3 @@ def test_scrub_sensitive_data():
     assert isinstance(scrubbed['list_data'][1], tuple)
     assert scrubbed['list_data'][1][0] == 1
     assert scrubbed['list_data'][1][2]['secret'] == '********'
-
