@@ -91,8 +91,10 @@ def _scrub_sensitive_data(data: Any) -> Any:
             k: '********' if _is_sensitive_key(k) else _scrub_sensitive_data(v)
             for k, v in data.items()
         }
-    if isinstance(data, (list, tuple)):
+    if isinstance(data, list):
         return [_scrub_sensitive_data(i) for i in data]
+    if isinstance(data, tuple):
+        return tuple(_scrub_sensitive_data(i) for i in data)
 
     # Handle LLMSettings specifically if it appears in context data
     try:
