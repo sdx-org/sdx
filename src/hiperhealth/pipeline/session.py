@@ -468,7 +468,10 @@ class Session:
         """
         title: Load session events from the parquet file.
         """
-        table = pq.read_table(self.path, schema=SESSION_SCHEMA)  # type: ignore
+        import typing
+
+        read_fn = typing.cast(typing.Callable[..., pa.Table], pq.read_table)
+        table = read_fn(self.path, schema=SESSION_SCHEMA)
         rows = table.to_pylist()
         self._events = rows
         # Recover language from first clinical_data_set if present
@@ -488,7 +491,10 @@ class Session:
             table = SESSION_SCHEMA.empty_table()
         else:
             table = pa.Table.from_pylist(self._events, schema=SESSION_SCHEMA)
-        pq.write_table(table, self.path)  # type: ignore
+        import typing
+
+        write_fn = typing.cast(typing.Callable[..., None], pq.write_table)
+        write_fn(table, self.path)
 
 
 __all__ = ['SESSION_SCHEMA', 'Inquiry', 'Session']
