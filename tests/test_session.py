@@ -712,8 +712,7 @@ class TestSessionSummary:
 
         assert restored['stages_completed'] == result['stages_completed']
         assert (
-            restored['clinical_data_fields']
-            == result['clinical_data_fields']
+            restored['clinical_data_fields'] == result['clinical_data_fields']
         )
 
     def test_summary_session_id_is_filename_stem(self, tmp_path: Path) -> None:
@@ -729,4 +728,3 @@ class TestSessionSummary:
         result = session.summary()
 
         assert result['session_id'] == 'visit_2026_07_08'
-
