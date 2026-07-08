@@ -4,6 +4,8 @@ title: Tests for the parquet-backed session and assess flow.
 
 from __future__ import annotations
 
+import json
+
 from pathlib import Path
 
 from hiperhealth.pipeline import (
@@ -591,3 +593,138 @@ class TestCheckRequirements:
 
         inquiries = runner.check_requirements(Stage.TREATMENT, session)
         assert len(inquiries) == 0
+
+
+# ── Session.summary() tests ───────────────────────────────────────
+
+
+class TestSessionSummary:
+    def test_summary_empty_session(self, tmp_path: Path) -> None:
+        """
+        title: summary() on a fresh session should show all-zero counts.
+        parameters:
+          tmp_path:
+            type: Path
+        """
+        path = tmp_path / 'session.parquet'
+        session = Session.create(path)
+
+        result = session.summary()
+
+        assert result['session_id'] == 'session'
+        assert result['language'] == 'en'
+        assert result['clinical_data_fields'] == 0
+        assert result['stages_completed'] == []
+        assert result['pending_inquiries'] == 0
+        assert result['required_inquiries'] == 0
+        assert result['total_events'] == 0
+
+    def test_summary_with_clinical_data(self, tmp_path: Path) -> None:
+        """
+        title: summary() should reflect the number of clinical data fields.
+        parameters:
+          tmp_path:
+            type: Path
+        """
+        path = tmp_path / 'patient_abc.parquet'
+        session = Session.create(path, language='pt')
+        session.set_clinical_data(
+            {'symptoms': 'bloating', 'age': 34, 'biological_sex': 'female'}
+        )
+
+        result = session.summary()
+
+        assert result['session_id'] == 'patient_abc'
+        assert result['language'] == 'pt'
+        assert result['clinical_data_fields'] == 3
+
+    def test_summary_after_stage_run(self, tmp_path: Path) -> None:
+        """
+        title: |-
+          Completed stages should appear in summary and leave others
+          pending.
+        parameters:
+          tmp_path:
+            type: Path
+        """
+        path = tmp_path / 'session.parquet'
+        session = Session.create(path)
+        session.set_clinical_data({'symptoms': 'fatigue'})
+
+        skill = _NoAssessSkill()
+        runner = StageRunner(skills=[skill])
+        runner.run_session(Stage.DIAGNOSIS, session)
+
+        result = session.summary()
+
+        assert Stage.DIAGNOSIS in result['stages_completed']
+        assert Stage.DIAGNOSIS not in result['stages_pending']
+        # All other standard stages should still be pending
+        assert Stage.SCREENING in result['stages_pending']
+        assert Stage.TREATMENT in result['stages_pending']
+
+    def test_summary_pending_inquiries_decrease(self, tmp_path: Path) -> None:
+        """
+        title: Inquiry counts in summary() should drop as answers are provided.
+        parameters:
+          tmp_path:
+            type: Path
+        """
+        path = tmp_path / 'session.parquet'
+        session = Session.create(path)
+        session.set_clinical_data({'symptoms': 'bloating'})
+
+        skill = _AssessingSkill()
+        runner = StageRunner(skills=[skill])
+        runner.check_requirements(Stage.DIAGNOSIS, session)
+
+        # Before answering: 2 inquiries (1 required, 1 deferred)
+        before = session.summary()
+        assert before['pending_inquiries'] == 2
+        assert before['required_inquiries'] == 1
+
+        # Provide the required answer
+        session.provide_answers({'dietary_history': 'high carb'})
+
+        # After answering: 1 inquiry left (the deferred one, not required)
+        after = session.summary()
+        assert after['pending_inquiries'] == 1
+        assert after['required_inquiries'] == 0
+
+    def test_summary_is_json_serializable(self, tmp_path: Path) -> None:
+        """
+        title: summary() return value should serialize to JSON without errors.
+        parameters:
+          tmp_path:
+            type: Path
+        """
+        path = tmp_path / 'session.parquet'
+        session = Session.create(path)
+        session.set_clinical_data({'symptoms': 'headache'})
+
+        skill = _NoAssessSkill()
+        runner = StageRunner(skills=[skill])
+        runner.run_session(Stage.DIAGNOSIS, session)
+
+        result = session.summary()
+        serialized = json.dumps(result)
+        restored = json.loads(serialized)
+
+        assert restored['stages_completed'] == result['stages_completed']
+        assert (
+            restored['clinical_data_fields'] == result['clinical_data_fields']
+        )
+
+    def test_summary_session_id_is_filename_stem(self, tmp_path: Path) -> None:
+        """
+        title: session_id in summary() should match the parquet filename stem.
+        parameters:
+          tmp_path:
+            type: Path
+        """
+        path = tmp_path / 'visit_2026_07_08.parquet'
+        session = Session.create(path)
+
+        result = session.summary()
+
+        assert result['session_id'] == 'visit_2026_07_08'

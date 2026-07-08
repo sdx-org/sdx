@@ -21,6 +21,7 @@ import pyarrow.parquet as pq
 from pydantic import BaseModel
 
 from hiperhealth.pipeline.context import PipelineContext
+from hiperhealth.pipeline.stages import Stage
 
 # ── Inquiry model ──────────────────────────────────────────────────
 
@@ -309,6 +310,52 @@ class Session:
             },
         )
 
+    def summary(self) -> dict[str, Any]:
+        """
+        title: Return a plain-dict snapshot of the current session state.
+        summary: |-
+          Provides a single, JSON-serializable overview of the session
+          without performing any additional I/O.  Useful for logging,
+          notebook display, and integration-layer diagnostics.
+
+          Returned keys:
+
+          - session_id: filename stem of the underlying parquet file.
+          - language: session language code.
+          - clinical_data_fields: number of patient data fields collected.
+          - stages_completed: ordered list of stages that have already run.
+          - stages_pending: standard Stage enum members not yet completed.
+          - pending_inquiries: total count of unanswered inquiry items.
+          - required_inquiries: count of unanswered 'required'-priority items.
+          - total_events: raw number of events in the event log.
+        returns:
+          type: dict[str, Any]
+        """
+        completed = self.stages_completed
+        completed_set = set(completed)
+        pending_inquiries = self.pending_inquiries
+
+        stages_pending: list[str] = []
+        for s in Stage:
+            if s.value not in completed_set:
+                stages_pending.append(s.value)
+
+        required_inquiries: int = 0
+        for i in pending_inquiries:
+            if i.priority == 'required':
+                required_inquiries += 1
+
+        return {
+            'session_id': self.path.stem,
+            'language': self._language,
+            'clinical_data_fields': len(self.clinical_data),
+            'stages_completed': list(completed),
+            'stages_pending': stages_pending,
+            'pending_inquiries': len(pending_inquiries),
+            'required_inquiries': required_inquiries,
+            'total_events': len(self._events),
+        }
+
     # ── Context bridge ─────────────────────────────────────────────
 
     def to_context(self) -> PipelineContext:
@@ -421,7 +468,10 @@ class Session:
         """
         title: Load session events from the parquet file.
         """
-        table = pq.read_table(self.path, schema=SESSION_SCHEMA)
+        import typing
+
+        read_fn = typing.cast(typing.Callable[..., pa.Table], pq.read_table)
+        table = read_fn(self.path, schema=SESSION_SCHEMA)
         rows = table.to_pylist()
         self._events = rows
         # Recover language from first clinical_data_set if present
@@ -441,7 +491,10 @@ class Session:
             table = SESSION_SCHEMA.empty_table()
         else:
             table = pa.Table.from_pylist(self._events, schema=SESSION_SCHEMA)
-        pq.write_table(table, self.path)
+        import typing
+
+        write_fn = typing.cast(typing.Callable[..., None], pq.write_table)
+        write_fn(table, self.path)
 
 
 __all__ = ['SESSION_SCHEMA', 'Inquiry', 'Session']
