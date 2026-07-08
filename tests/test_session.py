@@ -4,6 +4,8 @@ title: Tests for the parquet-backed session and assess flow.
 
 from __future__ import annotations
 
+import json
+
 from pathlib import Path
 
 from hiperhealth.pipeline import (
@@ -694,8 +696,6 @@ class TestSessionSummary:
           tmp_path:
             type: Path
         """
-        import json
-
         path = tmp_path / 'session.parquet'
         session = Session.create(path)
         session.set_clinical_data({'symptoms': 'headache'})
