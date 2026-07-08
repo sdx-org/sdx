@@ -334,18 +334,25 @@ class Session:
         completed = self.stages_completed
         completed_set = set(completed)
         pending_inquiries = self.pending_inquiries
+
+        stages_pending: list[str] = []
+        for s in Stage:
+            if s.value not in completed_set:
+                stages_pending.append(s.value)
+
+        required_inquiries: int = 0
+        for i in pending_inquiries:
+            if i.priority == 'required':
+                required_inquiries += 1
+
         return {
             'session_id': self.path.stem,
             'language': self._language,
             'clinical_data_fields': len(self.clinical_data),
             'stages_completed': list(completed),
-            'stages_pending': [
-                s.value for s in Stage if s.value not in completed_set
-            ],
+            'stages_pending': stages_pending,
             'pending_inquiries': len(pending_inquiries),
-            'required_inquiries': sum(
-                1 for i in pending_inquiries if i.priority == 'required'
-            ),
+            'required_inquiries': required_inquiries,
             'total_events': len(self._events),
         }
 
