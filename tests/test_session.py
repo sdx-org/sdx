@@ -640,7 +640,9 @@ class TestSessionSummary:
 
     def test_summary_after_stage_run(self, tmp_path: Path) -> None:
         """
-        title: Completed stages should appear in summary and leave others pending.
+        title: |-
+          Completed stages should appear in summary and leave others
+          pending.
         parameters:
           tmp_path:
             type: Path
@@ -709,7 +711,10 @@ class TestSessionSummary:
         restored = json.loads(serialized)
 
         assert restored['stages_completed'] == result['stages_completed']
-        assert restored['clinical_data_fields'] == result['clinical_data_fields']
+        assert (
+            restored['clinical_data_fields']
+            == result['clinical_data_fields']
+        )
 
     def test_summary_session_id_is_filename_stem(self, tmp_path: Path) -> None:
         """
