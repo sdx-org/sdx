@@ -21,6 +21,7 @@ import pyarrow.parquet as pq
 from pydantic import BaseModel
 
 from hiperhealth.pipeline.context import PipelineContext
+from hiperhealth.pipeline.stages import Stage
 
 # ── Inquiry model ──────────────────────────────────────────────────
 
@@ -308,6 +309,45 @@ class Session:
                 'values': values,
             },
         )
+
+    def summary(self) -> dict[str, Any]:
+        """
+        title: Return a plain-dict snapshot of the current session state.
+        summary: |-
+          Provides a single, JSON-serializable overview of the session
+          without performing any additional I/O.  Useful for logging,
+          notebook display, and integration-layer diagnostics.
+
+          Returned keys:
+
+          - session_id: filename stem of the underlying parquet file.
+          - language: session language code.
+          - clinical_data_fields: number of patient data fields collected.
+          - stages_completed: ordered list of stages that have already run.
+          - stages_pending: standard Stage enum members not yet completed.
+          - pending_inquiries: total count of unanswered inquiry items.
+          - required_inquiries: count of unanswered 'required'-priority items.
+          - total_events: raw number of events in the event log.
+        returns:
+          type: dict[str, Any]
+        """
+        completed = self.stages_completed
+        completed_set = set(completed)
+        pending_inquiries = self.pending_inquiries
+        return {
+            'session_id': self.path.stem,
+            'language': self._language,
+            'clinical_data_fields': len(self.clinical_data),
+            'stages_completed': list(completed),
+            'stages_pending': [
+                s.value for s in Stage if s.value not in completed_set
+            ],
+            'pending_inquiries': len(pending_inquiries),
+            'required_inquiries': sum(
+                1 for i in pending_inquiries if i.priority == 'required'
+            ),
+            'total_events': len(self._events),
+        }
 
     # ── Context bridge ─────────────────────────────────────────────
 
