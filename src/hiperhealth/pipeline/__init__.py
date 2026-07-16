@@ -8,6 +8,13 @@ from hiperhealth.pipeline.context import (
     get_skill_ui_values,
 )
 from hiperhealth.pipeline.discovery import discover_skills
+from hiperhealth.pipeline.models import (
+    AgentStep,
+    AgentStepResult,
+    ExecutionStep,
+    PromptFragment,
+    SkillResult,
+)
 from hiperhealth.pipeline.registry import (
     AvailableSkillRecord,
     ChannelManifest,
@@ -30,14 +37,18 @@ from hiperhealth.pipeline.skill_app import (
 from hiperhealth.pipeline.stages import Stage
 
 __all__ = [
+    'AgentStep',
+    'AgentStepResult',
     'AuditEntry',
     'AvailableSkillRecord',
     'BaseSkill',
     'ChannelManifest',
     'ChannelRecord',
+    'ExecutionStep',
     'Inquiry',
     'InstalledSkillRecord',
     'PipelineContext',
+    'PromptFragment',
     'RegistryState',
     'Session',
     'Skill',
@@ -45,6 +56,7 @@ __all__ = [
     'SkillManifest',
     'SkillMetadata',
     'SkillRegistry',
+    'SkillResult',
     'SkillSummary',
     'SkillUIAction',
     'SkillUIPhase',

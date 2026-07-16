@@ -258,8 +258,8 @@ Key concepts:
 - **SkillRegistry** manages skill installation (from local paths or Git URLs)
   and loading. Skills are stored in `~/.hiperhealth/skills/` and activated via
   `runner.register("skill-name")`
-- **hiperhealth.yaml** is a metadata file every skill project must include,
-  declaring name, version, entry point, and stages
+- **skill.yaml** is a metadata file every skill project must include, declaring
+  name, version, entry point, and stages
 
 Source layout:
 
