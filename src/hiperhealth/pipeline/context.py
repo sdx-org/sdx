@@ -51,6 +51,10 @@ class PipelineContext(BaseModel):
         type: str | None
       results:
         type: dict[str, Any]
+      skill_results:
+        type: dict[str, dict[str, Any]]
+      execution_steps:
+        type: list[Any]
       audit:
         type: list[AuditEntry]
       extras:
@@ -61,6 +65,8 @@ class PipelineContext(BaseModel):
     language: str = 'en'
     session_id: str | None = None
     results: dict[str, Any] = Field(default_factory=dict)
+    skill_results: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    execution_steps: list[Any] = Field(default_factory=list)
     audit: list[AuditEntry] = Field(default_factory=list)
     extras: dict[str, Any] = Field(default_factory=dict)
 
