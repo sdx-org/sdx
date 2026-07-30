@@ -21,7 +21,11 @@ import pyarrow.parquet as pq
 from pydantic import BaseModel
 
 from hiperhealth.pipeline.context import PipelineContext
+<<<<<<< HEAD
 from hiperhealth.pipeline.models import LifecycleEvent, SkillResult
+=======
+from hiperhealth.pipeline.models import ExecutionStep, SkillResult
+>>>>>>> 02f1aac (feat(pipeline): complete Week 2 per-skill persistence)
 
 # ── Inquiry model ──────────────────────────────────────────────────
 
@@ -221,6 +225,26 @@ class Session:
         return results
 
     @property
+    def execution_steps(self) -> list[ExecutionStep]:
+        """
+        title: Reconstruct execution steps from events.
+        returns:
+          type: list[ExecutionStep]
+        """
+        steps: list[ExecutionStep] = []
+        for event in self._events:
+            if event['event_type'] in (
+                'skill_started',
+                'skill_completed',
+                'skill_failed',
+                'skill_skipped',
+            ):
+                payload = json.loads(event['data'])
+                steps.append(ExecutionStep.model_validate(payload))
+        return steps
+
+
+    @property
     def results(self) -> dict[str, Any]:
         """
         title: Reconstruct stage results from completed events.
@@ -347,9 +371,7 @@ class Session:
         )
 
     def update_from_context(
-        self,
-        stage: str,
-        ctx: PipelineContext,
+        self, stage: str, ctx: PipelineContext, completed: bool = True
     ) -> None:
         """
         title: Capture results after a stage runs.
@@ -358,6 +380,8 @@ class Session:
             type: str
           ctx:
             type: PipelineContext
+          completed:
+            type: bool
         """
         # Persist step-level execution events
         for step in ctx.execution_steps:
@@ -381,20 +405,21 @@ class Session:
                 data=skill_result.model_dump(),
             )
 
-        stage_result = ctx.results.get(stage)
-        result_data: Any
-        if stage_result is not None:
-            if hasattr(stage_result, 'model_dump'):
-                result_data = stage_result.model_dump()
+        if completed:
+            stage_result = ctx.results.get(stage)
+            result_data: Any
+            if stage_result is not None:
+                if hasattr(stage_result, 'model_dump'):
+                    result_data = stage_result.model_dump()
+                else:
+                    result_data = stage_result
             else:
-                result_data = stage_result
-        else:
-            result_data = {}
-        self._append_event(
-            LifecycleEvent.STAGE_COMPLETED,
-            stage=stage,
-            data={'results': result_data},
-        )
+                result_data = {}
+            self._append_event(
+                LifecycleEvent.STAGE_COMPLETED,
+                stage=stage,
+                data={'results': result_data},
+            )
 
     # ── Event recording ────────────────────────────────────────────
 

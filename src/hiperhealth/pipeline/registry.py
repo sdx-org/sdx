@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Generator, Iterator
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, model_validator
@@ -175,7 +175,7 @@ def _parse_yaml(path: Path) -> dict[str, Any]:
     returns:
       type: dict[str, Any]
     """
-    import yaml
+    import yaml  # type: ignore
 
     with path.open(encoding='utf-8') as handle:
         return yaml.safe_load(handle) or {}
@@ -224,14 +224,14 @@ def _split_entry_point(entry_point: str) -> tuple[str, str]:
 
 
 @contextmanager
-def _prepend_sys_path(path: Path) -> Iterator[None]:
+def _prepend_sys_path(path: Path) -> Generator[None, None, None]:
     """
     title: Temporarily prepend a directory to sys.path.
     parameters:
       path:
         type: Path
     returns:
-      type: Iterator[None]
+      type: Generator[None, None, None]
     """
     value = str(path)
     sys.path.insert(0, value)
