@@ -296,6 +296,12 @@ class StageRunner:
                             error_data=error_data,
                         )
                     )
+                    ctx.skill_results[stage][skill_name] = SkillResult(
+                        stage=stage,
+                        skill_name=skill_name,
+                        status='failed',
+                        summary=str(e),
+                    )
                     raise
 
                 ctx.execution_steps.append(
@@ -429,11 +435,15 @@ class StageRunner:
         """
         ctx = session.to_context()
         session.record_event('stage_started', stage=stage)
-        ctx = self.run(
-            stage,
-            ctx,
-            disabled_skills=disabled_skills,
-            **kwargs,
-        )
-        session.update_from_context(stage, ctx)
+        completed = False
+        try:
+            ctx = self.run(
+                stage,
+                ctx,
+                disabled_skills=disabled_skills,
+                **kwargs,
+            )
+            completed = True
+        finally:
+            session.update_from_context(stage, ctx, completed=completed)
         return session
