@@ -472,3 +472,48 @@ class TestStageRunner:
         assert Stage.EXAM in ctx2.results
         # Audit from both runs
         assert len(ctx2.audit) >= 3  # from first run
+
+    def test_run_kwargs_preserve_llm_settings(self) -> None:
+        """
+        title: StageRunner kwargs should remain uncorrupted during execution.
+        """
+        from hiperhealth.llm import LLMSettings
+
+        class _DiagnosticsCheckSkill(BaseSkill):
+            def __init__(self) -> None:
+                """
+                title: Initialize a dummy check skill.
+                """
+                super().__init__(
+                    SkillMetadata(name='diag_check', stages=(Stage.DIAGNOSIS,))
+                )
+
+            def execute(
+                self, stage: str, ctx: PipelineContext
+            ) -> PipelineContext:
+                """
+                title: Assert llm_settings are correctly passed in kwargs.
+                parameters:
+                  stage:
+                    type: str
+                  ctx:
+                    type: PipelineContext
+                returns:
+                  type: PipelineContext
+                """
+                settings = ctx.extras.get('_run_kwargs', {}).get(
+                    'llm_settings'
+                )
+                assert isinstance(settings, LLMSettings)
+                assert settings.api_key.get_secret_value() == 'real-secret'
+                ctx.results[stage] = 'success'
+                return ctx
+
+        skill = _DiagnosticsCheckSkill()
+        runner = StageRunner(skills=[skill])
+        settings = LLMSettings(api_key='real-secret')
+
+        result = runner.run(
+            Stage.DIAGNOSIS, PipelineContext(), llm_settings=settings
+        )
+        assert result.results[Stage.DIAGNOSIS] == 'success'

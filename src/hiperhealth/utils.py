@@ -3,6 +3,7 @@ title: HiPerHealth utility functions.
 """
 
 import datetime
+import re
 
 from typing import Any
 
@@ -74,7 +75,17 @@ def make_json_serializable(obj: Any) -> Any:
         return obj
 
 
-_SENSITIVE_PATTERNS = {'key', 'token', 'secret', 'password', 'pwd'}
+_SENSITIVE_SUFFIXES = {'key', 'token'}
+_SENSITIVE_WORDS = {
+    'secret',
+    'password',
+    'pwd',
+    'credential',
+    'credentials',
+    'cookie',
+    'authorization',
+    'auth',
+}
 
 
 def _scrub_sensitive_data(data: Any) -> Any:
@@ -118,4 +129,16 @@ def _is_sensitive_key(key: str) -> bool:
       type: bool
     """
     name = key.lower()
-    return any(pattern in name for pattern in _SENSITIVE_PATTERNS)
+    # Strip trailing digits to handle e.g. password123
+    name = re.sub(r'\d+$', '', name)
+    tokens = re.split(r'[-_]', name)
+    if not tokens:
+        return False
+
+    if set(tokens) & _SENSITIVE_WORDS:
+        return True
+
+    if tokens[-1] in _SENSITIVE_SUFFIXES:
+        return True
+
+    return False

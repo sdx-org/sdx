@@ -65,12 +65,23 @@ def test_is_sensitive_key():
     assert _is_sensitive_key('secret_value')
     assert _is_sensitive_key('password123')
     assert _is_sensitive_key('DB_PWD')
+    assert _is_sensitive_key('authorization')
+    assert _is_sensitive_key('auth_header')
+    assert _is_sensitive_key('credentials')
+    assert _is_sensitive_key('cookie')
+    assert _is_sensitive_key('access_token')
+    assert _is_sensitive_key('refresh_token')
+    assert _is_sensitive_key('client_secret')
 
     # False positives (should not match)
     assert not _is_sensitive_key('api_endpoint')
     assert not _is_sensitive_key('user_name')
     assert not _is_sensitive_key('configuration')
     assert not _is_sensitive_key('db_port')
+    assert not _is_sensitive_key('monkeypox_exposure')
+    assert not _is_sensitive_key('keyboard_layout')
+    assert not _is_sensitive_key('key_findings')
+    assert not _is_sensitive_key('token_count')
 
 
 def test_scrub_sensitive_data():

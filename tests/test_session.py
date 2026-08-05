@@ -591,3 +591,27 @@ class TestCheckRequirements:
 
         inquiries = runner.check_requirements(Stage.TREATMENT, session)
         assert len(inquiries) == 0
+
+    def test_clinical_data_sensitive_substring_persistence(
+        self, tmp_path: Path
+    ) -> None:
+        """
+        title: Keys with sensitive substrings should persist uncorrupted.
+        parameters:
+          tmp_path:
+            type: Path
+        """
+        path = tmp_path / 'session.parquet'
+        session = Session.create(path)
+        session.set_clinical_data(
+            {
+                'monkeypox_exposure': False,
+                'keyboard_layout': 'qwerty',
+                'token_count': 42,
+            }
+        )
+
+        loaded = Session.load(path)
+        assert loaded.clinical_data['monkeypox_exposure'] is False
+        assert loaded.clinical_data['keyboard_layout'] == 'qwerty'
+        assert loaded.clinical_data['token_count'] == 42

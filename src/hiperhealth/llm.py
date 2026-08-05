@@ -113,6 +113,13 @@ class LLMSettings:
     persist_raw: bool = True
     api_params: dict[str, Any] = field(default_factory=dict)
 
+    def __post_init__(self) -> None:
+        """
+        title: Ensure api_key is always stored as a SecretStr.
+        """
+        if isinstance(self.api_key, str):
+            object.__setattr__(self, 'api_key', SecretStr(self.api_key))
+
     @property
     def normalized_provider(self) -> str:
         """
@@ -410,7 +417,7 @@ def load_llm_settings(
     return LLMSettings(
         provider=provider,
         model=model,
-        api_key=SecretStr(api_key) if api_key else '',
+        api_key=api_key or '',
         engine=engine,
         temperature=temperature,
         max_tokens=max_tokens,

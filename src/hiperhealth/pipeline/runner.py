@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, Any
 from hiperhealth.pipeline.context import AuditEntry, PipelineContext
 from hiperhealth.pipeline.session import Inquiry
 from hiperhealth.pipeline.skill import Skill
-from hiperhealth.utils import _scrub_sensitive_data
 
 if TYPE_CHECKING:
     from hiperhealth.pipeline.registry import SkillRegistry
@@ -157,7 +156,7 @@ class StageRunner:
         returns:
           type: PipelineContext
         """
-        ctx.extras['_run_kwargs'] = _scrub_sensitive_data(kwargs)
+        ctx.extras['_run_kwargs'] = kwargs
         return self._run_stage(stage, ctx, disabled_skills=disabled_skills)
 
     def run_many(
