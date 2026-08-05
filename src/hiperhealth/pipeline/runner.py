@@ -390,3 +390,6 @@ class StageRunner:
         )
         session.update_from_context(stage, ctx)
         return session
+
+
+__all__ = ['StageRunner']

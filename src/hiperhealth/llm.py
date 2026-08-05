@@ -10,7 +10,7 @@ import os
 from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Protocol, TypeVar, cast
 
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 
 TModel = TypeVar('TModel', bound=BaseModel)
 
@@ -86,7 +86,7 @@ class LLMSettings:
         type: str
         description: Value for model.
       api_key:
-        type: str
+        type: SecretStr | str
         description: Value for api_key.
       engine:
         type: str
@@ -106,12 +106,19 @@ class LLMSettings:
 
     provider: str = 'openai'
     model: str = ''
-    api_key: str = ''
+    api_key: SecretStr | str = field(default='', repr=False)
     engine: str = ''
     temperature: float = 0.0
     max_tokens: int = 4096
     persist_raw: bool = True
     api_params: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        """
+        title: Ensure api_key is always stored as a SecretStr.
+        """
+        if isinstance(self.api_key, str):
+            object.__setattr__(self, 'api_key', SecretStr(self.api_key))
 
     @property
     def normalized_provider(self) -> str:
@@ -220,7 +227,11 @@ class LLMSettings:
         kwargs['temperature'] = self.temperature
         kwargs['max_tokens'] = self.max_tokens
         if self.api_key:
-            kwargs['api_key'] = self.api_key
+            kwargs['api_key'] = (
+                self.api_key.get_secret_value()
+                if hasattr(self.api_key, 'get_secret_value')
+                else self.api_key
+            )
         return kwargs
 
 
@@ -406,7 +417,7 @@ def load_llm_settings(
     return LLMSettings(
         provider=provider,
         model=model,
-        api_key=api_key,
+        api_key=api_key or '',
         engine=engine,
         temperature=temperature,
         max_tokens=max_tokens,

@@ -21,6 +21,7 @@ import pyarrow.parquet as pq
 from pydantic import BaseModel
 
 from hiperhealth.pipeline.context import PipelineContext
+from hiperhealth.utils import _scrub_sensitive_data
 
 # ── Inquiry model ──────────────────────────────────────────────────
 
@@ -409,7 +410,7 @@ class Session:
             'stage': stage,
             'skill_name': skill_name,
             'data': json.dumps(
-                data if data is not None else {},
+                _scrub_sensitive_data(data) if data is not None else {},
                 ensure_ascii=False,
                 default=str,
             ),

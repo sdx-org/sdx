@@ -49,7 +49,7 @@ def test_load_diagnostics_llm_settings_prefers_specific_env(monkeypatch):
 
     assert settings.provider == 'ollama'
     assert settings.model == 'llama3.2:3b'
-    assert settings.api_key == ''
+    assert settings.api_key.get_secret_value() == ''
     assert settings.api_params['base_url'] == 'http://localhost:11434/v1'
 
 
@@ -373,3 +373,22 @@ def test_to_litellm_kwargs_always_includes_temperature_and_max_tokens():
         kwargs = settings.to_litellm_kwargs()
         assert kwargs['temperature'] == 0.0
         assert kwargs['max_tokens'] == 4096
+
+
+def test_llm_settings_api_key_converted_to_secret_str():
+    """
+    title: LLMSettings should convert string api_key to SecretStr on init.
+    """
+    settings = LLMSettings(api_key='plain-secret')
+    assert 'plain-secret' not in repr(settings)
+    assert settings.api_key.get_secret_value() == 'plain-secret'
+
+
+def test_llm_settings_with_overrides_api_key_converted():
+    """
+    title: with_overrides should convert string api_key to SecretStr.
+    """
+    base = LLMSettings(api_key='initial')
+    overridden = base.with_overrides(api_key='new-secret')
+    assert 'new-secret' not in repr(overridden)
+    assert overridden.api_key.get_secret_value() == 'new-secret'

@@ -143,6 +143,62 @@ class TestDiagnosticsSkill:
         parsed = json.loads(calls[0]['user'])
         assert parsed['symptoms'] == 'fever, cough'
 
+    def test_execute_diagnosis_stage_with_explicit_llm_settings(
+        self, monkeypatch: Any
+    ) -> None:
+        """
+        title: DiagnosticsSkill should pass explicit llm_settings.
+        parameters:
+          monkeypatch:
+            type: Any
+            description: Value for monkeypatch.
+        """
+        from hiperhealth.llm import LLMSettings
+
+        fake_result = LLMDiagnosis(summary='Test', options=[])
+        calls: list[dict[str, Any]] = []
+
+        def _fake_chat(
+            system: str,
+            user: str,
+            *,
+            session_id: str | None = None,
+            llm: Any = None,
+            llm_settings: Any = None,
+        ) -> LLMDiagnosis:
+            """
+            title: Capture diagnosis chat calls to verify llm_settings.
+            parameters:
+              system:
+                type: str
+              user:
+                type: str
+              session_id:
+                type: str | None
+              llm:
+                type: Any
+              llm_settings:
+                type: Any
+            returns:
+              type: LLMDiagnosis
+            """
+            calls.append({'llm_settings': llm_settings})
+            return fake_result
+
+        monkeypatch.setattr(diag_skill_mod, 'chat', _fake_chat)
+
+        skill = DiagnosticsSkill()
+        ctx = PipelineContext(patient={'symptoms': 'fever'})
+        settings = LLMSettings(api_key='explicit-secret-key')
+        runner = StageRunner(skills=[skill])
+        runner.run(Stage.DIAGNOSIS, ctx, llm_settings=settings)
+
+        assert len(calls) == 1
+        captured_settings = calls[0]['llm_settings']
+        assert isinstance(captured_settings, LLMSettings)
+        secret_val = captured_settings.api_key.get_secret_value()
+        assert secret_val == 'explicit-secret-key'
+
     def test_execute_exam_stage_uses_diagnosis_results(
         self, monkeypatch: Any
     ) -> None:
