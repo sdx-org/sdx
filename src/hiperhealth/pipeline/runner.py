@@ -318,9 +318,20 @@ class StageRunner:
                 skill_name = skill.metadata.name
                 input_hash = _compute_input_hash(ctx)
 
-                all_steps = list(ctx.execution_steps)
+                all_steps = []
+                for s in ctx.execution_steps:
+                    if isinstance(s, dict):
+                        all_steps.append(ExecutionStep.model_validate(s))
+                    else:
+                        all_steps.append(s)
+
                 for step_data in ctx.extras.get('past_steps', []):
-                    all_steps.append(ExecutionStep.model_validate(step_data))
+                    if isinstance(step_data, dict):
+                        all_steps.append(
+                            ExecutionStep.model_validate(step_data)
+                        )
+                    else:
+                        all_steps.append(step_data)
 
                 past_steps = [
                     s
