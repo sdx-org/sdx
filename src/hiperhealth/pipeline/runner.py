@@ -5,11 +5,10 @@ title: StageRunner — executes pipeline stages independently.
 from __future__ import annotations
 
 import copy
-
-from collections.abc import Collection, Iterator
-from contextlib import contextmanager
 import hashlib
 import json
+from collections.abc import Collection, Iterator
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
 
 from hiperhealth.pipeline.context import AuditEntry, PipelineContext
@@ -324,7 +323,8 @@ class StageRunner:
                     all_steps.append(ExecutionStep.model_validate(step_data))
 
                 past_steps = [
-                    s for s in all_steps
+                    s
+                    for s in all_steps
                     if s.stage == stage
                     and s.skill_name == skill_name
                     and s.hook == hook
@@ -334,7 +334,11 @@ class StageRunner:
                 if past_steps:
                     attempt = max(s.attempt for s in past_steps)
                     last_step = past_steps[-1]
-                    if resume and not force and last_step.status == 'completed':
+                    if (
+                        resume
+                        and not force
+                        and last_step.status == 'completed'
+                    ):
                         if last_step.input_hash == input_hash:
                             ctx.execution_steps.append(
                                 ExecutionStep(
@@ -348,7 +352,7 @@ class StageRunner:
                                 )
                             )
                             continue
-                    
+
                     if last_step.status in ('failed', 'skipped', 'started'):
                         attempt += 1
 
