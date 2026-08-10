@@ -423,12 +423,12 @@ class StageRunner:
                         else:
                             data = {'legacy_result': data}
 
-                    ctx.skill_results[stage][skill_name] = SkillResult(
-                        stage=stage,
-                        skill_name=skill_name,
-                        status='succeeded',
-                        data=data,
-                    )
+                        ctx.skill_results[stage][skill_name] = SkillResult(
+                            stage=stage,
+                            skill_name=skill_name,
+                            status='succeeded',
+                            data=data,
+                        )
 
         return ctx
 
