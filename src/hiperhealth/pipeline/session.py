@@ -239,7 +239,6 @@ class Session:
                 steps.append(ExecutionStep.model_validate(payload))
         return steps
 
-
     @property
     def results(self) -> dict[str, Any]:
         """
@@ -385,7 +384,8 @@ class Session:
         """
         # Persist step-level execution events
         for step in ctx.execution_steps:
-            # We assume step is an ExecutionStep, which has a status we can prepend 'skill_' to
+            # We assume step is an ExecutionStep, which has a status we can
+            # prepend 'skill_' to
             self._append_event(
                 f'skill_{step.status}',
                 stage=step.stage,
