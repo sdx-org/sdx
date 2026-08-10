@@ -180,3 +180,71 @@ class TestSessionPersistence:
 
         # Verify stage_completed was NOT recorded
         assert Stage.DIAGNOSIS not in reloaded_session.stages_completed
+
+    def test_partial_failure_and_resume(self, tmp_path: Any) -> None:
+        """
+        title: Verify that resume=True skips completed steps and retries failed ones.
+        parameters:
+          tmp_path:
+            type: Any
+        """
+        import pytest
+
+        session_path = tmp_path / 'test_resume_session.parquet'
+        session = Session.create(session_path)
+
+        runner = StageRunner(skills=[_DummySkillA(), _DummySkillC(), _DummySkillB()])
+        with pytest.raises(ValueError, match='Expected crash'):
+            runner.run_session(Stage.DIAGNOSIS, session)
+
+        # Now reload and resume
+        reloaded_session = Session.load(session_path)
+
+        class _FixedSkillC(_DummySkillC):
+            def execute(self, stage: str, ctx: PipelineContext) -> PipelineContext:
+                """
+                title: Execute Fixed Skill C.
+                parameters:
+                  stage:
+                    type: str
+                  ctx:
+                    type: PipelineContext
+                returns:
+                  type: PipelineContext
+                """
+                ctx.results[stage] = {'source': 'Skill C'}
+                return ctx
+
+        fixed_runner = StageRunner(skills=[_DummySkillA(), _FixedSkillC(), _DummySkillB()])
+        fixed_runner.run_session(Stage.DIAGNOSIS, reloaded_session, resume=True)
+
+        final_session = Session.load(session_path)
+        skill_results = final_session.skill_results
+
+        # Verify all three completed
+        assert skill_results[Stage.DIAGNOSIS]['test.skill_a'].status == 'succeeded'
+        assert skill_results[Stage.DIAGNOSIS]['test.skill_c'].status == 'succeeded'
+        assert skill_results[Stage.DIAGNOSIS]['test.skill_b'].status == 'succeeded'
+
+        # Verify A was skipped on retry
+        steps_a_exec = [
+            s for s in final_session.execution_steps 
+            if s.skill_name == 'test.skill_a' and s.hook == 'execute'
+        ]
+        assert steps_a_exec[0].status == 'started'
+        assert steps_a_exec[1].status == 'completed'
+        assert steps_a_exec[2].status == 'skipped'
+
+        # Verify C was retried (attempt=1 failed, attempt=2 succeeded)
+        steps_c_exec = [
+            s for s in final_session.execution_steps 
+            if s.skill_name == 'test.skill_c' and s.hook == 'execute'
+        ]
+        assert steps_c_exec[0].status == 'started'
+        assert steps_c_exec[0].attempt == 1
+        assert steps_c_exec[1].status == 'failed'
+        assert steps_c_exec[1].attempt == 1
+        assert steps_c_exec[2].status == 'started'
+        assert steps_c_exec[2].attempt == 2
+        assert steps_c_exec[3].status == 'completed'
+        assert steps_c_exec[3].attempt == 2
