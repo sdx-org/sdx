@@ -363,7 +363,11 @@ class Session:
             language=self._language,
             session_id=self.path.stem,
             results=self.results,
-            extras={'skill_ui': self.skill_ui_data},
+            skill_results=self.skill_results,
+            extras={
+                'skill_ui': self.skill_ui_data,
+                'past_steps': [s.model_dump() for s in self.execution_steps],
+            },
         )
 
     def update_from_context(

@@ -6,6 +6,8 @@ from __future__ import annotations
 
 from collections.abc import Collection, Iterator
 from contextlib import contextmanager
+import hashlib
+import json
 from typing import TYPE_CHECKING, Any
 
 from hiperhealth.pipeline.context import AuditEntry, PipelineContext
@@ -16,6 +18,23 @@ from hiperhealth.pipeline.skill import Skill
 if TYPE_CHECKING:
     from hiperhealth.pipeline.registry import SkillRegistry
     from hiperhealth.pipeline.session import Session
+
+
+def _compute_input_hash(ctx: PipelineContext) -> str:
+    """
+    title: Compute a deterministic hash of the current pipeline state.
+    parameters:
+      ctx:
+        type: PipelineContext
+    returns:
+      type: str
+    """
+    data = {
+        'patient': ctx.patient,
+        'language': ctx.language,
+    }
+    serialized = json.dumps(data, sort_keys=True)
+    return hashlib.sha256(serialized.encode('utf-8')).hexdigest()
 
 
 class StageRunner:
@@ -136,6 +155,8 @@ class StageRunner:
         ctx: PipelineContext,
         *,
         disabled_skills: str | Collection[str] | None = None,
+        resume: bool = True,
+        force: bool = False,
         **kwargs: Any,
     ) -> PipelineContext:
         """
@@ -151,6 +172,10 @@ class StageRunner:
             type: PipelineContext
           disabled_skills:
             type: str | Collection[str] | None
+          resume:
+            type: bool
+          force:
+            type: bool
           kwargs:
             type: Any
             variadic: keyword
@@ -158,7 +183,13 @@ class StageRunner:
           type: PipelineContext
         """
         ctx.extras['_run_kwargs'] = kwargs
-        return self._run_stage(stage, ctx, disabled_skills=disabled_skills)
+        return self._run_stage(
+            stage,
+            ctx,
+            disabled_skills=disabled_skills,
+            resume=resume,
+            force=force,
+        )
 
     def run_many(
         self,
@@ -166,6 +197,8 @@ class StageRunner:
         ctx: PipelineContext,
         *,
         disabled_skills: str | Collection[str] | None = None,
+        resume: bool = True,
+        force: bool = False,
         **kwargs: Any,
     ) -> PipelineContext:
         """
@@ -177,6 +210,10 @@ class StageRunner:
             type: PipelineContext
           disabled_skills:
             type: str | Collection[str] | None
+          resume:
+            type: bool
+          force:
+            type: bool
           kwargs:
             type: Any
             variadic: keyword
@@ -188,6 +225,8 @@ class StageRunner:
                 stage,
                 ctx,
                 disabled_skills=disabled_skills,
+                resume=resume,
+                force=force,
                 **kwargs,
             )
         return ctx
@@ -241,6 +280,8 @@ class StageRunner:
         ctx: PipelineContext,
         *,
         disabled_skills: str | Collection[str] | None = None,
+        resume: bool = True,
+        force: bool = False,
     ) -> PipelineContext:
         """
         title: Execute pre, execute, and post hooks for one stage.
@@ -251,6 +292,10 @@ class StageRunner:
             type: PipelineContext
           disabled_skills:
             type: str | Collection[str] | None
+          resume:
+            type: bool
+          force:
+            type: bool
         returns:
           type: PipelineContext
         """
@@ -266,13 +311,49 @@ class StageRunner:
         for hook in ('pre', 'execute', 'post'):
             for skill in relevant:
                 skill_name = skill.metadata.name
+                input_hash = _compute_input_hash(ctx)
+
+                all_steps = list(ctx.execution_steps)
+                for step_data in ctx.extras.get('past_steps', []):
+                    all_steps.append(ExecutionStep.model_validate(step_data))
+
+                past_steps = [
+                    s for s in all_steps
+                    if s.stage == stage
+                    and s.skill_name == skill_name
+                    and s.hook == hook
+                ]
+
+                attempt = 1
+                if past_steps:
+                    attempt = max(s.attempt for s in past_steps)
+                    last_step = past_steps[-1]
+                    if resume and not force and last_step.status == 'completed':
+                        if last_step.input_hash == input_hash:
+                            ctx.execution_steps.append(
+                                ExecutionStep(
+                                    run_id=run_id,
+                                    stage=stage,
+                                    skill_name=skill_name,
+                                    hook=hook,
+                                    attempt=attempt,
+                                    input_hash=input_hash,
+                                    status='skipped',
+                                )
+                            )
+                            continue
+                    
+                    if last_step.status in ('failed', 'skipped', 'started'):
+                        attempt += 1
+
                 ctx.execution_steps.append(
                     ExecutionStep(
                         run_id=run_id,
                         stage=stage,
                         skill_name=skill_name,
                         hook=hook,
-                        input_hash='',
+                        attempt=attempt,
+                        input_hash=input_hash,
                         status='started',
                     )
                 )
@@ -291,7 +372,8 @@ class StageRunner:
                             stage=stage,
                             skill_name=skill_name,
                             hook=hook,
-                            input_hash='',
+                            attempt=attempt,
+                            input_hash=input_hash,
                             status=status,
                             error_data=error_data,
                         )
@@ -310,7 +392,8 @@ class StageRunner:
                         stage=stage,
                         skill_name=skill_name,
                         hook=hook,
-                        input_hash='',
+                        attempt=attempt,
+                        input_hash=input_hash,
                         status=status,
                     )
                 )
@@ -324,15 +407,15 @@ class StageRunner:
                 )
 
                 # Implicitly save legacy skill results to avoid overwrites
-                if (
-                    hook == 'execute'
-                    and skill_name not in ctx.skill_results[stage]
-                ):
-                    data = ctx.results.get(stage, {})
-                    if isinstance(data, dict):
-                        data = dict(data)
-                    else:
-                        data = {'legacy_result': data}
+                # If a previous run failed, we should overwrite it on success.
+                if hook == 'execute':
+                    existing = ctx.skill_results[stage].get(skill_name)
+                    if not existing or existing.status != 'succeeded':
+                        data = ctx.results.get(stage, {})
+                        if isinstance(data, dict):
+                            data = dict(data)
+                        else:
+                            data = {'legacy_result': data}
 
                     ctx.skill_results[stage][skill_name] = SkillResult(
                         stage=stage,
@@ -412,6 +495,8 @@ class StageRunner:
         session: Session,
         *,
         disabled_skills: str | Collection[str] | None = None,
+        resume: bool = True,
+        force: bool = False,
         **kwargs: Any,
     ) -> Session:
         """
@@ -427,6 +512,10 @@ class StageRunner:
             type: Session
           disabled_skills:
             type: str | Collection[str] | None
+          resume:
+            type: bool
+          force:
+            type: bool
           kwargs:
             type: Any
             variadic: keyword
@@ -441,6 +530,8 @@ class StageRunner:
                 stage,
                 ctx,
                 disabled_skills=disabled_skills,
+                resume=resume,
+                force=force,
                 **kwargs,
             )
             completed = True
