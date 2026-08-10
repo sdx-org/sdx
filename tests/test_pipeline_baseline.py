@@ -90,24 +90,15 @@ class TestStageRunnerBaseline:
             type: Any
         """
         session_path = tmp_path / 'test_session.parquet'
-        session = Session(session_path)
+        session = Session.create(session_path)
 
         runner = StageRunner(skills=[_DummySkillA(), _DummySkillB()])
 
         # Run the session
         runner.run_session(Stage.DIAGNOSIS, session)
 
-        # Load the events directly from the session
-        # The session class uses a protected _events property
-        # internally for the raw list
-        events = getattr(session, '_events', [])
-        if not events:
-            # Try reloading it to populate _events if necessary
-            session._load()
-            events = getattr(session, '_events', [])
-
         # We expect a 'stage_started' and a 'stage_completed' event
-        event_types = [e['event_type'] for e in events]
+        event_types = [event['event_type'] for event in session.events]
         assert 'stage_started' in event_types
         assert 'stage_completed' in event_types
 
