@@ -175,7 +175,7 @@ def _parse_yaml(path: Path) -> dict[str, Any]:
     returns:
       type: dict[str, Any]
     """
-    import yaml  # type: ignore
+    import yaml
 
     with path.open(encoding='utf-8') as handle:
         return yaml.safe_load(handle) or {}

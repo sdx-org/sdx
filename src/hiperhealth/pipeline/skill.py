@@ -10,6 +10,11 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 from hiperhealth.pipeline.context import PipelineContext
 
 if TYPE_CHECKING:
+    from hiperhealth.pipeline.models import (
+        AgentStep,
+        AgentStepResult,
+        PromptFragment,
+    )
     from hiperhealth.pipeline.session import Inquiry
 
 
@@ -99,6 +104,68 @@ class Skill(Protocol):
         """
         ...
 
+    def compile_prompt_fragment(
+        self, stage: str, ctx: PipelineContext
+    ) -> PromptFragment | list[PromptFragment] | None:
+        """
+        title: Compile the output for the final stage prompt.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PromptFragment | list[PromptFragment] | None
+        """
+        ...
+
+    def plan_steps(self, stage: str, ctx: PipelineContext) -> list[AgentStep]:
+        """
+        title: Plan multiple sub-steps for an agent skill.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: list[AgentStep]
+        """
+        ...
+
+    def execute_step(
+        self, stage: str, step: AgentStep, ctx: PipelineContext
+    ) -> AgentStepResult:
+        """
+        title: Execute a single planned agent sub-step.
+        parameters:
+          stage:
+            type: str
+          step:
+            type: AgentStep
+          ctx:
+            type: PipelineContext
+        returns:
+          type: AgentStepResult
+        """
+        ...
+
+    def reduce_steps(
+        self, stage: str, results: list[AgentStepResult], ctx: PipelineContext
+    ) -> PipelineContext:
+        """
+        title: Synthesize all agent step results into the final context.
+        parameters:
+          stage:
+            type: str
+          results:
+            type: list[AgentStepResult]
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PipelineContext
+        """
+        ...
+
 
 class BaseSkill:
     """
@@ -181,3 +248,65 @@ class BaseSkill:
           type: PipelineContext
         """
         return ctx
+
+    def compile_prompt_fragment(
+        self, stage: str, ctx: PipelineContext
+    ) -> PromptFragment | list[PromptFragment] | None:
+        """
+        title: Compile the output for the final stage prompt.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PromptFragment | list[PromptFragment] | None
+        """
+        return None
+
+    def plan_steps(self, stage: str, ctx: PipelineContext) -> list[AgentStep]:
+        """
+        title: Plan multiple sub-steps for an agent skill.
+        parameters:
+          stage:
+            type: str
+          ctx:
+            type: PipelineContext
+        returns:
+          type: list[AgentStep]
+        """
+        return []
+
+    def execute_step(
+        self, stage: str, step: AgentStep, ctx: PipelineContext
+    ) -> AgentStepResult:
+        """
+        title: Execute a single planned agent sub-step.
+        parameters:
+          stage:
+            type: str
+          step:
+            type: AgentStep
+          ctx:
+            type: PipelineContext
+        returns:
+          type: AgentStepResult
+        """
+        raise NotImplementedError
+
+    def reduce_steps(
+        self, stage: str, results: list[AgentStepResult], ctx: PipelineContext
+    ) -> PipelineContext:
+        """
+        title: Synthesize all agent step results into the final context.
+        parameters:
+          stage:
+            type: str
+          results:
+            type: list[AgentStepResult]
+          ctx:
+            type: PipelineContext
+        returns:
+          type: PipelineContext
+        """
+        raise NotImplementedError

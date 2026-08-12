@@ -12,7 +12,11 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
 
 from hiperhealth.pipeline.context import AuditEntry, PipelineContext
-from hiperhealth.pipeline.models import ExecutionStep, SkillResult
+from hiperhealth.pipeline.models import (
+    ExecutionStep,
+    PromptFragment,
+    SkillResult,
+)
 from hiperhealth.pipeline.session import Inquiry
 from hiperhealth.pipeline.skill import Skill
 
@@ -375,9 +379,23 @@ class StageRunner:
                     )
                 )
 
+                agent_step_results = None
                 try:
                     func = getattr(skill, hook)
-                    ctx = func(stage, ctx)
+                    if hook == 'execute':
+                        planned_steps = skill.plan_steps(stage, ctx)
+                        if planned_steps:
+                            agent_step_results = []
+                            for step in planned_steps:
+                                res = skill.execute_step(stage, step, ctx)
+                                agent_step_results.append(res)
+                            ctx = skill.reduce_steps(
+                                stage, agent_step_results, ctx
+                            )
+                        else:
+                            ctx = func(stage, ctx)
+                    else:
+                        ctx = func(stage, ctx)
                     status = 'completed'
                     error_data = None
                 except Exception as e:
@@ -439,7 +457,40 @@ class StageRunner:
                             skill_name=skill_name,
                             status='succeeded',
                             data=data,
+                            agent_step_results=agent_step_results,
                         )
+
+        # Prompt Composition Phase
+        all_fragments: list[PromptFragment] = []
+        for skill in relevant:
+            skill_name = skill.metadata.name
+            fragments = skill.compile_prompt_fragment(stage, ctx)
+            if not fragments:
+                continue
+
+            if not isinstance(fragments, list):
+                fragments = [fragments]
+
+            if (
+                stage in ctx.skill_results
+                and skill_name in ctx.skill_results[stage]
+            ):
+                ctx.skill_results[stage][
+                    skill_name
+                ].prompt_fragment = fragments
+
+            for frag in fragments:
+                if frag.include_in_final_prompt:
+                    all_fragments.append(frag)
+
+        if all_fragments:
+            all_fragments.sort(key=lambda x: x.priority)
+            composed_parts = []
+            for frag in all_fragments:
+                composed_parts.append(f'### {frag.title}\n{frag.content}')
+
+            final_prompt = '\n\n'.join(composed_parts)
+            ctx.results[stage] = {'composed_prompt': final_prompt}
 
         return ctx
 

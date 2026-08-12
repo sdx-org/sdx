@@ -51,6 +51,8 @@ class SkillResult(BaseModel):
         type: dict[str, Any]
       prompt_fragment:
         type: list[PromptFragment] | None
+      agent_step_results:
+        type: list[AgentStepResult] | None
     """
 
     stage: str
@@ -59,6 +61,7 @@ class SkillResult(BaseModel):
     summary: str = ''
     data: dict[str, Any] = {}
     prompt_fragment: list[PromptFragment] | None = None
+    agent_step_results: list[AgentStepResult] | None = None
 
 
 class ExecutionStep(BaseModel):
