@@ -21,11 +21,11 @@ import pyarrow.parquet as pq
 from pydantic import BaseModel
 
 from hiperhealth.pipeline.context import PipelineContext
-<<<<<<< HEAD
-from hiperhealth.pipeline.models import LifecycleEvent, SkillResult
-=======
-from hiperhealth.pipeline.models import ExecutionStep, SkillResult
->>>>>>> 02f1aac (feat(pipeline): complete Week 2 per-skill persistence)
+from hiperhealth.pipeline.models import (
+    ExecutionStep,
+    LifecycleEvent,
+    SkillResult,
+)
 
 # ── Inquiry model ──────────────────────────────────────────────────
 
@@ -234,15 +234,14 @@ class Session:
         steps: list[ExecutionStep] = []
         for event in self._events:
             if event['event_type'] in (
-                'skill_started',
-                'skill_completed',
-                'skill_failed',
-                'skill_skipped',
+                LifecycleEvent.SKILL_STARTED,
+                LifecycleEvent.SKILL_COMPLETED,
+                LifecycleEvent.SKILL_FAILED,
+                LifecycleEvent.SKILL_SKIPPED,
             ):
                 payload = json.loads(event['data'])
                 steps.append(ExecutionStep.model_validate(payload))
         return steps
-
 
     @property
     def results(self) -> dict[str, Any]:
@@ -385,7 +384,8 @@ class Session:
         """
         # Persist step-level execution events
         for step in ctx.execution_steps:
-            # We assume step is an ExecutionStep, which has a status we can prepend 'skill_' to
+            # We assume step is an ExecutionStep, which has a status we can
+            # prepend 'skill_' to
             self._append_event(
                 LifecycleEvent(f'skill_{step.status}'),
                 stage=step.stage,
