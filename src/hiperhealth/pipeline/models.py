@@ -22,6 +22,7 @@ class LifecycleEvent(str, Enum):
     SKILL_STARTED = 'skill_started'
     SKILL_COMPLETED = 'skill_completed'
     SKILL_FAILED = 'skill_failed'
+    SKILL_SKIPPED = 'skill_skipped'
     SKILL_RESULT_RECORDED = 'skill_result_recorded'
 
 
