@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
 
 from hiperhealth.pipeline.context import AuditEntry, PipelineContext
+from hiperhealth.pipeline.models import LifecycleEvent
 from hiperhealth.pipeline.session import Inquiry
 from hiperhealth.pipeline.skill import Skill
 
@@ -325,7 +326,9 @@ class StageRunner:
         """
         ctx = session.to_context()
         ctx.extras['_run_kwargs'] = kwargs
-        session.record_event('check_requirements_started', stage=stage)
+        session.record_event(
+            LifecycleEvent.CHECK_REQUIREMENTS_STARTED, stage=stage
+        )
 
         relevant = self._relevant_skills(
             stage,
@@ -337,7 +340,7 @@ class StageRunner:
             inquiries = skill.check_requirements(stage, ctx)
             if inquiries:
                 session.record_event(
-                    'inquiries_raised',
+                    LifecycleEvent.INQUIRIES_RAISED,
                     stage=stage,
                     skill_name=skill.metadata.name,
                     data={
@@ -347,7 +350,7 @@ class StageRunner:
                 all_inquiries.extend(inquiries)
 
         session.record_event(
-            'check_requirements_completed',
+            LifecycleEvent.CHECK_REQUIREMENTS_COMPLETED,
             stage=stage,
             data={'total_inquiries': len(all_inquiries)},
         )
@@ -381,7 +384,7 @@ class StageRunner:
           type: Session
         """
         ctx = session.to_context()
-        session.record_event('stage_started', stage=stage)
+        session.record_event(LifecycleEvent.STAGE_STARTED, stage=stage)
         ctx = self.run(
             stage,
             ctx,

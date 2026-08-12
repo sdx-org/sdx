@@ -36,6 +36,16 @@ def test_prompt_fragment_defaults_and_validation() -> None:
             stage='diagnosis', skill_name='test_skill', title='Test Title'
         )
 
+    # Validation error on extra fields
+    with pytest.raises(ValidationError):
+        PromptFragment(
+            stage='diagnosis',
+            skill_name='test_skill',
+            title='Test Title',
+            content='Test content',
+            extra_field='not allowed',  # type: ignore
+        )
+
 
 def test_prompt_fragment_serialization_roundtrip() -> None:
     """
@@ -67,7 +77,7 @@ def test_skill_result_defaults_and_validation() -> None:
     )
     assert result.summary == ''
     assert result.data == {}
-    assert result.prompt_fragment is None
+    assert result.prompt_fragments is None
 
     # Invalid status
     with pytest.raises(ValidationError):
@@ -75,6 +85,15 @@ def test_skill_result_defaults_and_validation() -> None:
             stage='diagnosis',
             skill_name='test_skill',
             status='invalid_status',  # type: ignore
+        )
+
+    # Validation error on extra fields
+    with pytest.raises(ValidationError):
+        SkillResult(
+            stage='diagnosis',
+            skill_name='test_skill',
+            status='succeeded',
+            extra_field='not allowed',  # type: ignore
         )
 
 
@@ -94,7 +113,7 @@ def test_skill_result_serialization_roundtrip() -> None:
         status='failed',
         summary='Skill failed',
         data={'error_code': 123},
-        prompt_fragment=[fragment],
+        prompt_fragments=[fragment],
     )
 
     json_data = result.model_dump_json()
@@ -127,6 +146,18 @@ def test_execution_step_defaults_and_validation() -> None:
             hook='execute',
             input_hash='abc',
             status='pending',  # type: ignore
+        )
+
+    # Validation error on extra fields
+    with pytest.raises(ValidationError):
+        ExecutionStep(
+            run_id='run-123',
+            stage='intake',
+            skill_name='intake_skill',
+            hook='execute',
+            input_hash='abc',
+            status='started',
+            extra_field='not allowed',  # type: ignore
         )
 
 
@@ -164,6 +195,14 @@ def test_agent_step_defaults_and_validation() -> None:
     with pytest.raises(ValidationError):
         AgentStep(name='planning')  # missing description
 
+    # Validation error on extra fields
+    with pytest.raises(ValidationError):
+        AgentStep(
+            name='planning',
+            description='Plan the next moves',
+            extra_field='not allowed',  # type: ignore
+        )
+
 
 def test_agent_step_serialization_roundtrip() -> None:
     """
@@ -195,6 +234,14 @@ def test_agent_step_result_defaults_and_validation() -> None:
         AgentStepResult(
             name='sub-task',
             status='done',  # type: ignore
+        )
+
+    # Validation error on extra fields
+    with pytest.raises(ValidationError):
+        AgentStepResult(
+            name='sub-task',
+            status='succeeded',
+            extra_field='not allowed',  # type: ignore
         )
 
 

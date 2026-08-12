@@ -12,6 +12,7 @@ from hiperhealth.pipeline.models import (
     AgentStep,
     AgentStepResult,
     ExecutionStep,
+    LifecycleEvent,
     PromptFragment,
     SkillResult,
 )
@@ -47,6 +48,7 @@ __all__ = [
     'ExecutionStep',
     'Inquiry',
     'InstalledSkillRecord',
+    'LifecycleEvent',
     'PipelineContext',
     'PromptFragment',
     'RegistryState',
