@@ -57,7 +57,7 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-hiperhealth = ["py.typed", "skills/*/hiperhealth.yaml"]
+hiperhealth = ["py.typed", "skills/*/skill.yaml"]
 
 [project.optional-dependencies]
 notebook = [
