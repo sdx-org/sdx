@@ -7,6 +7,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+
 from collections.abc import Collection, Iterator
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
@@ -444,15 +445,15 @@ class StageRunner:
                             data = current_data
                             if isinstance(data, dict):
                                 data = copy.deepcopy(data)
-                        else:
-                            data = {'legacy_result': data}
+                            else:
+                                data = {'legacy_result': data}
 
-                        ctx.skill_results[stage][skill_name] = SkillResult(
-                            stage=stage,
-                            skill_name=skill_name,
-                            status='succeeded',
-                            data=data,
-                        )
+                            ctx.skill_results[stage][skill_name] = SkillResult(
+                                stage=stage,
+                                skill_name=skill_name,
+                                status='succeeded',
+                                data=data,
+                            )
 
         return ctx
 
