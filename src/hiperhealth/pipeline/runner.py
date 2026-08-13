@@ -4,18 +4,43 @@ title: StageRunner — executes pipeline stages independently.
 
 from __future__ import annotations
 
+import copy
+import hashlib
+import json
+
 from collections.abc import Collection, Iterator
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
 
 from hiperhealth.pipeline.context import AuditEntry, PipelineContext
-from hiperhealth.pipeline.models import LifecycleEvent
+from hiperhealth.pipeline.models import (
+    ExecutionStep,
+    LifecycleEvent,
+    SkillResult,
+)
 from hiperhealth.pipeline.session import Inquiry
 from hiperhealth.pipeline.skill import Skill
 
 if TYPE_CHECKING:
     from hiperhealth.pipeline.registry import SkillRegistry
     from hiperhealth.pipeline.session import Session
+
+
+def _compute_input_hash(ctx: PipelineContext) -> str:
+    """
+    title: Compute a deterministic hash of the current pipeline state.
+    parameters:
+      ctx:
+        type: PipelineContext
+    returns:
+      type: str
+    """
+    data = {
+        'patient': ctx.patient,
+        'language': ctx.language,
+    }
+    serialized = json.dumps(data, sort_keys=True)
+    return hashlib.sha256(serialized.encode('utf-8')).hexdigest()
 
 
 class StageRunner:
@@ -136,6 +161,8 @@ class StageRunner:
         ctx: PipelineContext,
         *,
         disabled_skills: str | Collection[str] | None = None,
+        resume: bool = True,
+        force: bool = False,
         **kwargs: Any,
     ) -> PipelineContext:
         """
@@ -151,6 +178,10 @@ class StageRunner:
             type: PipelineContext
           disabled_skills:
             type: str | Collection[str] | None
+          resume:
+            type: bool
+          force:
+            type: bool
           kwargs:
             type: Any
             variadic: keyword
@@ -158,7 +189,13 @@ class StageRunner:
           type: PipelineContext
         """
         ctx.extras['_run_kwargs'] = kwargs
-        return self._run_stage(stage, ctx, disabled_skills=disabled_skills)
+        return self._run_stage(
+            stage,
+            ctx,
+            disabled_skills=disabled_skills,
+            resume=resume,
+            force=force,
+        )
 
     def run_many(
         self,
@@ -166,6 +203,8 @@ class StageRunner:
         ctx: PipelineContext,
         *,
         disabled_skills: str | Collection[str] | None = None,
+        resume: bool = True,
+        force: bool = False,
         **kwargs: Any,
     ) -> PipelineContext:
         """
@@ -177,6 +216,10 @@ class StageRunner:
             type: PipelineContext
           disabled_skills:
             type: str | Collection[str] | None
+          resume:
+            type: bool
+          force:
+            type: bool
           kwargs:
             type: Any
             variadic: keyword
@@ -188,6 +231,8 @@ class StageRunner:
                 stage,
                 ctx,
                 disabled_skills=disabled_skills,
+                resume=resume,
+                force=force,
                 **kwargs,
             )
         return ctx
@@ -241,6 +286,8 @@ class StageRunner:
         ctx: PipelineContext,
         *,
         disabled_skills: str | Collection[str] | None = None,
+        resume: bool = True,
+        force: bool = False,
     ) -> PipelineContext:
         """
         title: Execute pre, execute, and post hooks for one stage.
@@ -251,6 +298,10 @@ class StageRunner:
             type: PipelineContext
           disabled_skills:
             type: str | Collection[str] | None
+          resume:
+            type: bool
+          force:
+            type: bool
         returns:
           type: PipelineContext
         """
@@ -259,35 +310,150 @@ class StageRunner:
             disabled_skills=disabled_skills,
         )
 
-        for skill in relevant:
-            ctx = skill.pre(stage, ctx)
-            ctx.audit.append(
-                AuditEntry(
-                    stage=stage,
-                    skill_name=skill.metadata.name,
-                    hook='pre',
-                )
-            )
+        run_id = ctx.session_id or 'unknown'
+        if stage not in ctx.skill_results:
+            ctx.skill_results[stage] = {}
 
-        for skill in relevant:
-            ctx = skill.execute(stage, ctx)
-            ctx.audit.append(
-                AuditEntry(
-                    stage=stage,
-                    skill_name=skill.metadata.name,
-                    hook='execute',
-                )
-            )
+        for hook in ('pre', 'execute', 'post'):
+            for skill in relevant:
+                skill_name = skill.metadata.name
+                input_hash = _compute_input_hash(ctx)
 
-        for skill in relevant:
-            ctx = skill.post(stage, ctx)
-            ctx.audit.append(
-                AuditEntry(
-                    stage=stage,
-                    skill_name=skill.metadata.name,
-                    hook='post',
+                all_steps = []
+                for s in ctx.execution_steps:
+                    if isinstance(s, dict):
+                        all_steps.append(ExecutionStep.model_validate(s))
+                    else:
+                        all_steps.append(s)
+
+                for step_data in ctx.extras.get('past_steps', []):
+                    if isinstance(step_data, dict):
+                        all_steps.append(
+                            ExecutionStep.model_validate(step_data)
+                        )
+                    else:
+                        all_steps.append(step_data)
+
+                past_steps = [
+                    s
+                    for s in all_steps
+                    if s.stage == stage
+                    and s.skill_name == skill_name
+                    and s.hook == hook
+                ]
+
+                attempt = 1
+                if past_steps:
+                    attempt = max(s.attempt for s in past_steps)
+                    last_step = past_steps[-1]
+                    if (
+                        resume
+                        and not force
+                        and last_step.status == 'completed'
+                    ):
+                        if last_step.input_hash == input_hash:
+                            ctx.execution_steps.append(
+                                ExecutionStep(
+                                    run_id=run_id,
+                                    stage=stage,
+                                    skill_name=skill_name,
+                                    hook=hook,
+                                    attempt=attempt,
+                                    input_hash=input_hash,
+                                    status='skipped',
+                                )
+                            )
+                            continue
+
+                    if last_step.status in ('failed', 'skipped', 'started'):
+                        attempt += 1
+
+                ctx.execution_steps.append(
+                    ExecutionStep(
+                        run_id=run_id,
+                        stage=stage,
+                        skill_name=skill_name,
+                        hook=hook,
+                        attempt=attempt,
+                        input_hash=input_hash,
+                        status='started',
+                    )
                 )
-            )
+
+                if hook == 'execute':
+                    _legacy_result_before = copy.deepcopy(
+                        ctx.results.get(stage, {})
+                    )
+                else:
+                    _legacy_result_before = None
+
+                try:
+                    func = getattr(skill, hook)
+                    ctx = func(stage, ctx)
+                    status = 'completed'
+                    error_data = None
+                except Exception as e:
+                    status = 'failed'
+                    error_data = {'error': str(e)}
+                    ctx.execution_steps.append(
+                        ExecutionStep(
+                            run_id=run_id,
+                            stage=stage,
+                            skill_name=skill_name,
+                            hook=hook,
+                            attempt=attempt,
+                            input_hash=input_hash,
+                            status=status,
+                            error_data=error_data,
+                        )
+                    )
+                    ctx.skill_results[stage][skill_name] = SkillResult(
+                        stage=stage,
+                        skill_name=skill_name,
+                        status='failed',
+                        summary=str(e),
+                    )
+                    raise
+
+                ctx.execution_steps.append(
+                    ExecutionStep(
+                        run_id=run_id,
+                        stage=stage,
+                        skill_name=skill_name,
+                        hook=hook,
+                        attempt=attempt,
+                        input_hash=input_hash,
+                        status=status,
+                    )
+                )
+
+                ctx.audit.append(
+                    AuditEntry(
+                        stage=stage,
+                        skill_name=skill_name,
+                        hook=hook,
+                    )
+                )
+
+                # Implicitly save legacy skill results to avoid overwrites
+                # If a previous run failed, we should overwrite it on success.
+                if hook == 'execute':
+                    existing = ctx.skill_results[stage].get(skill_name)
+                    if not existing or existing.status != 'succeeded':
+                        current_data = ctx.results.get(stage, {})
+                        if current_data != _legacy_result_before:
+                            data = current_data
+                            if isinstance(data, dict):
+                                data = copy.deepcopy(data)
+                            else:
+                                data = {'legacy_result': data}
+
+                            ctx.skill_results[stage][skill_name] = SkillResult(
+                                stage=stage,
+                                skill_name=skill_name,
+                                status='succeeded',
+                                data=data,
+                            )
 
         return ctx
 
@@ -362,6 +528,8 @@ class StageRunner:
         session: Session,
         *,
         disabled_skills: str | Collection[str] | None = None,
+        resume: bool = True,
+        force: bool = False,
         **kwargs: Any,
     ) -> Session:
         """
@@ -377,6 +545,10 @@ class StageRunner:
             type: Session
           disabled_skills:
             type: str | Collection[str] | None
+          resume:
+            type: bool
+          force:
+            type: bool
           kwargs:
             type: Any
             variadic: keyword
@@ -385,11 +557,17 @@ class StageRunner:
         """
         ctx = session.to_context()
         session.record_event(LifecycleEvent.STAGE_STARTED, stage=stage)
-        ctx = self.run(
-            stage,
-            ctx,
-            disabled_skills=disabled_skills,
-            **kwargs,
-        )
-        session.update_from_context(stage, ctx)
+        completed = False
+        try:
+            ctx = self.run(
+                stage,
+                ctx,
+                disabled_skills=disabled_skills,
+                resume=resume,
+                force=force,
+                **kwargs,
+            )
+            completed = True
+        finally:
+            session.update_from_context(stage, ctx, completed=completed)
         return session

@@ -26,18 +26,40 @@ class Deidentifier:
     """
     title: A class for PII detection and de-identification using Presidio.
     attributes:
-      analyzer:
-        description: Value for analyzer.
-      anonymizer:
-        description: Value for anonymizer.
+      _analyzer:
+        type: AnalyzerEngine | None
+      _anonymizer:
+        type: AnonymizerEngine | None
     """
 
     def __init__(self) -> None:
         """
         title: Initialize the Presidio Analyzer and Anonymizer engines.
         """
-        self.analyzer = AnalyzerEngine()
-        self.anonymizer = AnonymizerEngine()  # type: ignore[no-untyped-call]
+        self._analyzer: AnalyzerEngine | None = None
+        self._anonymizer: AnonymizerEngine | None = None
+
+    @property
+    def analyzer(self) -> AnalyzerEngine:
+        """
+        title: Get the AnalyzerEngine, initializing it lazily.
+        returns:
+          type: AnalyzerEngine
+        """
+        if self._analyzer is None:
+            self._analyzer = AnalyzerEngine()
+        return self._analyzer
+
+    @property
+    def anonymizer(self) -> AnonymizerEngine:
+        """
+        title: Get the AnonymizerEngine, initializing it lazily.
+        returns:
+          type: AnonymizerEngine
+        """
+        if self._anonymizer is None:
+            self._anonymizer = AnonymizerEngine()  # type: ignore[no-untyped-call]
+        return self._anonymizer
 
     def add_custom_recognizer(
         self,

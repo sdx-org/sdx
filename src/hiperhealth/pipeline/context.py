@@ -9,6 +9,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from hiperhealth.pipeline.models import ExecutionStep, SkillResult
+
 
 class AuditEntry(BaseModel):
     """
@@ -51,6 +53,10 @@ class PipelineContext(BaseModel):
         type: str | None
       results:
         type: dict[str, Any]
+      skill_results:
+        type: dict[str, dict[str, SkillResult]]
+      execution_steps:
+        type: list[ExecutionStep]
       audit:
         type: list[AuditEntry]
       extras:
@@ -61,6 +67,10 @@ class PipelineContext(BaseModel):
     language: str = 'en'
     session_id: str | None = None
     results: dict[str, Any] = Field(default_factory=dict)
+    skill_results: dict[str, dict[str, SkillResult]] = Field(
+        default_factory=dict
+    )
+    execution_steps: list[ExecutionStep] = Field(default_factory=list)
     audit: list[AuditEntry] = Field(default_factory=list)
     extras: dict[str, Any] = Field(default_factory=dict)
 
