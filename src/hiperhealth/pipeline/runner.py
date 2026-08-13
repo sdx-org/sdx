@@ -283,6 +283,13 @@ class StageRunner:
                     )
                 )
 
+                if hook == 'execute':
+                    _legacy_result_before = copy.deepcopy(
+                        ctx.results.get(stage, {})
+                    )
+                else:
+                    _legacy_result_before = None
+
                 try:
                     func = getattr(skill, hook)
                     ctx = func(stage, ctx)
@@ -334,18 +341,20 @@ class StageRunner:
                     hook == 'execute'
                     and skill_name not in ctx.skill_results[stage]
                 ):
-                    data = ctx.results.get(stage, {})
-                    if isinstance(data, dict):
-                        data = copy.deepcopy(data)
-                    else:
-                        data = {'legacy_result': data}
+                    current_data = ctx.results.get(stage, {})
+                    if current_data != _legacy_result_before:
+                        data = current_data
+                        if isinstance(data, dict):
+                            data = copy.deepcopy(data)
+                        else:
+                            data = {'legacy_result': data}
 
-                    ctx.skill_results[stage][skill_name] = SkillResult(
-                        stage=stage,
-                        skill_name=skill_name,
-                        status='succeeded',
-                        data=data,
-                    )
+                        ctx.skill_results[stage][skill_name] = SkillResult(
+                            stage=stage,
+                            skill_name=skill_name,
+                            status='succeeded',
+                            data=data,
+                        )
 
         return ctx
 
