@@ -21,6 +21,7 @@ import pyarrow.parquet as pq
 from pydantic import BaseModel
 
 from hiperhealth.pipeline.context import PipelineContext
+from hiperhealth.pipeline.models import LifecycleEvent
 
 # ── Inquiry model ──────────────────────────────────────────────────
 
@@ -170,8 +171,8 @@ class Session:
         data: dict[str, Any] = {}
         for event in self._events:
             if event['event_type'] in (
-                'clinical_data_set',
-                'answers_provided',
+                LifecycleEvent.CLINICAL_DATA_SET,
+                LifecycleEvent.ANSWERS_PROVIDED,
             ):
                 payload = json.loads(event['data'])
                 data.update(payload.get('fields', {}))
@@ -186,7 +187,7 @@ class Session:
         """
         data: dict[str, dict[str, dict[str, Any]]] = {}
         for event in self._events:
-            if event['event_type'] != 'skill_ui_data_provided':
+            if event['event_type'] != LifecycleEvent.SKILL_UI_DATA_PROVIDED:
                 continue
             payload = json.loads(event['data'])
             skill_id = payload.get('skill_id') or event.get('skill_name')
@@ -208,7 +209,7 @@ class Session:
         """
         results: dict[str, Any] = {}
         for event in self._events:
-            if event['event_type'] == 'stage_completed':
+            if event['event_type'] == LifecycleEvent.STAGE_COMPLETED:
                 payload = json.loads(event['data'])
                 results[event['stage']] = payload.get('results', {})
         return results
@@ -223,7 +224,7 @@ class Session:
         answered = set(self.clinical_data.keys())
         pending: list[Inquiry] = []
         for event in self._events:
-            if event['event_type'] == 'inquiries_raised':
+            if event['event_type'] == LifecycleEvent.INQUIRIES_RAISED:
                 payload = json.loads(event['data'])
                 for inq in payload.get('inquiries', []):
                     if inq['field'] not in answered:
@@ -240,7 +241,7 @@ class Session:
         return [
             e['stage']
             for e in self._events
-            if e['event_type'] == 'stage_completed'
+            if e['event_type'] == LifecycleEvent.STAGE_COMPLETED
         ]
 
     @property
@@ -262,7 +263,7 @@ class Session:
             type: dict[str, Any]
         """
         self._append_event(
-            'clinical_data_set',
+            LifecycleEvent.CLINICAL_DATA_SET,
             data={'fields': fields},
         )
 
@@ -274,7 +275,7 @@ class Session:
             type: dict[str, Any]
         """
         self._append_event(
-            'answers_provided',
+            LifecycleEvent.ANSWERS_PROVIDED,
             data={'fields': answers},
         )
 
@@ -299,7 +300,7 @@ class Session:
             type: str | None
         """
         self._append_event(
-            'skill_ui_data_provided',
+            LifecycleEvent.SKILL_UI_DATA_PROVIDED,
             stage=stage,
             skill_name=skill_id,
             data={
@@ -348,7 +349,7 @@ class Session:
         else:
             result_data = {}
         self._append_event(
-            'stage_completed',
+            LifecycleEvent.STAGE_COMPLETED,
             stage=stage,
             data={'results': result_data},
         )
@@ -357,7 +358,7 @@ class Session:
 
     def record_event(
         self,
-        event_type: str,
+        event_type: LifecycleEvent,
         stage: str | None = None,
         skill_name: str | None = None,
         data: dict[str, Any] | None = None,
@@ -366,7 +367,7 @@ class Session:
         title: Record an arbitrary event (used by the runner).
         parameters:
           event_type:
-            type: str
+            type: LifecycleEvent
           stage:
             type: str | None
           skill_name:
@@ -385,7 +386,7 @@ class Session:
 
     def _append_event(
         self,
-        event_type: str,
+        event_type: LifecycleEvent,
         stage: str | None = None,
         skill_name: str | None = None,
         data: dict[str, Any] | None = None,
@@ -394,7 +395,7 @@ class Session:
         title: Append a new event and persist the session to disk.
         parameters:
           event_type:
-            type: str
+            type: LifecycleEvent
           stage:
             type: str | None
           skill_name:
@@ -426,7 +427,7 @@ class Session:
         self._events = rows
         # Recover language from first clinical_data_set if present
         for event in rows:
-            if event['event_type'] == 'clinical_data_set':
+            if event['event_type'] == LifecycleEvent.CLINICAL_DATA_SET:
                 payload = json.loads(event['data'])
                 lang = payload.get('fields', {}).get('language')
                 if lang:
