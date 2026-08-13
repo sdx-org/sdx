@@ -2,6 +2,8 @@
 title: Tests for real notebook widget rendering.
 """
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 from collections.abc import Iterator
@@ -9,8 +11,9 @@ from pathlib import Path
 from textwrap import dedent
 from typing import TypeVar
 
-import ipywidgets as widgets
 import pytest
+
+widgets = pytest.importorskip('ipywidgets')
 
 from hiperhealth.notebook import ui
 from hiperhealth.notebook._app_manifest import SkillAppViewRecord

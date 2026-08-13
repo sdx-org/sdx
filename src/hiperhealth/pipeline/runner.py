@@ -4,6 +4,8 @@ title: StageRunner — executes pipeline stages independently.
 
 from __future__ import annotations
 
+import copy
+
 from collections.abc import Collection, Iterator
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
@@ -334,7 +336,7 @@ class StageRunner:
                 ):
                     data = ctx.results.get(stage, {})
                     if isinstance(data, dict):
-                        data = dict(data)
+                        data = copy.deepcopy(data)
                     else:
                         data = {'legacy_result': data}
 
