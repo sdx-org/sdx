@@ -9,7 +9,11 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
 
 from hiperhealth.pipeline.context import AuditEntry, PipelineContext
-from hiperhealth.pipeline.models import ExecutionStep, LifecycleEvent, SkillResult
+from hiperhealth.pipeline.models import (
+    ExecutionStep,
+    LifecycleEvent,
+    SkillResult,
+)
 from hiperhealth.pipeline.session import Inquiry
 from hiperhealth.pipeline.skill import Skill
 
