@@ -21,7 +21,11 @@ import pyarrow.parquet as pq
 from pydantic import BaseModel
 
 from hiperhealth.pipeline.context import PipelineContext
-from hiperhealth.pipeline.models import LifecycleEvent
+from hiperhealth.pipeline.models import (
+    ExecutionStep,
+    LifecycleEvent,
+    SkillResult,
+)
 
 # ── Inquiry model ──────────────────────────────────────────────────
 
@@ -201,6 +205,45 @@ class Session:
         return data
 
     @property
+    def skill_results(self) -> dict[str, dict[str, SkillResult]]:
+        """
+        title: Reconstruct per-skill results from completed events.
+        returns:
+          type: dict[str, dict[str, SkillResult]]
+        """
+        results: dict[str, dict[str, SkillResult]] = {}
+        for event in self._events:
+            if event['event_type'] == LifecycleEvent.SKILL_RESULT_RECORDED:
+                stage = event['stage']
+                skill_name = event['skill_name']
+                payload = json.loads(event['data'])
+                if stage not in results:
+                    results[stage] = {}
+                results[stage][skill_name] = SkillResult.model_validate(
+                    payload
+                )
+        return results
+
+    @property
+    def execution_steps(self) -> list[ExecutionStep]:
+        """
+        title: Reconstruct execution steps from events.
+        returns:
+          type: list[ExecutionStep]
+        """
+        steps: list[ExecutionStep] = []
+        for event in self._events:
+            if event['event_type'] in (
+                LifecycleEvent.SKILL_STARTED,
+                LifecycleEvent.SKILL_COMPLETED,
+                LifecycleEvent.SKILL_FAILED,
+                LifecycleEvent.SKILL_SKIPPED,
+            ):
+                payload = json.loads(event['data'])
+                steps.append(ExecutionStep.model_validate(payload))
+        return steps
+
+    @property
     def results(self) -> dict[str, Any]:
         """
         title: Reconstruct stage results from completed events.
@@ -327,9 +370,7 @@ class Session:
         )
 
     def update_from_context(
-        self,
-        stage: str,
-        ctx: PipelineContext,
+        self, stage: str, ctx: PipelineContext, completed: bool = True
     ) -> None:
         """
         title: Capture results after a stage runs.
@@ -338,21 +379,47 @@ class Session:
             type: str
           ctx:
             type: PipelineContext
+          completed:
+            type: bool
         """
-        stage_result = ctx.results.get(stage)
-        result_data: Any
-        if stage_result is not None:
-            if hasattr(stage_result, 'model_dump'):
-                result_data = stage_result.model_dump()
+        # Persist step-level execution events
+        for step in ctx.execution_steps:
+            # We assume step is an ExecutionStep, which has a status we can
+            # prepend 'skill_' to
+            self._append_event(
+                LifecycleEvent(f'skill_{step.status}'),
+                stage=step.stage,
+                skill_name=step.skill_name,
+                data=step.model_dump(),
+            )
+        ctx.execution_steps.clear()
+
+        # Persist individual skill results
+        for skill_name, skill_result in ctx.skill_results.get(
+            stage, {}
+        ).items():
+            self._append_event(
+                LifecycleEvent.SKILL_RESULT_RECORDED,
+                stage=stage,
+                skill_name=skill_name,
+                data=skill_result.model_dump(),
+            )
+
+        if completed:
+            stage_result = ctx.results.get(stage)
+            result_data: Any
+            if stage_result is not None:
+                if hasattr(stage_result, 'model_dump'):
+                    result_data = stage_result.model_dump()
+                else:
+                    result_data = stage_result
             else:
-                result_data = stage_result
-        else:
-            result_data = {}
-        self._append_event(
-            LifecycleEvent.STAGE_COMPLETED,
-            stage=stage,
-            data={'results': result_data},
-        )
+                result_data = {}
+            self._append_event(
+                LifecycleEvent.STAGE_COMPLETED,
+                stage=stage,
+                data={'results': result_data},
+            )
 
     # ── Event recording ────────────────────────────────────────────
 

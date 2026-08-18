@@ -11,6 +11,10 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
+import pytest
+
+pytest.importorskip('build.__main__')
+
 
 def test_wheel_contains_skill_manifests(tmp_path: Any) -> None:
     """

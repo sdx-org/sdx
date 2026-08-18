@@ -472,3 +472,26 @@ class TestStageRunner:
         assert Stage.EXAM in ctx2.results
         # Audit from both runs
         assert len(ctx2.audit) >= 3  # from first run
+
+    def test_implicit_result_attribution(self) -> None:
+        """
+        title: Runner should not assign unchanged stage result to no-op skill.
+        """
+        active_skill = _CounterSkill(name='active', stages=(Stage.DIAGNOSIS,))
+        noop_skill = BaseSkill(
+            SkillMetadata(name='noop', stages=(Stage.DIAGNOSIS,))
+        )
+
+        runner = StageRunner(skills=[active_skill, noop_skill])
+        ctx = PipelineContext()
+
+        result = runner.run(Stage.DIAGNOSIS, ctx)
+
+        # active_skill produced a result, it should be captured
+        assert 'active' in result.skill_results[Stage.DIAGNOSIS]
+        assert result.skill_results[Stage.DIAGNOSIS]['active'].data == {
+            'legacy_result': 'active_executed'
+        }
+
+        # noop_skill execute was a no-op, it should not capture active's result
+        assert 'noop' not in result.skill_results[Stage.DIAGNOSIS]
