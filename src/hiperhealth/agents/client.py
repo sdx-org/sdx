@@ -66,7 +66,7 @@ def dump_llm_json(text: str, sid: str | None) -> None:
     retry=retry_if_exception_type((ValidationError, TypeError)),
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=1, max=4),
-    before_sleep=before_sleep_log(_log, logging.WARNING),
+    before_sleep=before_sleep_log(_log, logging.WARNING),  # type: ignore[arg-type]
     reraise=True,
 )
 def _call_llm_structured(
