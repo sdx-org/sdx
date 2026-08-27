@@ -321,7 +321,9 @@ class WearableDataFileExtractor(BaseWearableDataExtractor[FileInput]):
           type: dict[str, object]
         """
         for key, value in row.items():
-            if value.isnumeric():
+            if value is None:
+                row[key] = None
+            elif value.lstrip('-').isnumeric():
                 row[key] = int(value)
             elif is_float(value):
                 row[key] = float(value)
