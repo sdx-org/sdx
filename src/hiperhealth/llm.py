@@ -5,12 +5,20 @@ title: Provider-agnostic LLM settings and structured-generation adapters.
 from __future__ import annotations
 
 import json
+import logging
 import os
 
 from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Protocol, TypeVar, cast
 
 from pydantic import BaseModel
+from tenacity import (
+    before_sleep_log,
+    retry,
+    retry_if_exception,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 TModel = TypeVar('TModel', bound=BaseModel)
 
@@ -40,6 +48,70 @@ _DEFAULT_PROVIDER_MODEL = {
     'ollama': 'llama3.2:1b',
     'openai': 'o4-mini',
 }
+
+_log = logging.getLogger(__name__)
+
+
+def _is_transient_litellm_error(exc: BaseException) -> bool:
+    """
+    title: Return True for transient LiteLLM errors that warrant a retry.
+    summary: |-
+      Checks dynamically to avoid a hard import of litellm at module load
+      time. Returns False if litellm is not importable.
+    parameters:
+      exc:
+        type: BaseException
+        description: The exception to evaluate.
+    returns:
+      type: bool
+      description: True if the error is transient and safe to retry.
+    """
+    try:
+        import litellm
+
+        return isinstance(
+            exc,
+            (
+                litellm.RateLimitError,  # type: ignore[attr-defined]
+                litellm.Timeout,  # type: ignore[attr-defined]
+                litellm.APIConnectionError,  # type: ignore[attr-defined]
+                litellm.ServiceUnavailableError,  # type: ignore[attr-defined]
+            ),
+        )
+    except ImportError:
+        return False
+
+
+@retry(
+    retry=retry_if_exception(_is_transient_litellm_error),
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    before_sleep=before_sleep_log(_log, logging.WARNING),
+    reraise=True,
+)
+def _call_completion(
+    completion_fn: _CompletionFn,
+    **kwargs: Any,
+) -> Any:
+    """
+    title: Invoke the LiteLLM completion function with transient-error retry.
+    summary: |-
+      Retries up to 3 times with exponential backoff on rate-limit,
+      timeout, connection, and service-unavailable errors. All other
+      exceptions propagate immediately.
+    parameters:
+      completion_fn:
+        type: _CompletionFn
+        description: The LiteLLM completion callable to invoke.
+      kwargs:
+        type: Any
+        description: Keyword arguments forwarded to completion_fn.
+        variadic: keyword
+    returns:
+      type: Any
+      description: The raw LiteLLM response object.
+    """
+    return completion_fn(**kwargs)
 
 
 class StructuredLLM(Protocol):
@@ -287,7 +359,8 @@ class LiteLLMStructuredLLM:
           description: Return value.
         """
         completion_fn = self._get_completion_fn()
-        response = completion_fn(
+        response = _call_completion(
+            completion_fn,
             messages=_build_messages(system, user, output_type),
             **self.settings.to_litellm_kwargs(),
         )

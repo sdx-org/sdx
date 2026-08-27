@@ -20,6 +20,7 @@ summary: |-
 from __future__ import annotations
 
 import inspect
+import sys
 
 from datetime import date, datetime
 from typing import Any
@@ -171,3 +172,82 @@ def test_model_basic_crud(model_cls, db_session: Session):
 
     fetched = db_session.get(model_cls, pk_value)
     assert fetched is not None
+
+
+# ── gen_sqla type-mapping tests (issue #136) ───────────────────────
+
+_GEN_MODELS = str(
+    __import__('pathlib').Path(__file__).resolve().parent.parent
+    / 'scripts'
+    / 'gen_models'
+)
+if _GEN_MODELS not in sys.path:
+    sys.path.insert(0, _GEN_MODELS)
+
+
+def test_python_type_to_sqla_optional_str_maps_to_string() -> None:
+    """
+    title: Optional[str] should map to String, not JSON.
+    """
+    from typing import Optional
+
+    from gen_sqla import python_type_to_sqla
+
+    sa_type, py_hint = python_type_to_sqla(Optional[str])
+    assert sa_type == 'String', f'expected String, got {sa_type}'
+    assert py_hint == 'str'
+
+
+def test_python_type_to_sqla_union_pipe_syntax_maps_to_string() -> None:
+    """
+    title: str | None (PEP 604 syntax) should map to String, not JSON.
+    """
+    from gen_sqla import python_type_to_sqla
+
+    sa_type, py_hint = python_type_to_sqla(str | None)
+    assert sa_type == 'String', f'expected String, got {sa_type}'
+    assert py_hint == 'str'
+
+
+def test_python_type_to_sqla_optional_int_maps_to_integer() -> None:
+    """
+    title: Optional[int] should map to Integer, not JSON.
+    """
+    from typing import Optional
+
+    from gen_sqla import python_type_to_sqla
+
+    sa_type, py_hint = python_type_to_sqla(Optional[int])
+    assert sa_type == 'Integer', f'expected Integer, got {sa_type}'
+    assert py_hint == 'int'
+
+
+def test_python_type_to_sqla_bare_str_still_maps_to_string() -> None:
+    """
+    title: Plain str (non-optional) should still map to String.
+    """
+    from gen_sqla import python_type_to_sqla
+
+    sa_type, py_hint = python_type_to_sqla(str)
+    assert sa_type == 'String'
+    assert py_hint == 'str'
+
+
+def test_python_type_to_sqla_list_still_falls_back_to_json() -> None:
+    """
+    title: list[str] should still fall back to JSON.
+    """
+    from gen_sqla import python_type_to_sqla
+
+    sa_type, _ = python_type_to_sqla(list[str])
+    assert sa_type == 'JSON'
+
+
+def test_python_type_to_sqla_multi_union_falls_back_to_json() -> None:
+    """
+    title: str | int (two non-None types) should fall back to JSON.
+    """
+    from gen_sqla import python_type_to_sqla
+
+    sa_type, _ = python_type_to_sqla(str | int)
+    assert sa_type == 'JSON'

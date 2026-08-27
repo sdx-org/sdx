@@ -24,10 +24,11 @@ summary: |-
 from __future__ import annotations
 
 import sys
+import types
 
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Union, get_args, get_origin
 
 from formatting import run_ruff
 from gen_base import is_concrete_model, iter_pydantic_models
@@ -57,12 +58,43 @@ TYPE_MAP = {
 FALLBACK_TYPE = 'JSON'
 
 
+def _unwrap_optional(annotation: Any) -> Any:
+    """
+    title: Return the inner type of Optional[X] / X | None, or unchanged.
+    summary: |-
+      Handles both the legacy ``Optional[X]`` (``Union[X, None]``) form
+      and the Python 3.10+ ``X | None`` (``types.UnionType``) form.
+      If the union contains more than one non-None type the annotation is
+      returned unchanged so the caller falls back to JSON.
+    parameters:
+      annotation:
+        type: Any
+        description: The type annotation to inspect.
+    returns:
+      type: Any
+      description: The unwrapped inner type, or the original annotation.
+    """
+    # Python 3.10+ `X | Y` syntax produces types.UnionType
+    if isinstance(annotation, types.UnionType):
+        args = [a for a in annotation.__args__ if a is not type(None)]
+        return args[0] if len(args) == 1 else annotation
+
+    # typing.Optional[X] / typing.Union[X, None]
+    if get_origin(annotation) is Union:
+        args = [a for a in get_args(annotation) if a is not type(None)]
+        return args[0] if len(args) == 1 else annotation
+
+    return annotation
+
+
 def python_type_to_sqla(annotation: Any) -> tuple[str, str]:
     """
     title: Return a pair ``(sqlalchemy_type_name, python_hint_string)``.
     summary: |-
       * Scalars map to a concrete SA type and their own type-name hint
         (e.g. ``("String", "str")``).
+      * ``Optional[X]`` / ``X | None`` are unwrapped before lookup so
+        nullable scalar fields get native SQL types instead of JSON.
       * Lists / dicts / unknown objects fall back to JSON + ``Any``.
     parameters:
       annotation:
@@ -72,6 +104,9 @@ def python_type_to_sqla(annotation: Any) -> tuple[str, str]:
       type: tuple[str, str]
       description: Return value.
     """
+    # Unwrap Optional[X] / X | None before any other check
+    annotation = _unwrap_optional(annotation)
+
     origin = getattr(annotation, '__origin__', None)
 
     # Generic collections → JSON
