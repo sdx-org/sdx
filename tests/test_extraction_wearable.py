@@ -144,3 +144,27 @@ def test_support_inmemory_csv(wearable_extractor):
     assert len(wearable_data) == 4
     assert wearable_data[0]['name'] == 'John Doe'
     assert wearable_data[1]['heart_rate'] == 80
+
+
+def test_is_supported_accepts_str_path(wearable_extractor):
+    """
+    title: is_supported should accept str paths, not just Path objects.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+    """
+    assert wearable_extractor.is_supported(str(CSV_FILE))
+    assert wearable_extractor.is_supported(str(JSON_FILE))
+    assert not wearable_extractor.is_supported(str(UNSUPPORTED_FILE))
+
+
+def test_extract_wearable_data_accepts_str_path(wearable_extractor):
+    """
+    title: extract_wearable_data should accept str paths.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+    """
+    wearable_data = wearable_extractor.extract_wearable_data(str(CSV_FILE))
+    assert isinstance(wearable_data, list)
+    assert len(wearable_data) > 0
