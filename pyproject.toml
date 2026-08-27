@@ -17,6 +17,7 @@ dependencies = [
     "atpublic >=6",
     "questionary >=2.1.0",
     "pillow >=11.3.0",
+    "opencv-python-headless >=4.5.0",
     "pytesseract >=0.3.13",
     "python-magic >=0.4.27",
     "presidio-analyzer >=2.2.359,<3.0.0",
