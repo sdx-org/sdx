@@ -56,6 +56,23 @@ def test_extract_csv(wearable_extractor):
     assert len(wearable_data) > 0
 
 
+def test_extract_csv_from_string_path(wearable_extractor):
+    """
+    title: Test that CSV string paths can be extracted.
+    parameters:
+      wearable_extractor:
+        description: Value for wearable_extractor.
+    """
+    csv_path = str(CSV_FILE)
+
+    assert wearable_extractor.is_supported(csv_path)
+    assert wearable_extractor._is_csv(csv_path)
+    wearable_data = wearable_extractor.extract_wearable_data(csv_path)
+
+    assert wearable_data
+    assert len(wearable_data) > 0
+
+
 def test_extract_unsupported_file(wearable_extractor):
     """
     title: Test that unsupported file cannot be extracted.
